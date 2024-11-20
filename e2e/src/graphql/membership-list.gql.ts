@@ -7,7 +7,6 @@ export const LIST_MEMBERSHIP_QUERY = graphql(`
         workspaceId
         user {
           id
-          name
         }
         isOwner
         isAccepted
