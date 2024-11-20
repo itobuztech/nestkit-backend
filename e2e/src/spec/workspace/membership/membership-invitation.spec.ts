@@ -263,11 +263,13 @@ describe('Membership invitation module', () => {
         },
       });
 
-      const addedWorkspace =
-        membershipList.data.listMemberships.memberships.find(
-          (workspace) => workspace.workspaceId === workspaceID,
-        );
-      expect(addedWorkspace?.user.id).toBe(userId);
+      let flag = false;
+      membershipList.data.listMemberships.memberships.forEach((membership) => {
+        expect(membership.workspaceId).toBe(workspaceID);
+        if (membership.user.id === userId) flag = true;
+      });
+
+      expect(flag).toBe(true);
     }
   });
 
@@ -280,7 +282,6 @@ describe('Membership invitation module', () => {
     expect(response.data).toBeDefined();
   });
 
-  //This test has an issue - NST-77
   test(' View the List of Workspace and the user should not be able to view the workspace', async () => {
     const listWorkspace = await api.graphql.query<
       ListWorkSpaceQuery,
