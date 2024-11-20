@@ -263,7 +263,6 @@ describe('Membership invitation module', () => {
         },
       });
 
-      console.log(membershipList, workspaceID);
       let flag = false;
       membershipList.data.listMemberships.memberships.forEach((membership) => {
         expect(membership.workspaceId).toBe(workspaceID);
