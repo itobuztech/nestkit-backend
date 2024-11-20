@@ -28,6 +28,7 @@ const documents = {
     "\n  query GetUsers($getUsersInput: GetUsersInput) {\n    getUsers(getUsersInput: $getUsersInput) {\n      email\n      id\n      name\n    }\n  }\n": types.GetUsersDocument,
     "\n  query ListWorkSpace($listWorkspaceInput: ListWorkSpaceInput) {\n    listWorkSpace(listWorkspaceInput: $listWorkspaceInput) {\n      workspace {\n        name\n        id\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.ListWorkSpaceDocument,
     "\n  query Login($loginInput: LoginInput!) {\n    login(loginInput: $loginInput) {\n      id\n      token\n      refreshToken\n    }\n  }\n": types.LoginDocument,
+    "\n  query ListMemberships($listMembershipsInput: ListMembershipInput!) {\n    listMemberships(listMembershipsInput: $listMembershipsInput) {\n      memberships {\n        workspaceId\n        user {\n          id\n          name\n        }\n        isOwner\n        isAccepted\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.ListMembershipsDocument,
     "\n  mutation ResetPassword($resetPassword: PasswordResetInput!) {\n    resetPassword(resetPassword: $resetPassword) {\n      message\n    }\n  }\n": types.ResetPasswordDocument,
     "\n  query Role {\n    listBasePrivilege {\n      privilege {\n        name\n        group\n        id\n        type\n        createdAt\n        updatedAt\n        deletedAt\n      }\n    }\n  }\n": types.RoleDocument,
     "\n  mutation RefreshAccessToken($refreshAccessTokenInput: RefreshAccessTokenInput!) {\n  refreshAccessToken(refreshAccessTokenInput: $refreshAccessTokenInput) {\n    token\n    refreshToken\n  }\n}\n": types.RefreshAccessTokenDocument,
@@ -116,6 +117,10 @@ export function graphql(source: "\n  query ListWorkSpace($listWorkspaceInput: Li
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query Login($loginInput: LoginInput!) {\n    login(loginInput: $loginInput) {\n      id\n      token\n      refreshToken\n    }\n  }\n"): (typeof documents)["\n  query Login($loginInput: LoginInput!) {\n    login(loginInput: $loginInput) {\n      id\n      token\n      refreshToken\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ListMemberships($listMembershipsInput: ListMembershipInput!) {\n    listMemberships(listMembershipsInput: $listMembershipsInput) {\n      memberships {\n        workspaceId\n        user {\n          id\n          name\n        }\n        isOwner\n        isAccepted\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListMemberships($listMembershipsInput: ListMembershipInput!) {\n    listMemberships(listMembershipsInput: $listMembershipsInput) {\n      memberships {\n        workspaceId\n        user {\n          id\n          name\n        }\n        isOwner\n        isAccepted\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

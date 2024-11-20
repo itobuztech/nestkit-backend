@@ -10,6 +10,8 @@ import {
   AcceptInvitationMutationVariables,
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
+  ListMembershipsQuery,
+  ListMembershipsQueryVariables,
   ListWorkSpaceQuery,
   ListWorkSpaceQueryVariables,
   SendInvitationMutation,
@@ -23,8 +25,9 @@ import {
 import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutation.gql';
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
-import { faker } from '@faker-js/faker';
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
+import { LIST_MEMBERSHIP_QUERY } from '../../../graphql/membership-list.gql';
+import { faker } from '@faker-js/faker';
 
 describe('Membership invitation module', () => {
   let workspaceID: string | undefined;
@@ -243,6 +246,28 @@ describe('Membership invitation module', () => {
         },
       });
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
+    }
+  });
+
+  test('Membership List verify', async () => {
+    if (workspaceID) {
+      const membershipList = await api.graphql.query<
+        ListMembershipsQuery,
+        ListMembershipsQueryVariables
+      >({
+        query: LIST_MEMBERSHIP_QUERY,
+        variables: {
+          listMembershipsInput: {
+            workspaceId: workspaceID,
+          },
+        },
+      });
+
+      const addedWorkspace =
+        membershipList.data.listMemberships.memberships.find(
+          (workspace) => workspace.workspaceId === workspaceID,
+        );
+      expect(addedWorkspace?.user.id).toBe(userId);
     }
   });
 
