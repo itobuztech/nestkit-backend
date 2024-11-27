@@ -2,7 +2,7 @@ import { SIGN_UP_MUTATION } from '../../../graphql/sign-up-mutation.gql';
 import { VERIFY_EMAIL_MUTATION } from '../../../graphql/verify-email-mutation.gql';
 import { GraphQlApi } from '../../../lib/graphql-api';
 import { waitForTime } from '../../../lib/wait-for-time';
-import { fetchEmailsFromInbox } from '../../../lib/fetchEmails';
+import { fetchEmailsImap } from '../../../lib/fetchEmailsImap';
 import { appEnv } from '../../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
 import {
@@ -80,7 +80,7 @@ describe('Membership invitation module', () => {
   }, 10000);
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsFromInbox('Welcome');
+    invitationLink = await fetchEmailsImap('Welcome');
     onboardingToken = invitationLink?.substring(46);
     expect(invitationLink).toContain('verify-email');
   });
@@ -139,7 +139,7 @@ describe('Membership invitation module', () => {
   }, 15000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsFromInbox('Membership Invitation');
+    invitationLink = await fetchEmailsImap('Membership Invitation');
     onboardingToken = invitationLink?.substring(60);
     expect(invitationLink).toContain('membership-verify');
   });

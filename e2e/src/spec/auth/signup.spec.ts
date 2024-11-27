@@ -3,7 +3,7 @@ import { VERIFY_EMAIL_MUTATION } from '../../graphql/verify-email-mutation.gql';
 import { LOGIN_QUERY } from '../../graphql/login-query.gql';
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsFromInbox } from '../../lib/fetchEmails';
+import { fetchEmailsImap } from '../../lib/fetchEmailsImap';
 import { appEnv } from '../../lib/app-env';
 import { PrismaClient, User } from '@prisma/client';
 import {
@@ -22,7 +22,8 @@ describe('User Sign up', () => {
   let onboardingToken: string | undefined;
   let addedUser: User | null;
   let userId: string | undefined;
-  const userEmail = `automation-${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`;
+  const userEmail = appEnv.IMAP_EMAIL;
+  const userEmailUpdated = `${appEnv.IMAP_EMAIL.split('@')[0]}+${crypto.randomUUID()}${appEnv.IMAP_EMAIL.split('@')[1]}`;
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
 
@@ -31,6 +32,20 @@ describe('User Sign up', () => {
   });
 
   test('Add a new user', async () => {
+    console.log(userEmailUpdated);
+    const existingUser = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (existingUser) {
+      await prisma.user.update({
+        where: { email: userEmail },
+        data: {
+          email: userEmailUpdated,
+        },
+      });
+    }
+
     const signUpData = await api.graphql.mutate<
       SignupMutation,
       SignupMutationVariables
@@ -48,8 +63,8 @@ describe('User Sign up', () => {
     userId = data?.id;
     expect(data?.id).not.toBe(null);
 
-    await waitForTime();
-  }, 10000);
+    await waitForTime(30000);
+  }, 50000);
 
   test('Should hash the password correctly', async () => {
     addedUser = await prisma.user.findUnique({
@@ -59,7 +74,7 @@ describe('User Sign up', () => {
   });
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsFromInbox('Welcome');
+    invitationLink = await fetchEmailsImap('Welcome');
     onboardingToken = invitationLink?.substring(46);
     expect(invitationLink).toContain('verify-email');
   });
@@ -125,5 +140,19 @@ describe('User Sign up', () => {
     });
 
     expect(user?.isVerified).toBe(true);
+
+    await prisma.user.update({
+      where: { email: userEmail },
+      data: {
+        email: `${appEnv.IMAP_EMAIL.split('@')[0]}+${crypto.randomUUID()}${appEnv.IMAP_EMAIL.split('@')[1]}`,
+      },
+    });
+
+    await prisma.user.update({
+      where: { email: userEmailUpdated },
+      data: {
+        email: userEmail,
+      },
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsFromInbox } from '../../lib/fetchEmails';
+import { fetchEmailsImap } from '../../lib/fetchEmailsImap';
 import { appEnv } from '../../lib/app-env';
 import { REQUEST_PASSWORD_RESET_MUTATION } from '../../graphql/request-password-reset-mutation.gql';
 import { PASSWORD_RESET_MUTATION } from '../../graphql/password-reset-mutation.gql';
@@ -24,9 +24,7 @@ describe('Password Reset', () => {
   test('Should send a password reset email to the user', async () => {
     const user = await dbClient.user.findFirst({
       where: {
-        email: {
-          contains: `${appEnv.TESTINATOR_TEAM_ID}`,
-        },
+        email: appEnv.IMAP_EMAIL,
         isVerified: true,
       },
     });
@@ -73,9 +71,9 @@ describe('Password Reset', () => {
   });
 
   test('Fetch emails from the inbox and extract the invitation link', async () => {
-    invitationLink = await fetchEmailsFromInbox('Password Reset Request');
-    onboardingToken = invitationLink?.substring(48);
+    invitationLink = await fetchEmailsImap('Password Reset Request');
     if (invitationLink) {
+      onboardingToken = invitationLink?.substring(48);
       expect(invitationLink).toContain('password-reset');
     }
   });
