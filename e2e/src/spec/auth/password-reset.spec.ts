@@ -14,17 +14,20 @@ import {
   ResetPasswordMutationVariables,
 } from '../../gql/graphql';
 import { faker } from '@faker-js/faker';
+import { DbUserOperations } from '../../lib/dbUserOperations';
 
 describe('Password Reset', () => {
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
   const api = new GraphQlApi();
   const dbClient = new PrismaClient();
+  const dbUserOperations = new DbUserOperations();
+  const userEmail = appEnv.IMAP_EMAIL;
+  let userPreviousEmail: string | undefined;
 
   test('Should send a password reset email to the user', async () => {
     const user = await dbClient.user.findFirst({
       where: {
-        email: appEnv.IMAP_EMAIL,
         isVerified: true,
       },
     });
@@ -33,6 +36,10 @@ describe('Password Reset', () => {
       return;
     }
 
+    userPreviousEmail = user.email;
+    await dbUserOperations.checkExistingUserAndUpdate();
+    await dbUserOperations.changeEmail(user.email);
+
     const passwordResetResponse = await api.graphql.mutate<
       RequestPasswordResetMutation,
       RequestPasswordResetMutationVariables
@@ -40,7 +47,7 @@ describe('Password Reset', () => {
       mutation: REQUEST_PASSWORD_RESET_MUTATION,
       variables: {
         passwordReset: {
-          email: user.email,
+          email: userEmail,
         },
       },
     });
@@ -49,8 +56,8 @@ describe('Password Reset', () => {
       'Password reset email sent',
     );
 
-    await waitForTime();
-  }, 10000);
+    await waitForTime(30000);
+  }, 50000);
 
   test('Should not return an error if the email is not registered', async () => {
     const requestRandomUserPasswordReset = await api.graphql.mutate<
@@ -116,6 +123,17 @@ describe('Password Reset', () => {
       },
     });
     expect(response.errors?.[0].message).toBe('jwt malformed');
+  });
+
+  test('Login with the user', async () => {
+    const response = await api.login({
+      email: userEmail,
+      password: appEnv.SEED_PASSWORD,
+    });
+    expect(response.data).toBeDefined();
+
+    if (userPreviousEmail)
+      await dbUserOperations.revertEmail(userPreviousEmail);
   });
 
   test('Should return an error if the new password does not meet criteria', async () => {

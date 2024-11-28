@@ -16,6 +16,7 @@ import {
   VerifyEmailMutation,
   VerifyEmailMutationVariables,
 } from '../../gql/graphql';
+import { DbUserOperations } from '../../lib/dbUserOperations';
 
 describe('User Sign up', () => {
   let invitationLink: string | undefined;
@@ -23,28 +24,12 @@ describe('User Sign up', () => {
   let addedUser: User | null;
   let userId: string | undefined;
   const userEmail = appEnv.IMAP_EMAIL;
-  const userEmailUpdated = `${appEnv.IMAP_EMAIL.split('@')[0]}+${crypto.randomUUID()}${appEnv.IMAP_EMAIL.split('@')[1]}`;
   const api = new GraphQlApi();
+  const dbUserOperations = new DbUserOperations();
   const prisma = new PrismaClient();
 
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
   test('Add a new user', async () => {
-    console.log(userEmailUpdated);
-    const existingUser = await prisma.user.findUnique({
-      where: { email: userEmail },
-    });
-
-    if (existingUser) {
-      await prisma.user.update({
-        where: { email: userEmail },
-        data: {
-          email: userEmailUpdated,
-        },
-      });
-    }
+    await dbUserOperations.checkExistingUserAndUpdate();
 
     const signUpData = await api.graphql.mutate<
       SignupMutation,
@@ -62,7 +47,6 @@ describe('User Sign up', () => {
     const data = signUpData.data?.signup;
     userId = data?.id;
     expect(data?.id).not.toBe(null);
-
     await waitForTime(30000);
   }, 50000);
 
@@ -74,8 +58,8 @@ describe('User Sign up', () => {
   });
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome');
-    onboardingToken = invitationLink?.substring(46);
+    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    onboardingToken = invitationLink?.substring(49);
     expect(invitationLink).toContain('verify-email');
   });
 
@@ -110,7 +94,6 @@ describe('User Sign up', () => {
         } as VerifyEmailInput,
       },
     });
-
     const data = verifyEmailData.data?.verifyEmail;
     expect(data?.refreshToken).not.toBe(null);
   });
@@ -134,25 +117,12 @@ describe('User Sign up', () => {
 
   test('should return the user ID after successful signup', async () => {
     expect(userId).not.toBe(null);
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     expect(user?.isVerified).toBe(true);
 
-    await prisma.user.update({
-      where: { email: userEmail },
-      data: {
-        email: `${appEnv.IMAP_EMAIL.split('@')[0]}+${crypto.randomUUID()}${appEnv.IMAP_EMAIL.split('@')[1]}`,
-      },
-    });
-
-    await prisma.user.update({
-      where: { email: userEmailUpdated },
-      data: {
-        email: userEmail,
-      },
-    });
+    await dbUserOperations.revertDbOperations();
   });
 });

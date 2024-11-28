@@ -22,44 +22,28 @@ import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutat
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
 import { faker } from '@faker-js/faker';
+import { DbUserOperations } from '../../../lib/dbUserOperations';
 
 describe('Membership invitation module', () => {
   let workspaceID: string | undefined;
   const workspaceName = faker.lorem.word();
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
-  let user: User | null;
   let userId: string | undefined;
-  const userEmail = `automation-${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`;
+  const userEmail = appEnv.IMAP_EMAIL;
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
+  const dbUserOperations = new DbUserOperations();
+  let user: User | null;
   const dbClient = new PrismaClient();
 
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  test(`Login as a ${UserType.ADMIN}`, async () => {
-    user = await dbClient.user.findFirst({
-      where: {
-        userType: UserType.ADMIN,
-        isVerified: true,
-      },
-    });
-
-    if (!user) {
-      return;
-    }
-
-    const response = await api.login({
-      email: user.email,
-      password: appEnv.SEED_PASSWORD,
-    });
-
-    expect(response.data).toBeDefined();
-  });
-
   test('Add a new user', async () => {
+    await dbUserOperations.checkExistingUserAndUpdate();
+
     const signUpData = await api.graphql.mutate<
       SignupMutation,
       SignupMutationVariables
@@ -76,14 +60,15 @@ describe('Membership invitation module', () => {
     const data = signUpData.data?.signup;
     userId = data?.id;
     expect(data?.id).not.toBe(null);
-    await waitForTime(6000);
-  }, 10000);
+    await waitForTime(20000);
+  }, 30000);
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome');
-    onboardingToken = invitationLink?.substring(46);
+    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
+    onboardingToken = invitationLink?.substring(49);
     expect(invitationLink).toContain('verify-email');
-  });
+  }, 9000);
 
   test('Verify the email with onboarding token', async () => {
     const verifyEmailData = await api.graphql.mutate<
@@ -97,9 +82,24 @@ describe('Membership invitation module', () => {
         } as VerifyEmailInput,
       },
     });
-
     const data = verifyEmailData.data?.verifyEmail;
     expect(data?.refreshToken).not.toBe(null);
+  }, 9000);
+
+  test('Login with the user', async () => {
+    user = await dbClient.user.findFirst({
+      where: {
+        userType: UserType.ADMIN,
+        isVerified: true,
+      },
+    });
+    if (user) {
+      const response = await api.login({
+        email: user.email,
+        password: appEnv.SEED_PASSWORD,
+      });
+      expect(response.data).toBeDefined();
+    }
   });
 
   test('New Workspace created', async () => {
@@ -135,14 +135,15 @@ describe('Membership invitation module', () => {
       });
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
-    await waitForTime(6000);
-  }, 15000);
+    await waitForTime(40000);
+  }, 50000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('Membership Invitation');
+    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.substring(60);
     expect(invitationLink).toContain('membership-verify');
-  });
+  }, 7000);
 
   test('Verify invitation', async () => {
     if (userId && workspaceID) {
@@ -160,5 +161,7 @@ describe('Membership invitation module', () => {
       });
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
+
+    await dbUserOperations.revertDbOperations();
   });
 });
