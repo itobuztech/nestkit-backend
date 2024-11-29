@@ -14,15 +14,12 @@ import {
   GetRoleQueryVariables,
   GetUsersQuery,
   GetUsersQueryVariables,
-  RoleListQuery,
-  RoleListQueryVariables,
   RoleQuery,
   RoleQueryVariables,
   UnAssignRoleMutation,
   UnAssignRoleMutationVariables,
 } from '../../gql/graphql';
 import { USER_LIST } from '../../graphql/get-user-list.gql';
-import { GET_ROLE_LIST_QUERY } from '../../graphql/get-role-list-query.gql';
 import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
@@ -37,11 +34,9 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
   describe(`Assign Role functionalities for user : ${type}`, () => {
     let dbUser: User | null;
     let user: User | null;
-    let roleId: string | undefined;
     let userId: string | undefined;
     let privilegeArrayForCurrentUser: string[] | undefined;
     let privilegeArrayForAllRoles: string[] | undefined;
-    let rolesArray: string[] | undefined;
     const api = new GraphQlApi();
     const dbClient = new PrismaClient();
     let workspaceId: string | undefined;
@@ -58,7 +53,19 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
           deletedAt?: any;
         }
       | undefined;
+    let randomPrivilege2:
+      | {
+          name: string;
+          group: string;
+          id: string;
+          type: string;
+          createdAt: string;
+          updatedAt: string;
+          deletedAt?: any;
+        }
+      | undefined;
     let createdRoleId: string | undefined;
+    let createdRoleId2: string | undefined;
 
     test(`Login as a ${type.toUpperCase()} `, async () => {
       dbUser = await dbClient.user.findFirst({
@@ -94,7 +101,6 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
-    //This test NST-60 has issue
     test('Fetch user list and store the user ID ', async () => {
       user = await dbClient.user.findFirst({
         where: {
@@ -142,9 +148,19 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       });
 
       randomPrivilege = sample(privilegeList.data.listBasePrivilege.privilege);
+      randomPrivilege2 = sample(privilegeList.data.listBasePrivilege.privilege);
+
+      for (const privilege of privilegeList.data.listBasePrivilege.privilege) {
+        if (
+          randomPrivilege?.id === randomPrivilege2?.id &&
+          randomPrivilege2?.name === 'UPDATE'
+        )
+          randomPrivilege2 = privilege;
+        else break;
+      }
     });
 
-    test(`Create Role for ${type}`, async () => {
+    test(`Create Role for first privilege${type}`, async () => {
       if (!randomPrivilege) {
         throw new Error(
           'Random privilege id not found! The privilege list fetch might have failed!',
@@ -173,34 +189,36 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       }
     });
 
-    test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
+    test(`Create Role for second privilege${type}`, async () => {
+      if (!randomPrivilege2) {
+        throw new Error(
+          'Random privilege id not found! The privilege list fetch might have failed!',
+        );
+      } else {
+        const createRoleResponse = await api.graphql.mutate<
+          CreateRoleMutation,
+          CreateRoleMutationVariables
+        >({
+          mutation: CREATE_ROLE_MUTATION,
+          variables: {
+            roleCreateInput: {
+              title,
+              privileges: [randomPrivilege2.id],
+            },
           },
-        },
-        context: {
-          headers: {
-            current_workspace_id: workspaceId,
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
           },
-        },
-      });
+        });
 
-      roleList.data.roleList.role.forEach((role) => {
-        expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
-        expect(role.title).toBeDefined();
-      });
-
-      roleId = sample(roleList.data.roleList.role)?.id;
+        createdRoleId2 = createRoleResponse.data?.createRole.id;
+        expect(createRoleResponse.data?.createRole.id).toBeDefined();
+      }
     });
 
-    test('Assign the random role to the user', async () => {
+    test('Assign the first created role to the user', async () => {
       if (createdRoleId && userId) {
         const assignRole = await api.graphql.mutate<
           AssignRoleMutation,
@@ -210,6 +228,28 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
           variables: {
             assignRoleInput: {
               roleId: createdRoleId,
+              userId,
+            },
+          },
+        });
+        expect(assignRole.data?.assignRole.success).toBe(true);
+      } else {
+        throw new Error(
+          'Role ID and User ID not found! Role list and user list might not have been fetched properly',
+        );
+      }
+    });
+
+    test('Assign the second created role to the user', async () => {
+      if (createdRoleId2 && userId) {
+        const assignRole = await api.graphql.mutate<
+          AssignRoleMutation,
+          AssignRoleMutationVariables
+        >({
+          mutation: ASSIGN_ROLE_MUTATION,
+          variables: {
+            assignRoleInput: {
+              roleId: createdRoleId2,
               userId,
             },
           },
@@ -241,26 +281,22 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
           query: CURRENT_USER_QUERY,
           variables: {},
         });
-        const roles: string[] = [];
-        currentUser.data.currentUser.roles.forEach((role) => {
-          roles?.push(role);
-        });
+
         const privileges: string[] = [];
         currentUser.data.currentUser.privilege.forEach((privilege) => {
           privileges?.push(privilege.id);
         });
         expect(currentUser.data.currentUser.userType).toBe(UserType.USER);
-        expect(currentUser.data.currentUser.roles).toContain(roleId);
+        expect(currentUser.data.currentUser.roles).toContain(createdRoleId);
+        expect(currentUser.data.currentUser.roles).toContain(createdRoleId2);
 
-        return { roles, privileges };
+        return privileges;
       }
 
-      const response = await currentUserInfo();
-      rolesArray = response.roles;
-      privilegeArrayForCurrentUser = response.privileges;
+      privilegeArrayForCurrentUser = await currentUserInfo();
     });
 
-    test('Login with the user which can unassign role', async () => {
+    test('Login with the user who can unassign role', async () => {
       if (dbUser) {
         const response = await api.login({
           email: dbUser.email,
@@ -273,8 +309,8 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
     test('Assert the multiple role privileges', async () => {
       async function fetchPrivilege() {
         const privileges: string[] = [];
-        if (rolesArray) {
-          for (const role of rolesArray) {
+        if (createdRoleId && createdRoleId2) {
+          for (const role of [createdRoleId, createdRoleId2]) {
             const getRoleResponse = await api.graphql.query<
               GetRoleQuery,
               GetRoleQueryVariables
@@ -301,15 +337,14 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       }
       privilegeArrayForAllRoles = await fetchPrivilege();
 
-      privilegeArrayForAllRoles?.sort();
-      privilegeArrayForCurrentUser?.sort();
-      expect(privilegeArrayForAllRoles).toStrictEqual(
-        privilegeArrayForCurrentUser,
-      );
+      if (privilegeArrayForAllRoles)
+        expect(privilegeArrayForCurrentUser).toEqual(
+          expect.arrayContaining(privilegeArrayForAllRoles),
+        );
     });
 
     test('Unassign role which has been created', async () => {
-      if (roleId && userId) {
+      if (createdRoleId && userId) {
         const unAssignRole = await api.graphql.mutate<
           UnAssignRoleMutation,
           UnAssignRoleMutationVariables
@@ -317,7 +352,7 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
           mutation: UNASSIGN_ROLE_MUTATION,
           variables: {
             unAssignRoleInput: {
-              roleId,
+              roleId: createdRoleId,
               userId,
             },
           },
@@ -330,6 +365,27 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       }
     });
 
+    test('Unassign role which has been created', async () => {
+      if (createdRoleId2 && userId) {
+        const unAssignRole = await api.graphql.mutate<
+          UnAssignRoleMutation,
+          UnAssignRoleMutationVariables
+        >({
+          mutation: UNASSIGN_ROLE_MUTATION,
+          variables: {
+            unAssignRoleInput: {
+              roleId: createdRoleId2,
+              userId,
+            },
+          },
+        });
+        expect(unAssignRole.data?.unAssignRole.success).toBe(true);
+      } else {
+        throw new Error(
+          'Role ID and User ID not found! Role list and user list might not have been fetched properly',
+        );
+      }
+    });
     test('Login with the assigned user again', async () => {
       if (user) {
         const response = await api.login({
@@ -350,7 +406,8 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       });
 
       expect(currentUser.data.currentUser.userType).toBe(UserType.USER);
-      expect(currentUser.data.currentUser.roles).not.toContain(roleId);
+      expect(currentUser.data.currentUser.roles).not.toContain(createdRoleId);
+      expect(currentUser.data.currentUser.roles).not.toContain(createdRoleId2);
     });
   });
 });
