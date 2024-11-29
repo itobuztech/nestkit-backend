@@ -15,7 +15,11 @@ interface Message {
   body: string;
 }
 
-export const readEmails = ({ searchDate }: { searchDate: string }): Promise<Message[]> => {
+export const readEmails = ({
+  searchDate,
+}: {
+  searchDate: string;
+}): Promise<Message[]> => {
   return new Promise((resolve, reject) => {
     const imap = new Imap(imapConfig);
     const messages: Message[] = [];
@@ -35,7 +39,7 @@ export const readEmails = ({ searchDate }: { searchDate: string }): Promise<Mess
             imap.end();
             return reject(err);
           }
-
+          // console.log(results);
           const fetch = imap.fetch(results, { bodies: '' });
 
           fetch.on('message', (msg: any, seqno: number) => {
@@ -97,7 +101,7 @@ export const readEmails = ({ searchDate }: { searchDate: string }): Promise<Mess
 };
 
 // Usage example
-// readEmails({ searchDate: 'Nov 24, 2024'})
+// readEmails({ searchDate: 'Nov 24, 2024' })
 //   .then((messages) => {
 //     console.log('Done fetching all messages!', messages.length);
 //     console.log('Fetched messages:', messages);
