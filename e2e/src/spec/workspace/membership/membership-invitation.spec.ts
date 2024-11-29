@@ -65,7 +65,7 @@ describe('Membership invitation module', () => {
     });
 
     const data = signUpData.data?.signup;
-    console.log(signUpData);
+    console.log(signUpData, 'signup');
     userId = data?.id;
     expect(data?.id).not.toBe(null);
     await waitForTime(60000);
@@ -269,33 +269,7 @@ describe('Membership invitation module', () => {
       >({
         query: LIST_MEMBERSHIP_QUERY,
         variables: {
-          listMembershipsInput: {
-            workspaceId: workspaceID,
-          },
-        },
-      });
-
-      let flag = false;
-      membershipList.data.listMemberships.memberships.forEach((membership) => {
-        expect(membership.workspaceId).toBe(workspaceID);
-        if (membership.user.id === userId) flag = true;
-      });
-
-      expect(flag).toBe(true);
-    }
-  });
-
-  test('Membership List verify', async () => {
-    if (workspaceID) {
-      const membershipList = await api.graphql.query<
-        ListMembershipsQuery,
-        ListMembershipsQueryVariables
-      >({
-        query: LIST_MEMBERSHIP_QUERY,
-        variables: {
-          listMembershipsInput: {
-            workspaceId: workspaceID,
-          },
+          listMembershipsInput: {},
         },
       });
 

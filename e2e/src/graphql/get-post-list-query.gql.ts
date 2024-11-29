@@ -8,15 +8,19 @@ export const GET_POST_LIST_QUERY = graphql(`
         content
         id
         published
-        authorId
         createdAt
         updatedAt
         deletedAt
+        author {
+          name
+          id
+        }
       }
       pagination {
         totalPage
         currentPage
         perPage
+        totalRows
       }
     }
   }
