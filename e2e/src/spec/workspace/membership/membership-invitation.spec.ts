@@ -2,7 +2,7 @@ import { SIGN_UP_MUTATION } from '../../../graphql/sign-up-mutation.gql';
 import { VERIFY_EMAIL_MUTATION } from '../../../graphql/verify-email-mutation.gql';
 import { GraphQlApi } from '../../../lib/graphql-api';
 import { waitForTime } from '../../../lib/wait-for-time';
-import { fetchEmailsFromInbox } from '../../../lib/fetchEmails';
+import { fetchEmailsImap } from '../../../lib/fetchEmailsImap';
 import { appEnv } from '../../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
 import {
@@ -24,6 +24,7 @@ import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutat
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
 import { faker } from '@faker-js/faker';
+import { DbUserOperations } from '../../../lib/dbUserOperations';
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
 
 describe('Membership invitation module', () => {
@@ -31,41 +32,22 @@ describe('Membership invitation module', () => {
   const workspaceName = faker.lorem.word();
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
-  let user: User | null;
   let userId: string | undefined;
-  const userEmail = `automation-${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`;
+  const userEmail = appEnv.IMAP_EMAIL;
   let adminEmail: string | undefined;
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
+  const dbUserOperations = new DbUserOperations();
+  let user: User | null;
   const dbClient = new PrismaClient();
 
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  test(`Login as a ${UserType.ADMIN}`, async () => {
-    user = await dbClient.user.findFirst({
-      where: {
-        userType: UserType.ADMIN,
-        isVerified: true,
-      },
-    });
-
-    if (!user) {
-      return;
-    }
-
-    adminEmail = user.email;
-
-    const response = await api.login({
-      email: adminEmail,
-      password: appEnv.SEED_PASSWORD,
-    });
-
-    expect(response.data).toBeDefined();
-  });
-
   test('Add a new user', async () => {
+    await dbUserOperations.checkExistingUserAndUpdate();
+
     const signUpData = await api.graphql.mutate<
       SignupMutation,
       SignupMutationVariables
@@ -80,16 +62,19 @@ describe('Membership invitation module', () => {
     });
 
     const data = signUpData.data?.signup;
+    console.log(signUpData);
     userId = data?.id;
     expect(data?.id).not.toBe(null);
-    await waitForTime(6000);
-  }, 10000);
+    await waitForTime(60000);
+  }, 80000);
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsFromInbox('Welcome');
+    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.substring(46);
+    console.log(invitationLink, onboardingToken);
     expect(invitationLink).toContain('verify-email');
-  });
+  }, 9000);
 
   test('Verify the email with onboarding token', async () => {
     const verifyEmailData = await api.graphql.mutate<
@@ -103,9 +88,27 @@ describe('Membership invitation module', () => {
         } as VerifyEmailInput,
       },
     });
-
     const data = verifyEmailData.data?.verifyEmail;
+    console.log(verifyEmailData);
     expect(data?.refreshToken).not.toBe(null);
+  }, 9000);
+
+  test('Login with the admin', async () => {
+    user = await dbClient.user.findFirst({
+      where: {
+        userType: UserType.ADMIN,
+        isVerified: true,
+      },
+    });
+    if (user) {
+      adminEmail = user.email;
+      const response = await api.login({
+        email: user.email,
+        password: appEnv.SEED_PASSWORD,
+      });
+      console.log(response);
+      expect(response.data).toBeDefined();
+    }
   });
 
   test('New Workspace created', async () => {
@@ -120,7 +123,7 @@ describe('Membership invitation module', () => {
         },
       },
     });
-
+    console.log(createWorkspace);
     workspaceID = createWorkspace.data?.createWorkspace.id;
     expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
   });
@@ -139,16 +142,19 @@ describe('Membership invitation module', () => {
           },
         },
       });
+      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
-    await waitForTime(6000);
-  }, 15000);
+    await waitForTime(65000);
+  }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsFromInbox('Membership Invitation');
+    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.substring(60);
+    console.log(invitationLink, onboardingToken);
     expect(invitationLink).toContain('membership-verify');
-  });
+  }, 7000);
 
   test('Verify and deny the invitation', async () => {
     if (userId && workspaceID) {
@@ -164,16 +170,17 @@ describe('Membership invitation module', () => {
           },
         },
       });
+      console.log(verifyInvitation);
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
   });
 
-  test(`Login as a ${UserType.ADMIN}`, async () => {
+  test(`Login as the assigned user`, async () => {
     const response = await api.login({
       email: userEmail,
       password: appEnv.SEED_PASSWORD,
     });
-
+    console.log(response);
     expect(response.data).toBeDefined();
   });
 
@@ -184,6 +191,7 @@ describe('Membership invitation module', () => {
     >({
       query: LIST_WORKSPACE_QUERY,
     });
+    console.log(listWorkspace);
 
     const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
       (workspace) => workspace.id === workspaceID,
@@ -217,14 +225,17 @@ describe('Membership invitation module', () => {
           },
         },
       });
+      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
-    await waitForTime(6000);
-  }, 15000);
+    await waitForTime(65000);
+  }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsFromInbox('Membership Invitation');
+    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.substring(60);
+    console.log(invitationLink, onboardingToken);
     expect(invitationLink).toContain('membership-verify');
   });
 
@@ -242,11 +253,12 @@ describe('Membership invitation module', () => {
           },
         },
       });
+      console.log(verifyInvitation);
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
   });
 
-  test(`Login as a ${UserType.ADMIN}`, async () => {
+  test(`Login as the assigned user`, async () => {
     const response = await api.login({
       email: userEmail,
       password: appEnv.SEED_PASSWORD,
@@ -256,7 +268,7 @@ describe('Membership invitation module', () => {
   });
 
   //This test has an issue - NST-77
-  test(' View the List of Workspace and the user should not be able to view the workspace', async () => {
+  test(' View the List of Workspace and the user should be able to view the workspace', async () => {
     const listWorkspace = await api.graphql.query<
       ListWorkSpaceQuery,
       ListWorkSpaceQueryVariables
@@ -269,5 +281,6 @@ describe('Membership invitation module', () => {
     );
 
     expect(addedWorkspace?.name).toBe(workspaceName);
+    await dbUserOperations.revertDbOperations();
   });
 });
