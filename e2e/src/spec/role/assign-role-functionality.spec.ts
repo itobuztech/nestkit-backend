@@ -4,6 +4,10 @@ import { appEnv } from '../../lib/app-env';
 import {
   AssignRoleMutation,
   AssignRoleMutationVariables,
+  CreateRoleMutation,
+  CreateRoleMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   GetRoleQuery,
@@ -12,6 +16,8 @@ import {
   GetUsersQueryVariables,
   RoleListQuery,
   RoleListQueryVariables,
+  RoleQuery,
+  RoleQueryVariables,
   UnAssignRoleMutation,
   UnAssignRoleMutationVariables,
 } from '../../gql/graphql';
@@ -22,6 +28,10 @@ import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
 import { sample } from 'lodash';
 import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { faker } from '@faker-js/faker';
+import { CREATE_ROLE_MUTATION } from '../../graphql/create-role-mutation.gql';
+import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
 
 [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assign Role functionalities for user : ${type}`, () => {
@@ -34,6 +44,21 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
     let rolesArray: string[] | undefined;
     const api = new GraphQlApi();
     const dbClient = new PrismaClient();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
+    const title = faker.lorem.word();
+    let randomPrivilege:
+      | {
+          name: string;
+          group: string;
+          id: string;
+          type: string;
+          createdAt: string;
+          updatedAt: string;
+          deletedAt?: any;
+        }
+      | undefined;
+    let createdRoleId: string | undefined;
 
     test(`Login as a ${type.toUpperCase()} `, async () => {
       dbUser = await dbClient.user.findFirst({
@@ -50,6 +75,23 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
         password: appEnv.SEED_PASSWORD,
       });
       expect(response.data).toBeDefined();
+    });
+
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
     //This test NST-60 has issue
@@ -80,6 +122,57 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
       userId = userToBeAssigned?.id;
     });
 
+    test(`View the list of privileges for user - ${type}`, async () => {
+      const privilegeList = await api.graphql.query<
+        RoleQuery,
+        RoleQueryVariables
+      >({
+        query: PRIVILEGE_LIST,
+        variables: {},
+      });
+
+      expect(
+        privilegeList.data.listBasePrivilege.privilege.length,
+      ).toBeGreaterThan(0);
+
+      privilegeList.data.listBasePrivilege.privilege.forEach((privilege) => {
+        expect(privilege.id).toBeDefined();
+        expect(privilege.group).toBeDefined();
+        expect(privilege.name).toBeDefined();
+      });
+
+      randomPrivilege = sample(privilegeList.data.listBasePrivilege.privilege);
+    });
+
+    test(`Create Role for ${type}`, async () => {
+      if (!randomPrivilege) {
+        throw new Error(
+          'Random privilege id not found! The privilege list fetch might have failed!',
+        );
+      } else {
+        const createRoleResponse = await api.graphql.mutate<
+          CreateRoleMutation,
+          CreateRoleMutationVariables
+        >({
+          mutation: CREATE_ROLE_MUTATION,
+          variables: {
+            roleCreateInput: {
+              title,
+              privileges: [randomPrivilege.id],
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
+        });
+
+        createdRoleId = createRoleResponse.data?.createRole.id;
+        expect(createRoleResponse.data?.createRole.id).toBeDefined();
+      }
+    });
+
     test(`Fetch the role list and store the role ID - ${type}`, async () => {
       const roleList = await api.graphql.query<
         RoleListQuery,
@@ -89,6 +182,11 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
         variables: {
           roleListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -103,7 +201,7 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
     });
 
     test('Assign the random role to the user', async () => {
-      if (roleId && userId) {
+      if (createdRoleId && userId) {
         const assignRole = await api.graphql.mutate<
           AssignRoleMutation,
           AssignRoleMutationVariables
@@ -111,7 +209,7 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
           mutation: ASSIGN_ROLE_MUTATION,
           variables: {
             assignRoleInput: {
-              roleId,
+              roleId: createdRoleId,
               userId,
             },
           },
@@ -185,6 +283,11 @@ import { GET_ROLE_QUERY } from '../../graphql/get-role-query.gql';
               variables: {
                 roleGetInput: {
                   id: role,
+                },
+              },
+              context: {
+                headers: {
+                  current_workspace_id: workspaceId,
                 },
               },
             });
