@@ -26,7 +26,6 @@ import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-
 const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
   describe(`Post CRUD functionalities for ${userTypeRole}`, () => {
@@ -75,7 +74,6 @@ userArrays.forEach((userTypeRole) => {
         },
       });
 
-     
       workspaceId = createWorkspace.data?.createWorkspace.id;
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
@@ -115,13 +113,13 @@ userArrays.forEach((userTypeRole) => {
               authorId: user?.id,
               content: content,
               published: faker.datatype.boolean(),
-              title: title
+              title: title,
             },
           },
           context: {
             headers: {
-              'current_workspace_id': workspaceId,           
-             },
+              current_workspace_id: workspaceId,
+            },
           },
         });
         console.log(createPostResponse.errors);
@@ -145,7 +143,7 @@ userArrays.forEach((userTypeRole) => {
             },
           },
         });
-        
+
         const data = getPost.data;
         console.log(data.getPost?.id);
         expect(data.getPost?.id).toBe(postId);
@@ -174,8 +172,8 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              'current_workspace_id': workspaceId,           
-             },
+              current_workspace_id: workspaceId,
+            },
           },
         });
 
@@ -200,10 +198,6 @@ userArrays.forEach((userTypeRole) => {
 
         const data = postList.data;
         expect(data.getPostList.posts.length).toBeGreaterThan(0);
-
-        const addedPost = data.getPostList.posts.find(
-          (post) => post.id === postId,
-        );
       }
     });
 
@@ -224,8 +218,8 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              'current_workspace_id': workspaceId,           
-             },
+              current_workspace_id: workspaceId,
+            },
           },
         });
         expect(deletePostResponse.data?.deletePost).toBe(true);
@@ -249,8 +243,8 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              'current_workspace_id': workspaceId,           
-             },
+              current_workspace_id: workspaceId,
+            },
           },
         });
         expect(deletePostResponse.data?.deletePost).toBe(true);
