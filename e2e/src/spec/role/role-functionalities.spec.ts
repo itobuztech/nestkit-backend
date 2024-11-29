@@ -170,6 +170,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
             fromStash: false,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
 
       roleList.data.roleList.role.forEach((role) => {
@@ -201,6 +206,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
               removePrivileges: [randomPrivilege.id],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(updateRole.data?.updateRole.id).toBe(createdRoleId);
@@ -221,6 +231,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           variables: {
             roleGetInput: {
               id: createdRoleId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -253,6 +268,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
               fromStash: false,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(deleteRole.data?.deleteRole).toBe(true);
@@ -272,6 +292,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         variables: {
           roleListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -297,6 +322,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
                 fromStash: false,
               },
             },
+            context: {
+              headers: {
+                current_workspace_id: workspaceId,
+              },
+            },
           });
         } else {
           throw new Error(
@@ -320,6 +350,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
             roleDeleteInput: {
               id: createdRoleId,
               fromStash: true,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
