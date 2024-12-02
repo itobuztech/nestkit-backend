@@ -123,7 +123,8 @@ type CurrentUserResponse {
   email: String!
   name: String
   id: String!
-  userType: String!
+  profileImage: String
+  userType: String
   sessionCount: Float!
   roles: [String!]!
   privilege: [RolePrivilegeResponse!]!
@@ -410,6 +411,7 @@ input PasswordResetInput {
 }
 
 input SignupInput {
+  name: String
   email: String!
   password: String!
 }
