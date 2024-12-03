@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UploadMediaService } from './upload-media/upload-media.service';
-import { UploadMediaController } from './upload-media/upload-controller';
+import { FileService } from './upload-file/upload-file.service';
+import { UploadMediaController } from './upload-file/upload-controller';
 import { UpdateProfileImageService } from './update-profile-image/update-profile-image.service';
 import { UpdateProfileImageController } from './update-profile-image/update-profile-image.controller';
+import { ListMediaService } from './list-file/list-file.service';
+import { DeleteFileService } from './delete-file/delete-file.service';
 
 @Module({
   controllers: [UploadMediaController, UpdateProfileImageController],
-  providers: [UploadMediaService, UpdateProfileImageService],
+  providers: [FileService, UpdateProfileImageService, ListMediaService, DeleteFileService],
 })
 export class MediaModule {}

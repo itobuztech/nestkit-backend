@@ -2,7 +2,7 @@ import { Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from 
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Request } from "express";
 
-import { UploadMediaService } from "../upload-media/upload-media.service";
+import { FileService } from "../upload-file/upload-file.service";
 import { UpdateProfileImageService } from "./update-profile-image.service";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 
@@ -11,7 +11,7 @@ import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 @Controller('media')
 export class UpdateProfileImageController {
   constructor(
-    private readonly uploadMediaService: UploadMediaService,
+    private readonly uploadMediaService: FileService,
     private readonly updateProfileImage: UpdateProfileImageService,
   ) {}
 
@@ -22,7 +22,7 @@ export class UpdateProfileImageController {
     @Req() req: Request,
   ) {
     const filePath = await this.uploadMediaService.saveFile(file);
-    const media = await this.uploadMediaService.uploadMedia({ ...file, path: filePath });
+    const media = await this.uploadMediaService.uploadMedia({ ...file, path: filePath }, { workspaceId: req.currentWorkspaceId as string });
     return await this.updateProfileImage.updateProfileMedia(media, req.user?.id || '');
   }
 }

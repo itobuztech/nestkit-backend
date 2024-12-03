@@ -4,12 +4,13 @@ import { join, dirname } from 'path';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
+import { File } from '@prisma/client';
 
 @Injectable()
-export class UploadMediaService {
+export class FileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async uploadMedia(file: Express.Multer.File) {
+  async uploadMedia(file: Express.Multer.File, { workspaceId }: { workspaceId: string }): Promise<File> {
     // Save file information to the database
     const media = await this.prisma.file.create({
       data: {
@@ -17,6 +18,7 @@ export class UploadMediaService {
         mimeType: file.mimetype,
         size: file.size,
         url: file.path,
+        workspaceId
       },
     });
 
@@ -53,5 +55,11 @@ export class UploadMediaService {
     const newFilename = `${uuidv4()}${extension}`;
     const newFilePath = path.join(path.dirname(originalFilePath), newFilename);
     return newFilePath;
+  }
+
+  async deleteFile(path: string): Promise<void> {
+
+    // Delete file from the filesystem
+    await fs.unlink(join(process.cwd(), 'public', path));
   }
 }
