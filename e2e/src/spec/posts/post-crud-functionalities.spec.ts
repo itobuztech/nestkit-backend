@@ -122,7 +122,7 @@ userArrays.forEach((userTypeRole) => {
             },
           },
         });
-        console.log(createPostResponse.errors);
+
         const data = createPostResponse.data;
         expect(data?.createPost.id).toBeDefined();
 
