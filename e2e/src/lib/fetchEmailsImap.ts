@@ -2,7 +2,6 @@ import { readEmails } from './imap-client';
 import { format } from 'date-fns';
 
 export async function fetchEmailsImap(emailSubject: string) {
-  console.log('hello 1');
   try {
     let invitationLink: string;
     const messages = await readEmails({
