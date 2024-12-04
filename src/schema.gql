@@ -123,8 +123,7 @@ type CurrentUserResponse {
   email: String!
   name: String
   id: String!
-  profileImage: String
-  userType: String
+  userType: String!
   sessionCount: Float!
   roles: [String!]!
   privilege: [RolePrivilegeResponse!]!
@@ -134,10 +133,6 @@ type GetUserResponse {
   email: String!
   name: String
   id: String!
-}
-
-type UpdateProfileResponse {
-  success: Boolean!
 }
 
 type PassWordResetRequestResponse {
@@ -206,26 +201,6 @@ type ListMembershipResponse {
   pagination: BaseListResponse!
 }
 
-type FileResponse {
-  id: String!
-  name: String!
-  description: String
-  size: Int!
-  mimeType: String!
-  url: String!
-  folderId: String
-  authorId: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-  workspaceId: String
-}
-
-type ListMediaResponse {
-  file: [FileResponse!]!
-  pagination: BaseListResponse!
-}
-
 type Query {
   listWorkSpace(listWorkspaceInput: ListWorkSpaceInput): ListWorkSpaceResponse!
   listMemberships(listMembershipsInput: ListMembershipInput!): ListMembershipResponse!
@@ -236,7 +211,6 @@ type Query {
   getPost(getPostInput: GetPostInput!): GetPostResponse
   getUsers(getUsersInput: GetUsersInput): [GetUserResponse!]!
   currentUser: CurrentUserResponse!
-  listMedia(listMediaInput: ListMediaInput): ListMediaResponse!
   login(loginInput: LoginInput!): LoginResponse!
 }
 
@@ -311,20 +285,6 @@ input GetUsersInput {
   search: String
 }
 
-input ListMediaInput {
-  page: Int
-  pageSize: Int
-  orderBy: Order = DESC
-  fromStash: Boolean = false
-  orderByField: mediaOrderByField = createdAt
-}
-
-enum mediaOrderByField {
-  createdAt
-  updatedAt
-  size
-}
-
 input LoginInput {
   email: String!
   password: String!
@@ -344,8 +304,6 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
-  updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
-  deleteFile(fileDeleteInput: FileDeleteInput): Boolean!
   requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
   resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
   signup(signupInput: SignupInput!): SignupResponse!
@@ -433,16 +391,6 @@ input PostDeleteInput {
   fromStash: Boolean
 }
 
-input UpdateProfileInput {
-  name: String
-  password: String
-}
-
-input FileDeleteInput {
-  id: String!
-  fromStash: Boolean
-}
-
 input PasswordResetRequestInput {
   email: String!
 }
@@ -452,7 +400,6 @@ input PasswordResetInput {
 }
 
 input SignupInput {
-  name: String
   email: String!
   password: String!
 }
