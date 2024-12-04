@@ -6,6 +6,8 @@ import {
   AssignRoleMutationVariables,
   CreatePostMutation,
   CreatePostMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   DeletePostMutation,
@@ -14,8 +16,6 @@ import {
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
-  RoleListQuery,
-  RoleListQueryVariables,
   UnAssignRoleMutation,
   UnAssignRoleMutationVariables,
   UpdatePostMutation,
@@ -23,7 +23,6 @@ import {
   UpdateRoleMutation,
   UpdateRoleMutationVariables,
 } from '../../gql/graphql';
-import { GET_ROLE_LIST_QUERY } from '../../graphql/get-role-list-query.gql';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
 import { faker } from '@faker-js/faker';
@@ -35,6 +34,7 @@ import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
 import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
 [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
@@ -52,6 +52,8 @@ import { GraphQLError } from 'graphql';
     const titleUpdated = faker.lorem.word();
     const api = new GraphQlApi();
     const dbClient = new PrismaClient();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test('Login with the user', async () => {
       user = await dbClient.user.findFirst({
@@ -92,6 +94,23 @@ import { GraphQLError } from 'graphql';
       userPrivilegesArray = await currentUserInfo();
     });
 
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+    });
+
     test(`Login as a ${type} `, async () => {
       loginUser = await dbClient.user.findFirst({
         where: {
@@ -109,29 +128,16 @@ import { GraphQLError } from 'graphql';
       expect(response.data).toBeDefined();
     });
 
-    test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
-          },
+    test(`Get the role id of the user`, async () => {
+      const role = await dbClient.role.findFirst({
+        where: {
+          name: UserType.USER,
         },
       });
-
-      roleList.data.roleList.role.forEach((role) => {
-        expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
-        expect(role.title).toBeDefined();
-      });
-
-      const userRole = roleList.data.roleList.role.find(
-        (role) => role.name === UserType.USER,
-      );
-      userRoleId = userRole?.id;
+      if (!role) {
+        return;
+      }
+      userRoleId = role?.id;
     });
 
     test(`Update role for user : ${type}`, async () => {
@@ -154,7 +160,7 @@ import { GraphQLError } from 'graphql';
         expect(updateRole.data?.updateRole.id).toBe(userRoleId);
       } else {
         throw new Error(
-          'Random privilege id and created role id not found! The privilege list fetch and role creation might have failed!',
+          'User privilege array and user role id not found! The privilege list fetch and role creation might have failed!',
         );
       }
     });
@@ -171,7 +177,6 @@ import { GraphQLError } from 'graphql';
 
     test(`Create Post as USER`, async () => {
       try {
-        if (!user) return;
         await api.graphql.mutate<
           CreatePostMutation,
           CreatePostMutationVariables
@@ -179,10 +184,14 @@ import { GraphQLError } from 'graphql';
           mutation: CREATE_POST_MUTATION,
           variables: {
             createPostInput: {
-              authorId: user?.id,
               content: content,
               published: faker.datatype.boolean(),
               title: title,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -203,22 +212,15 @@ import { GraphQLError } from 'graphql';
     });
 
     test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
-          },
+      const role = await dbClient.role.findFirst({
+        where: {
+          name: type,
         },
       });
-
-      const userRole = roleList.data.roleList.role.find(
-        (role) => role.name === type,
-      );
-      roleIdToBeAssigned = userRole?.id;
+      if (!role) {
+        return;
+      }
+      roleIdToBeAssigned = role?.id;
     });
 
     test(`Assign the ${type} role to the user`, async () => {
@@ -255,7 +257,6 @@ import { GraphQLError } from 'graphql';
     });
 
     test(`Create Post as USER`, async () => {
-      if (!user) return;
       const createPostResponse = await api.graphql.mutate<
         CreatePostMutation,
         CreatePostMutationVariables
@@ -263,10 +264,14 @@ import { GraphQLError } from 'graphql';
         mutation: CREATE_POST_MUTATION,
         variables: {
           createPostInput: {
-            authorId: user?.id,
             content: content,
             published: faker.datatype.boolean(),
             title: title,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -289,6 +294,11 @@ import { GraphQLError } from 'graphql';
               id: postId,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         const data = getPost.data;
@@ -309,10 +319,14 @@ import { GraphQLError } from 'graphql';
         variables: {
           postId: postId,
           updatePostInput: {
-            authorId: user?.id,
             content: updatedContent,
             published: faker.datatype.boolean(),
             title: updatedTitle,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -330,6 +344,11 @@ import { GraphQLError } from 'graphql';
         variables: {
           getPostListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -359,6 +378,11 @@ import { GraphQLError } from 'graphql';
             fromStash: false,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
       expect(deletePostResponse.data?.deletePost).toBe(true);
     });
@@ -375,6 +399,11 @@ import { GraphQLError } from 'graphql';
           postDeleteInput: {
             id: postId,
             fromStash: true,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -434,6 +463,11 @@ import { GraphQLError } from 'graphql';
               title: titleUpdated,
               createPrivileges: userPrivilegesArray,
               removePrivileges: [],
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
