@@ -68,9 +68,31 @@ export type CurrentUserResponse = {
   id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
   privilege: Array<RolePrivilegeResponse>;
+  profileImage?: Maybe<Scalars['String']['output']>;
   roles: Array<Scalars['String']['output']>;
   sessionCount: Scalars['Float']['output'];
-  userType: Scalars['String']['output'];
+  userType?: Maybe<Scalars['String']['output']>;
+};
+
+export type FileDeleteInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type FileResponse = {
+  __typename?: 'FileResponse';
+  authorId?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  folderId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  mimeType: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  size: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  url: Scalars['String']['output'];
+  workspaceId?: Maybe<Scalars['String']['output']>;
 };
 
 export type GetPostInput = {
@@ -108,6 +130,20 @@ export type GetUserResponse = {
 
 export type GetUsersInput = {
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ListMediaInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<MediaOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ListMediaResponse = {
+  __typename?: 'ListMediaResponse';
+  file: Array<FileResponse>;
+  pagination: BaseListResponse;
 };
 
 export type ListMembershipInput = {
@@ -167,6 +203,7 @@ export type Mutation = {
   createPost: CreatePostResponse;
   createRole: RoleCreateResponse;
   createWorkspace: CreateWorkspaceResponse;
+  deleteFile: Scalars['Boolean']['output'];
   deletePost: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteWorkSpace: Scalars['Boolean']['output'];
@@ -177,6 +214,7 @@ export type Mutation = {
   signup: SignupResponse;
   unAssignRole: UnAssignRoleResponse;
   updatePost: UpdatePostResponse;
+  updateProfile: UpdateProfileResponse;
   updateRole: RoleUpdateResponse;
   updateWorkspace: UpdateWorkspaceResponse;
   verifyEmail: VerifyEmailResponse;
@@ -205,6 +243,11 @@ export type MutationCreateRoleArgs = {
 
 export type MutationCreateWorkspaceArgs = {
   createWorkspaceInput: CreateWorkspaceInput;
+};
+
+
+export type MutationDeleteFileArgs = {
+  fileDeleteInput?: InputMaybe<FileDeleteInput>;
 };
 
 
@@ -256,6 +299,11 @@ export type MutationUnAssignRoleArgs = {
 export type MutationUpdatePostArgs = {
   postId: Scalars['String']['input'];
   updatePostInput: UpdatePostInput;
+};
+
+
+export type MutationUpdateProfileArgs = {
+  updateProfileInput?: InputMaybe<UpdateProfileInput>;
 };
 
 
@@ -349,6 +397,7 @@ export type Query = {
   getRole: RoleGetResponse;
   getUsers: Array<GetUserResponse>;
   listBasePrivilege: PrivilegeListResponse;
+  listMedia: ListMediaResponse;
   listMemberships: ListMembershipResponse;
   listWorkSpace: ListWorkSpaceResponse;
   login: LoginResponse;
@@ -373,6 +422,11 @@ export type QueryGetRoleArgs = {
 
 export type QueryGetUsersArgs = {
   getUsersInput?: InputMaybe<GetUsersInput>;
+};
+
+
+export type QueryListMediaArgs = {
+  listMediaInput?: InputMaybe<ListMediaInput>;
 };
 
 
@@ -496,6 +550,7 @@ export type SendInvitationResponse = {
 
 export type SignupInput = {
   email: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
   password: Scalars['String']['input'];
 };
 
@@ -524,6 +579,16 @@ export type UpdatePostInput = {
 export type UpdatePostResponse = {
   __typename?: 'UpdatePostResponse';
   id: Scalars['String']['output'];
+};
+
+export type UpdateProfileInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateProfileResponse = {
+  __typename?: 'UpdateProfileResponse';
+  success: Scalars['Boolean']['output'];
 };
 
 export type UpdateWorkspaceInput = {
@@ -566,6 +631,12 @@ export type WorkspaceDeleteInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['String']['input'];
 };
+
+export enum MediaOrderByField {
+  CreatedAt = 'createdAt',
+  Size = 'size',
+  UpdatedAt = 'updatedAt'
+}
 
 export enum OrderByField {
   AuthorId = 'authorId',
@@ -619,7 +690,7 @@ export type CreateWorkspaceMutation = { __typename?: 'Mutation', createWorkspace
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { __typename?: 'Query', currentUser: { __typename?: 'CurrentUserResponse', id: string, name?: string | null, email: string, userType: string, sessionCount: number, roles: Array<string>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: string, name: string, id: string, type: string }> } };
+export type CurrentUserQuery = { __typename?: 'Query', currentUser: { __typename?: 'CurrentUserResponse', id: string, name?: string | null, email: string, userType?: string | null, sessionCount: number, roles: Array<string>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: string, name: string, id: string, type: string }> } };
 
 export type DeletePostMutationVariables = Exact<{
   postDeleteInput?: InputMaybe<PostDeleteInput>;

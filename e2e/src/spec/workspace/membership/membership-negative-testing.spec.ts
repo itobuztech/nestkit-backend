@@ -73,6 +73,17 @@ describe('Membership invitation module', () => {
         userId: userId,
       },
     });
+
+    if (user?.id && workspace?.id)
+      await dbClient.workspaceMembership.create({
+        data: {
+          userId: user?.id,
+          workspaceId: workspace?.workspaceId,
+          isOwner: true,
+          isAccepted: true,
+        },
+      });
+
     workspaceID = workspace?.workspaceId;
     if (workspaceID && userId) {
       const sendInvitation = await api.graphql.mutate<
