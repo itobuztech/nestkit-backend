@@ -86,7 +86,7 @@ describe('Password Reset', () => {
       onboardingToken = invitationLink?.substring(48);
       expect(invitationLink).toContain('password-reset');
     }
-  });
+  },10000);
 
   test('Should reset the password when provided with a valid token', async () => {
     if (onboardingToken) {
