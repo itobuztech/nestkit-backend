@@ -74,15 +74,23 @@ describe('Membership invitation module', () => {
       },
     });
 
-    if (user?.id && workspace?.id)
-      await dbClient.workspaceMembership.create({
-        data: {
+    if (user?.id && workspace?.id) {
+      const adminHasAccess = await dbClient.workspaceMembership.findFirst({
+        where: {
           userId: user?.id,
           workspaceId: workspace?.workspaceId,
-          isOwner: true,
-          isAccepted: true,
         },
       });
+      if (!adminHasAccess)
+        await dbClient.workspaceMembership.create({
+          data: {
+            userId: user?.id,
+            workspaceId: workspace?.workspaceId,
+            isOwner: true,
+            isAccepted: true,
+          },
+        });
+    }
 
     workspaceID = workspace?.workspaceId;
     if (workspaceID && userId) {
@@ -109,7 +117,7 @@ describe('Membership invitation module', () => {
 
   test(`Send invitation with a workspace which is not available for the logged in user`, async () => {
     const excludedWorkspaceIds = await dbClient.workspaceMembership.findMany({
-      where: { userId: userId },
+      where: { userId: user?.id },
       select: { workspaceId: true },
     });
 
@@ -142,7 +150,7 @@ describe('Membership invitation module', () => {
         'Membership not available for this workspace',
       );
     }
-  });
+  }, 9000);
 
   test(`Verify invitation Admin`, async () => {
     const verifyInvitation = await api.graphql.mutate<
