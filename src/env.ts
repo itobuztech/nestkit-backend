@@ -15,7 +15,7 @@ export const appEnv = cleanEnv(process.env, {
     choices: ['development', 'test', 'production', 'staging'],
   }),
   SEED_PASSWORD: str({ default: 'SamLauncher@123' }),
-  SEED_EMAIL: email({ default: 'example@team930312.testinator.com' }),
+  SEED_EMAIL: email({ default: 'example@example.com' }),
   JSON_TOKEN_SECRET: str({ default: 'SamLauncher@123' }),
   CORS_ORIGIN: str({
     default: '*',
