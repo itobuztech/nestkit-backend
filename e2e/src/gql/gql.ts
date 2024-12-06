@@ -11,6 +11,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * 3. It does not support dead code elimination, so it will add unused operations.
  *
  * Therefore it is highly recommended to use the babel or swc plugin for production.
+ * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
     "\n  mutation AssignRole($assignRoleInput: AssignRoleInput!) {\n    assignRole(assignRoleInput: $assignRoleInput) {\n      success\n    }\n  }\n": types.AssignRoleDocument,
@@ -21,7 +22,7 @@ const documents = {
     "\n  mutation DeletePost($postDeleteInput: PostDeleteInput) {\n    deletePost(postDeleteInput: $postDeleteInput)\n  }\n": types.DeletePostDocument,
     "\n  mutation DeleteRole($roleDeleteInput: RoleDeleteInput) {\n    deleteRole(roleDeleteInput: $roleDeleteInput)\n  }\n": types.DeleteRoleDocument,
     "\n mutation DeleteWorkSpace($deleteWorkspaceInput: WorkspaceDeleteInput) {\n  deleteWorkSpace(deleteWorkspaceInput: $deleteWorkspaceInput)\n}\n": types.DeleteWorkSpaceDocument,
-    "\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n          name\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.GetPostListDocument,
+    "\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.GetPostListDocument,
     "\n  query GetPost($getPostInput: GetPostInput!) {\n    getPost(getPostInput: $getPostInput) {\n      id\n      title\n      content\n      published\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n": types.GetPostDocument,
     "\n  query RoleList($roleListInput: RoleListInput) {\n    roleList(roleListInput: $roleListInput) {\n      role {\n        title\n        name\n        id\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.RoleListDocument,
     "\n  query GetRole($roleGetInput: RoleGetInput!) {\n    getRole(roleGetInput: $roleGetInput) {\n      id\n      title\n      name\n      createdAt\n      updatedAt\n      deletedAt\n      privilege {\n        name\n        group\n        id\n        type\n      }\n    }\n  }\n": types.GetRoleDocument,
@@ -91,7 +92,7 @@ export function graphql(source: "\n mutation DeleteWorkSpace($deleteWorkspaceInp
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n          name\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n          name\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetPostList($getPostListInput: GetPostListInput) {\n    getPostList(getPostListInput: $getPostListInput) {\n      posts {\n        title\n        content\n        id\n        published\n        author {\n          id\n        }\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
