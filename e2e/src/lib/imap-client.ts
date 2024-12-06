@@ -101,11 +101,10 @@ export const readEmails = ({
 };
 
 // Usage example
-readEmails({ searchDate: 'Nov 29, 2024' })
-  .then((messages) => {
-    console.log('Done fetching all messages!', messages.length);
-    console.log('Fetched messages:', messages);
-  })
-  .catch((err) => {
-    console.error('Error fetching messages:', err);
-  });
+// readEmails({ searchDate: 'Nov 29, 2024' })
+//   .then((messages) => {
+
+//   })
+//   .catch((err) => {
+//     console.error('Error fetching messages:', err);
+//   });
