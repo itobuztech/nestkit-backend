@@ -2,12 +2,13 @@ import { UseGuards, SetMetadata } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
 import { Request } from 'express';
+import * as sanitizeHtml from 'sanitize-html';
 
 import { UpdatePostResponse } from './update-post-response.dto';
 import { UpdatePostInput } from './update-post.dto';
 import { PrismaService } from 'src/prisma.service';
 import { RoleGuard } from 'src/auth/role.guard';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PostMemberShipValidation } from '../post-membership-validation';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
 import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
@@ -48,7 +49,7 @@ export class PostUpdateService {
 
     const post = await this.prisma.post.update({
       where: { id: postId },
-      data: updatePostInput,
+      data: {...updatePostInput, content: sanitizeHtml(updatePostInput.content),},
     });
     return post;
   }

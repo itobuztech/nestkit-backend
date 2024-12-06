@@ -5,10 +5,6 @@ import { Post } from "@prisma/client";
 
 @ObjectType()
 export class PostListResponse {
-  @Field(() => [PostResponse])
-  posts: Post[];
-
-  @Field(() => BaseListResponse)
-  pagination: BaseListResponse;
-
+  @Field(() => [PostResponse]) posts: Post[];
+  @Field(() => BaseListResponse) pagination: BaseListResponse;
 }

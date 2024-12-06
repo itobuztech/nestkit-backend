@@ -6,6 +6,8 @@ import {
   AssignRoleMutationVariables,
   CreateRoleMutation,
   CreateRoleMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   DeleteRoleMutation,
   DeleteRoleMutationVariables,
   GetRoleQuery,
@@ -33,6 +35,7 @@ import { faker } from '@faker-js/faker';
 import { UPDATE_ROLE_MUTATION } from '../../graphql/update-role-mutation.gql';
 import { DELETE_ROLE_MUTATION } from '../../graphql/delete-role-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
 [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
@@ -67,6 +70,8 @@ import { GraphQLError } from 'graphql';
     let createdRoleId: string | undefined;
     const api = new GraphQlApi();
     const dbClient = new PrismaClient();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test(`Login as a ${type.toUpperCase()} `, async () => {
       loginUser = await dbClient.user.findFirst({
@@ -85,7 +90,23 @@ import { GraphQLError } from 'graphql';
       expect(response.data).toBeDefined();
     });
 
-    //This test has issue - NST-60
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+    });
+
     test('Fetch user list and store the user ID', async () => {
       user = await dbClient.user.findFirst({
         where: {
@@ -109,29 +130,25 @@ import { GraphQLError } from 'graphql';
       userId = userToBeAssigned?.id;
     });
 
-    test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
+    test('Adding membership to the random user', async () => {
+      if (workspaceId && userId)
+        await dbClient.workspaceMembership.create({
+          data: {
+            workspaceId,
+            userId,
+            isOwner: false,
+            isAccepted: true,
           },
+        });
+    });
+
+    test(`Fetch the role list and store the role ID - ${type}`, async () => {
+      const role = await dbClient.role.findFirst({
+        where: {
+          name: type,
         },
       });
-
-      roleList.data.roleList.role.forEach((role) => {
-        expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
-        expect(role.title).toBeDefined();
-      });
-
-      const roleToBeAssigned = roleList.data.roleList.role.find(
-        (role) => role.name === type,
-      );
-      roleId = roleToBeAssigned?.id;
+      roleId = role?.id;
     });
 
     test(`Assign the ${type} role to the user`, async () => {
@@ -216,8 +233,13 @@ import { GraphQLError } from 'graphql';
               privileges: [randomPrivilege.id],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
-
+        console.log(createRoleResponse);
         createdRoleId = createRoleResponse.data?.createRole.id;
         expect(createRoleResponse.data?.createRole.id).toBeDefined();
       }
@@ -232,6 +254,11 @@ import { GraphQLError } from 'graphql';
         variables: {
           roleListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -265,6 +292,11 @@ import { GraphQLError } from 'graphql';
               removePrivileges: [randomPrivilege.id],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(updateRole.data?.updateRole.id).toBe(createdRoleId);
@@ -285,6 +317,11 @@ import { GraphQLError } from 'graphql';
           variables: {
             roleGetInput: {
               id: createdRoleId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -317,6 +354,11 @@ import { GraphQLError } from 'graphql';
               fromStash: false,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(deleteRole.data?.deleteRole).toBe(true);
@@ -336,6 +378,11 @@ import { GraphQLError } from 'graphql';
         variables: {
           roleListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -361,6 +408,11 @@ import { GraphQLError } from 'graphql';
                 fromStash: false,
               },
             },
+            context: {
+              headers: {
+                current_workspace_id: workspaceId,
+              },
+            },
           });
         } else {
           throw new Error(
@@ -384,6 +436,11 @@ import { GraphQLError } from 'graphql';
             roleDeleteInput: {
               id: createdRoleId,
               fromStash: true,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });

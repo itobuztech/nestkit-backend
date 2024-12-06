@@ -1,11 +1,10 @@
+import { CurrentUserService } from './current-user/current-user.service';
 import { GetUserService } from './get-user/get-users.service';
-import { UserService } from './user.service';
 
 import { Module } from '@nestjs/common';
+import { UpdateProfileService } from './update-profile/update-profile.service';
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [UserService, GetUserService],
+  providers: [GetUserService, CurrentUserService, UpdateProfileService],
 })
 export class UserModule {}
