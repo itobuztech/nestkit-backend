@@ -7,10 +7,11 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
 import { faker } from '@faker-js/faker';
 import FormData from 'form-data';
 import fs from "fs";
+import { UploadFile } from "../../../../e2e/interface/upload-file"
 
 const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
-  describe(`Post CRUD functionalities for ${userTypeRole}`, () => {
+  describe(`File upload functionalities for ${userTypeRole}`, () => {
     let user: User | null;
     const workspaceName = faker.lorem.word();
     let workspaceId: string | undefined;
@@ -56,15 +57,35 @@ userArrays.forEach((userTypeRole) => {
       formData.append('file', fs.createReadStream('/src/lib/IMG_2060.jpeg'));
     
       formData.append('description', 'Example description for the media');
-      const response = await axios.post(`${appEnv.API_BASE_URL}/media/upload`, formData, {
+      const uploadFileResponse: UploadFile = await api.post(`${appEnv.API_BASE_URL}/media/upload`, formData, {
         headers: {
           ...formData.getHeaders(),
           current_workspace_id: workspaceId,
         },
       });
     
-      expect(response.status).toBe(201);
-      expect(response.data).toHaveProperty('fileUrl');
+      expect(uploadFileResponse.status).toBe(201);
+      expect(uploadFileResponse.data).toHaveProperty('fileUrl');
     });
   });
 });
+
+/*
+test("Get user profile details", async () => {
+      const headers = {
+        Authorization: `jwt ${loginToken}`,
+      };
+      const getProfileResponse: GetProfileResponse = await api.get(
+        "/api/user/profile",
+        {
+          headers,
+        }
+      );8
+      expect(getProfileResponse.message).toBe("User profile details");
+      if (userType === "ADMIN")
+        expect(getProfileResponse.data.email).toBe(appEnv.ADMIN_EMAIL);
+      else expect(getProfileResponse.data.email).toBe(appEnv.USER_EMAIL);
+
+      imageUrl = getProfileResponse.data.avatar;
+    });
+*/
