@@ -13,6 +13,7 @@ type RoleResponse {
   title: String!
   name: String!
   id: String!
+  description: String!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
@@ -64,6 +65,7 @@ type RolePrivilegeResponse {
 type RoleGetResponse {
   title: String!
   name: String!
+  description: String
   id: String!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -226,7 +228,25 @@ type ListMediaResponse {
   pagination: BaseListResponse!
 }
 
+type GetFileResponse {
+  id: String!
+  name: String!
+  description: String
+  size: Int!
+  mimeType: String!
+  url: String!
+  folderId: String
+  authorId: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  workspaceId: String
+  resizeImages: [GetFileResponse!]
+}
+
 type Query {
+  login(loginInput: LoginInput!): LoginResponse!
+  rateLimitGlobal: String!
   listWorkSpace(listWorkspaceInput: ListWorkSpaceInput): ListWorkSpaceResponse!
   listMemberships(listMembershipsInput: ListMembershipInput!): ListMembershipResponse!
   roleList(roleListInput: RoleListInput): RoleListResponse!
@@ -237,7 +257,12 @@ type Query {
   getUsers(getUsersInput: GetUsersInput): [GetUserResponse!]!
   currentUser: CurrentUserResponse!
   listMedia(listMediaInput: ListMediaInput): ListMediaResponse!
-  login(loginInput: LoginInput!): LoginResponse!
+  getFile(getFileInput: GetFileInput): GetFileResponse
+}
+
+input LoginInput {
+  email: String!
+  password: String!
 }
 
 input ListWorkSpaceInput {
@@ -292,7 +317,7 @@ input GetPostListInput {
   orderBy: Order = DESC
   fromStash: Boolean = false
   title: String
-  authorId: Int
+  authorId: String
   orderByField: orderByField = id
 }
 
@@ -325,12 +350,19 @@ enum mediaOrderByField {
   size
 }
 
-input LoginInput {
-  email: String!
-  password: String!
+input GetFileInput {
+  id: String!
+  fromStash: Boolean
 }
 
 type Mutation {
+  requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
+  resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
+  signup(signupInput: SignupInput!): SignupResponse!
+  verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
+  refreshAccessToken(refreshAccessTokenInput: RefreshAccessTokenInput!): VerifyEmailResponse!
+  rateLimitSkip: String!
+  rateLimitCustomize: String!
   createWorkspace(createWorkspaceInput: CreateWorkspaceInput!): CreateWorkspaceResponse!
   updateWorkspace(updateWorkspaceInput: UpdateWorkspaceInput!): UpdateWorkspaceResponse!
   deleteWorkSpace(deleteWorkspaceInput: WorkspaceDeleteInput): Boolean!
@@ -346,11 +378,29 @@ type Mutation {
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
   updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
   deleteFile(fileDeleteInput: FileDeleteInput): Boolean!
-  requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
-  resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
-  signup(signupInput: SignupInput!): SignupResponse!
-  verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
-  refreshAccessToken(refreshAccessTokenInput: RefreshAccessTokenInput!): VerifyEmailResponse!
+  resizeFile(resizeFileInput: ResizeFileInput): JSON!
+}
+
+input PasswordResetRequestInput {
+  email: String!
+}
+
+input PasswordResetInput {
+  password: String!
+}
+
+input SignupInput {
+  name: String
+  email: String!
+  password: String!
+}
+
+input VerifyEmailInput {
+  token: String!
+}
+
+input RefreshAccessTokenInput {
+  refreshToken: String!
 }
 
 input CreateWorkspaceInput {
@@ -443,24 +493,19 @@ input FileDeleteInput {
   fromStash: Boolean
 }
 
-input PasswordResetRequestInput {
-  email: String!
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input ResizeFileInput {
+  id: String!
+  resizeOptions: ImageResizeOptions!
 }
 
-input PasswordResetInput {
-  password: String!
-}
-
-input SignupInput {
-  name: String
-  email: String!
-  password: String!
-}
-
-input VerifyEmailInput {
-  token: String!
-}
-
-input RefreshAccessTokenInput {
-  refreshToken: String!
+input ImageResizeOptions {
+  width: Int!
+  height: Int!
+  left: Int!
+  top: Int!
 }

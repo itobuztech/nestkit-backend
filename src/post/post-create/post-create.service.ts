@@ -5,7 +5,7 @@ import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
 
 import { CreatePostResponse } from './create-post-response.dto';
 import { CreatePostInput } from './create-post-input.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PostMemberShipValidation } from '../post-membership-validation';
@@ -34,7 +34,10 @@ export class PostCreateService {
     @Context('req') req: Request,
   ) {
 
-    this.postMemberShipValidation.validateAuthorMembership(req.memberships, (createPostInput?.authorId || req?.user?.id) || '');
+    if (createPostInput.authorId) {
+      await this.postMemberShipValidation.validateMembership(this.prisma, createPostInput?.authorId, req.currentWorkspaceId || '');
+    }
+    
 
     const post = await this.prisma.post.create({
       data: {
