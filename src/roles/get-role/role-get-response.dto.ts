@@ -11,7 +11,8 @@ export class RolePrivilegeResponse {
 @ObjectType()
 export class RoleGetResponse {
   @Field() title: string;
-  @Field() name: string;
+  @Field() type: string;
+  @Field({ nullable: true }) description?: string;
   @Field() id: string;
   @Field() createdAt: Date;
   @Field() updatedAt: Date;

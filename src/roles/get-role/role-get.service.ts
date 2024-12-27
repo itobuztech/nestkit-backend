@@ -4,7 +4,7 @@ import {
   RoleGetResponse,
   RolePrivilegeResponse,
 } from './role-get-response.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleGetInput } from './role-get-input.dto';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import { RoleGuard } from 'src/auth/role.guard';
@@ -54,6 +54,7 @@ export class RoleGetService {
     return {
       ...role,
       deletedAt: role.deletedAt as any,
+      description: role.description || '',
       privilege: transformPrivileges,
     };
   }
