@@ -3,7 +3,7 @@ import { Request } from "express";
 import { UseGuards } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
-import { PrismaService } from "src/prisma.service";
+import { PrismaService } from "src/prisma/prisma.service";
 import { ListMediaInput } from "./list-file.input.dto";
 import { ListMediaResponse } from "./list-file.response.dto";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
@@ -23,6 +23,7 @@ export class ListMediaService {
     const currentWorkspaceId = req.currentWorkspaceId;
     
     let queryObject: Prisma.FileWhereInput = {
+      resizeImageId: null,
       workspaceId: {
         equals: currentWorkspaceId,
       },
