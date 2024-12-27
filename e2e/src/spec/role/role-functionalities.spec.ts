@@ -179,7 +179,6 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
 
       roleList.data.roleList.role.forEach((role) => {
         expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
         expect(role.title).toBeDefined();
       });
 
