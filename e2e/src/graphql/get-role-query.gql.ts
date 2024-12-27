@@ -5,7 +5,7 @@ export const GET_ROLE_QUERY = graphql(`
     getRole(roleGetInput: $roleGetInput) {
       id
       title
-      name
+      type
       createdAt
       updatedAt
       deletedAt
