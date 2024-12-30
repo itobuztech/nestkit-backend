@@ -20,7 +20,7 @@ export const appEnv = cleanEnv(process.env, {
     default: 'https://mailinator.com/api/v2/domains/private/messages/',
   }),
   API_BASE_URL: str({ default: 'http://localhost:4000' }),
-  ADMIN_EMAIL: str({ default: 'example+admin-1@team930312.testinator.com' }),
+  ADMIN_EMAIL: str({ default: 'zenia+admin-1@itobuz.com' }),
   JEST_HTML_REPORTER_FILE_NAME: str({ default: 'test.html' }),
   IMAP_EMAIL: str({ default: 'qa@itobuz.wordpress-studio.io' }),
 
