@@ -3,7 +3,6 @@ import { VERIFY_EMAIL_MUTATION } from '../../graphql/verify-email-mutation.gql';
 import { LOGIN_QUERY } from '../../graphql/login-query.gql';
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsImap } from '../../lib/fetchEmailsImap';
 import { appEnv } from '../../lib/app-env';
 import { PrismaClient, User } from '@prisma/client';
 import {
@@ -17,6 +16,7 @@ import {
   VerifyEmailMutationVariables,
 } from '../../gql/graphql';
 import { DbUserOperations } from '../../lib/dbUserOperations';
+import { fetchEmailsMailHog } from '../../lib/fetchEmailsMailHog';
 
 describe('User Sign up', () => {
   let invitationLink: string | undefined;
@@ -58,7 +58,7 @@ describe('User Sign up', () => {
   });
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    invitationLink = await fetchEmailsMailHog('Welcome');
     onboardingToken = invitationLink?.substring(49);
     expect(invitationLink).toContain('verify-email');
   });

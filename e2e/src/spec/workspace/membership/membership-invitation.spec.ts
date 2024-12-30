@@ -2,7 +2,6 @@ import { SIGN_UP_MUTATION } from '../../../graphql/sign-up-mutation.gql';
 import { VERIFY_EMAIL_MUTATION } from '../../../graphql/verify-email-mutation.gql';
 import { GraphQlApi } from '../../../lib/graphql-api';
 import { waitForTime } from '../../../lib/wait-for-time';
-import { fetchEmailsImap } from '../../../lib/fetchEmailsImap';
 import { appEnv } from '../../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
 import {
@@ -26,6 +25,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mut
 import { faker } from '@faker-js/faker';
 import { DbUserOperations } from '../../../lib/dbUserOperations';
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
+import { fetchEmailsMailHog } from '../../../lib/fetchEmailsMailHog';
 
 describe('Membership invitation module', () => {
   let workspaceID: string | undefined;
@@ -69,7 +69,7 @@ describe('Membership invitation module', () => {
   }, 80000);
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    invitationLink = await fetchEmailsMailHog('Welcome');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.substring(46);
     console.log(invitationLink, onboardingToken);
@@ -149,9 +149,9 @@ describe('Membership invitation module', () => {
   }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(60);
+    onboardingToken = invitationLink?.substring(51);
     console.log(invitationLink, onboardingToken);
     expect(invitationLink).toContain('membership-verify');
   }, 7000);
@@ -232,9 +232,9 @@ describe('Membership invitation module', () => {
   }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(60);
+    onboardingToken = invitationLink?.substring(51);
     console.log(invitationLink, onboardingToken);
     expect(invitationLink).toContain('membership-verify');
   });

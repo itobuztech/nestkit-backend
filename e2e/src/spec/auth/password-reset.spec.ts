@@ -1,6 +1,5 @@
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsImap } from '../../lib/fetchEmailsImap';
 import { appEnv } from '../../lib/app-env';
 import { REQUEST_PASSWORD_RESET_MUTATION } from '../../graphql/request-password-reset-mutation.gql';
 import { PASSWORD_RESET_MUTATION } from '../../graphql/password-reset-mutation.gql';
@@ -15,6 +14,7 @@ import {
 } from '../../gql/graphql';
 import { faker } from '@faker-js/faker';
 import { DbUserOperations } from '../../lib/dbUserOperations';
+import { fetchEmailsMailHog } from '../../lib/fetchEmailsMailHog';
 
 describe('Password Reset', () => {
   let invitationLink: string | undefined;
@@ -78,7 +78,7 @@ describe('Password Reset', () => {
   });
 
   test('Fetch emails from the inbox and extract the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('Password Reset Request');
+    invitationLink = await fetchEmailsMailHog('Password Reset Request');
     if (invitationLink) {
       invitationLink = invitationLink
         ?.replace(/=/g, '')
@@ -86,7 +86,7 @@ describe('Password Reset', () => {
       onboardingToken = invitationLink?.substring(48);
       expect(invitationLink).toContain('password-reset');
     }
-  },10000);
+  }, 10000);
 
   test('Should reset the password when provided with a valid token', async () => {
     if (onboardingToken) {
