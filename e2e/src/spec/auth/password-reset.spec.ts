@@ -13,7 +13,6 @@ import {
   ResetPasswordMutationVariables,
 } from '../../gql/graphql';
 import { faker } from '@faker-js/faker';
-import { DbUserOperations } from '../../lib/dbUserOperations';
 import { fetchEmailsMailHog } from '../../lib/fetchEmailsMailHog';
 
 describe('Password Reset', () => {
@@ -21,9 +20,7 @@ describe('Password Reset', () => {
   let onboardingToken: string | undefined;
   const api = new GraphQlApi();
   const dbClient = new PrismaClient();
-  const dbUserOperations = new DbUserOperations();
-  const userEmail = appEnv.IMAP_EMAIL;
-  let userPreviousEmail: string | undefined;
+  let userEmail: string;
 
   test('Should send a password reset email to the user', async () => {
     const user = await dbClient.user.findFirst({
@@ -36,9 +33,7 @@ describe('Password Reset', () => {
       return;
     }
 
-    userPreviousEmail = user.email;
-    await dbUserOperations.checkExistingUserAndUpdate();
-    await dbUserOperations.changeEmail(user.email);
+    userEmail = user.email;
 
     const passwordResetResponse = await api.graphql.mutate<
       RequestPasswordResetMutation,
@@ -134,9 +129,6 @@ describe('Password Reset', () => {
       password: appEnv.SEED_PASSWORD,
     });
     expect(response.data).toBeDefined();
-
-    if (userPreviousEmail)
-      await dbUserOperations.revertEmail(userPreviousEmail);
   });
 
   test('Should return an error if the new password does not meet criteria', async () => {
