@@ -420,6 +420,7 @@ type Mutation {
   createWorkspace(createWorkspaceInput: CreateWorkspaceInput!): CreateWorkspaceResponse!
   updateWorkspace(updateWorkspaceInput: UpdateWorkspaceInput!): UpdateWorkspaceResponse!
   deleteWorkSpace(deleteWorkspaceInput: WorkspaceDeleteInput): Boolean!
+  restoreWorkSpace(restoreWorkspaceInput: WorkspaceRestoreInput): Boolean!
   sendInvitation(sendInvitationInput: SendInvitationInput!): SendInvitationResponse!
   acceptInvitation(acceptInvitationInput: AcceptInvitationInput!): Boolean!
   createRole(roleCreateInput: RoleCreateInput!): RoleCreateResponse!
@@ -430,6 +431,7 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
+  restore(postRestoreInput: PostRestoreInput): Boolean!
   updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
   deleteFile(fileDeleteInput: FileDeleteInput): Boolean!
   resizeFile(resizeFileInput: ResizeFileInput): JSON!
@@ -477,6 +479,10 @@ input UpdateWorkspaceInput {
 input WorkspaceDeleteInput {
   id: String!
   fromStash: Boolean
+}
+
+input WorkspaceRestoreInput {
+  id: String!
 }
 
 input SendInvitationInput {
@@ -535,6 +541,10 @@ input UpdatePostInput {
 input PostDeleteInput {
   id: String!
   fromStash: Boolean
+}
+
+input PostRestoreInput {
+  id: String!
 }
 
 input UpdateProfileInput {
