@@ -18,6 +18,7 @@ const documents = {
     "\n  mutation CreateRole($roleCreateInput: RoleCreateInput!) {\n    createRole(roleCreateInput: $roleCreateInput) {\n      id\n    }\n  }\n": types.CreateRoleDocument,
     "\n  mutation CreateWorkspace($createWorkspaceInput: CreateWorkspaceInput!) {\n  createWorkspace(createWorkspaceInput: $createWorkspaceInput) {\n    id\n  }\n}\n\n": types.CreateWorkspaceDocument,
     "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n": types.CurrentUserDocument,
+    "\n  mutation DeleteFile($fileDeleteInput: FileDeleteInput) {\n  deleteFile(fileDeleteInput: $fileDeleteInput)\n}\n": types.DeleteFileDocument,
     "\n  mutation DeletePost($postDeleteInput: PostDeleteInput) {\n    deletePost(postDeleteInput: $postDeleteInput)\n  }\n": types.DeletePostDocument,
     "\n  mutation DeleteRole($roleDeleteInput: RoleDeleteInput) {\n    deleteRole(roleDeleteInput: $roleDeleteInput)\n  }\n": types.DeleteRoleDocument,
     "\n mutation DeleteWorkSpace($deleteWorkspaceInput: WorkspaceDeleteInput) {\n  deleteWorkSpace(deleteWorkspaceInput: $deleteWorkspaceInput)\n}\n": types.DeleteWorkSpaceDocument,
@@ -34,6 +35,7 @@ const documents = {
     "\n  query Role {\n    listBasePrivilege {\n      privilege {\n        name\n        group\n        id\n        type\n        createdAt\n        updatedAt\n        deletedAt\n      }\n    }\n  }\n": types.RoleDocument,
     "\n  mutation RefreshAccessToken($refreshAccessTokenInput: RefreshAccessTokenInput!) {\n  refreshAccessToken(refreshAccessTokenInput: $refreshAccessTokenInput) {\n    token\n    refreshToken\n  }\n}\n": types.RefreshAccessTokenDocument,
     "\n  mutation RequestPasswordReset($passwordReset: PasswordResetRequestInput!) {\n    requestPasswordReset(passwordReset: $passwordReset) {\n      message\n    }\n  }\n": types.RequestPasswordResetDocument,
+    "\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n": types.ResizeFileDocument,
     "\n  mutation SendInvitation($sendInvitationInput: SendInvitationInput!) {\n    sendInvitation(sendInvitationInput: $sendInvitationInput) {\n      success\n    }\n  }\n": types.SendInvitationDocument,
     "\n  mutation Signup($signupInput: SignupInput!) {\n    signup(signupInput: $signupInput) {\n      id\n    }\n  }\n": types.SignupDocument,
     "\n  mutation UnAssignRole($unAssignRoleInput: UnAssignRoleInput!) {\n    unAssignRole(unAssignRoleInput: $unAssignRoleInput) {\n      success\n    }\n  }\n": types.UnAssignRoleDocument,
@@ -78,6 +80,10 @@ export function graphql(source: "\n  mutation CreateWorkspace($createWorkspaceIn
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"): (typeof documents)["\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteFile($fileDeleteInput: FileDeleteInput) {\n  deleteFile(fileDeleteInput: $fileDeleteInput)\n}\n"): (typeof documents)["\n  mutation DeleteFile($fileDeleteInput: FileDeleteInput) {\n  deleteFile(fileDeleteInput: $fileDeleteInput)\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -142,6 +148,10 @@ export function graphql(source: "\n  mutation RefreshAccessToken($refreshAccessT
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation RequestPasswordReset($passwordReset: PasswordResetRequestInput!) {\n    requestPasswordReset(passwordReset: $passwordReset) {\n      message\n    }\n  }\n"): (typeof documents)["\n  mutation RequestPasswordReset($passwordReset: PasswordResetRequestInput!) {\n    requestPasswordReset(passwordReset: $passwordReset) {\n      message\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n"): (typeof documents)["\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
