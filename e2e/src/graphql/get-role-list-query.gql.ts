@@ -5,9 +5,11 @@ export const GET_ROLE_LIST_QUERY = graphql(`
     roleList(roleListInput: $roleListInput) {
       role {
         title
-        name
+        description
+        type
         id
         deletedAt
+        description
       }
       pagination {
         totalPage
