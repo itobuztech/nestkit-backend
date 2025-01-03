@@ -145,7 +145,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
     test(`Fetch the role list and store the role ID - ${type}`, async () => {
       const role = await dbClient.role.findFirst({
         where: {
-          name: type,
+          type: type,
         },
       });
       roleId = role?.id;
@@ -262,10 +262,10 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
         },
       });
-
+      console.log(createdRoleId);
+      console.log(roleList);
       roleList.data.roleList.role.forEach((role) => {
         expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
         expect(role.title).toBeDefined();
       });
 

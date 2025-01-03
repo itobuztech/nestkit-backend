@@ -16,6 +16,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: { input: any; output: any; }
 };
 
 export type AcceptInvitationInput = {
@@ -39,6 +41,18 @@ export type BaseListResponse = {
   perPage: Scalars['Float']['output'];
   totalPage: Scalars['Float']['output'];
   totalRows: Scalars['Float']['output'];
+};
+
+export type CreateFolderInput = {
+  name: Scalars['String']['input'];
+  parentId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateFolderResponse = {
+  __typename?: 'CreateFolderResponse';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['String']['output']>;
 };
 
 export type CreatePostInput = {
@@ -74,6 +88,11 @@ export type CurrentUserResponse = {
   userType?: Maybe<Scalars['String']['output']>;
 };
 
+export type DeleteFolderInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
 export type FileDeleteInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['String']['input'];
@@ -95,12 +114,72 @@ export type FileResponse = {
   workspaceId?: Maybe<Scalars['String']['output']>;
 };
 
+export type FolderListResponse = {
+  __typename?: 'FolderListResponse';
+  folder: Array<FolderResponse>;
+  pagination: BaseListResponse;
+};
+
+export enum FolderOrderByField {
+  AuthorId = 'authorId',
+  Id = 'id',
+  Published = 'published',
+  Title = 'title'
+}
+
+export type FolderResponse = {
+  __typename?: 'FolderResponse';
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type GetFileInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type GetFileResponse = {
+  __typename?: 'GetFileResponse';
+  authorId?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  folderId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  mimeType: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  resizeImages?: Maybe<Array<GetFileResponse>>;
+  size: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  url: Scalars['String']['output'];
+  workspaceId?: Maybe<Scalars['String']['output']>;
+};
+
+export type GetFolderInput = {
+  id: Scalars['String']['input'];
+};
+
+export type GetFolderResponse = {
+  __typename?: 'GetFolderResponse';
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['String']['output']>;
+  subFolders?: Maybe<Array<GetFolderResponse>>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type GetPostInput = {
   id: Scalars['String']['input'];
 };
 
 export type GetPostListInput = {
-  authorId?: InputMaybe<Scalars['Int']['input']>;
+  authorId?: InputMaybe<Scalars['String']['input']>;
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   orderBy?: InputMaybe<Order>;
   orderByField?: InputMaybe<OrderByField>;
@@ -132,6 +211,22 @@ export type GetUsersInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ImageResizeOptions = {
+  height: Scalars['Int']['input'];
+  left: Scalars['Int']['input'];
+  top: Scalars['Int']['input'];
+  width: Scalars['Int']['input'];
+};
+
+export type ListFolderInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<FolderOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type ListMediaInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   orderBy?: InputMaybe<Order>;
@@ -161,7 +256,7 @@ export type ListMembershipResponse = {
 };
 
 export type ListWorkSpaceInput = {
-  authorId?: InputMaybe<Scalars['Int']['input']>;
+  authorId?: InputMaybe<Scalars['String']['input']>;
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Order>;
@@ -184,8 +279,9 @@ export type LoginInput = {
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   id: Scalars['String']['output'];
-  refreshToken: Scalars['String']['output'];
-  token: Scalars['String']['output'];
+  refreshToken?: Maybe<Scalars['String']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  twoFA?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type MembershipResponse = {
@@ -200,24 +296,31 @@ export type Mutation = {
   __typename?: 'Mutation';
   acceptInvitation: Scalars['Boolean']['output'];
   assignRole: AssignRoleResponse;
+  createFolder: CreateFolderResponse;
   createPost: CreatePostResponse;
   createRole: RoleCreateResponse;
   createWorkspace: CreateWorkspaceResponse;
   deleteFile: Scalars['Boolean']['output'];
+  deleteFolder: Scalars['Boolean']['output'];
   deletePost: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteWorkSpace: Scalars['Boolean']['output'];
+  rateLimitCustomize: Scalars['String']['output'];
+  rateLimitSkip: Scalars['String']['output'];
   refreshAccessToken: VerifyEmailResponse;
   requestPasswordReset: PassWordResetRequestResponse;
   resetPassword: PassWordResetResponse;
+  resizeFile: Scalars['JSON']['output'];
   sendInvitation: SendInvitationResponse;
   signup: SignupResponse;
   unAssignRole: UnAssignRoleResponse;
+  updateFolder: Scalars['Boolean']['output'];
   updatePost: UpdatePostResponse;
   updateProfile: UpdateProfileResponse;
   updateRole: RoleUpdateResponse;
   updateWorkspace: UpdateWorkspaceResponse;
   verifyEmail: VerifyEmailResponse;
+  verifyOtp: LoginResponse;
 };
 
 
@@ -228,6 +331,11 @@ export type MutationAcceptInvitationArgs = {
 
 export type MutationAssignRoleArgs = {
   assignRoleInput: AssignRoleInput;
+};
+
+
+export type MutationCreateFolderArgs = {
+  createFolderInput?: InputMaybe<CreateFolderInput>;
 };
 
 
@@ -248,6 +356,11 @@ export type MutationCreateWorkspaceArgs = {
 
 export type MutationDeleteFileArgs = {
   fileDeleteInput?: InputMaybe<FileDeleteInput>;
+};
+
+
+export type MutationDeleteFolderArgs = {
+  folderDeleteInput?: InputMaybe<DeleteFolderInput>;
 };
 
 
@@ -281,6 +394,11 @@ export type MutationResetPasswordArgs = {
 };
 
 
+export type MutationResizeFileArgs = {
+  resizeFileInput?: InputMaybe<ResizeFileInput>;
+};
+
+
 export type MutationSendInvitationArgs = {
   sendInvitationInput: SendInvitationInput;
 };
@@ -293,6 +411,11 @@ export type MutationSignupArgs = {
 
 export type MutationUnAssignRoleArgs = {
   unAssignRoleInput: UnAssignRoleInput;
+};
+
+
+export type MutationUpdateFolderArgs = {
+  updateFolderInput: UpdateFolderInput;
 };
 
 
@@ -321,10 +444,20 @@ export type MutationVerifyEmailArgs = {
   verifyEmailInput: VerifyEmailInput;
 };
 
+
+export type MutationVerifyOtpArgs = {
+  otpLoginInput: OtpLoginInput;
+};
+
 export enum Order {
   Asc = 'ASC',
   Desc = 'DESC'
 }
+
+export type OtpLoginInput = {
+  email: Scalars['String']['input'];
+  otp: Scalars['Float']['input'];
+};
 
 export type PassWordResetRequestResponse = {
   __typename?: 'PassWordResetRequestResponse';
@@ -392,16 +525,30 @@ export type PrivilegeResponse = {
 export type Query = {
   __typename?: 'Query';
   currentUser: CurrentUserResponse;
+  getFile?: Maybe<GetFileResponse>;
+  getFolder: GetFolderResponse;
   getPost?: Maybe<GetPostResponse>;
   getPostList: PostListResponse;
   getRole: RoleGetResponse;
   getUsers: Array<GetUserResponse>;
   listBasePrivilege: PrivilegeListResponse;
+  listFolder: FolderListResponse;
   listMedia: ListMediaResponse;
   listMemberships: ListMembershipResponse;
   listWorkSpace: ListWorkSpaceResponse;
   login: LoginResponse;
+  rateLimitGlobal: Scalars['String']['output'];
   roleList: RoleListResponse;
+};
+
+
+export type QueryGetFileArgs = {
+  getFileInput?: InputMaybe<GetFileInput>;
+};
+
+
+export type QueryGetFolderArgs = {
+  getFolderInput: GetFolderInput;
 };
 
 
@@ -422,6 +569,11 @@ export type QueryGetRoleArgs = {
 
 export type QueryGetUsersArgs = {
   getUsersInput?: InputMaybe<GetUsersInput>;
+};
+
+
+export type QueryListFolderArgs = {
+  listFolderInput?: InputMaybe<ListFolderInput>;
 };
 
 
@@ -453,9 +605,13 @@ export type RefreshAccessTokenInput = {
   refreshToken: Scalars['String']['input'];
 };
 
+export type ResizeFileInput = {
+  id: Scalars['String']['input'];
+  resizeOptions: ImageResizeOptions;
+};
+
 export type RoleCreateInput = {
   description?: InputMaybe<Scalars['String']['input']>;
-  name?: RoleName;
   privileges: Array<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
@@ -478,10 +634,11 @@ export type RoleGetResponse = {
   __typename?: 'RoleGetResponse';
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
   privilege: Array<RolePrivilegeResponse>;
   title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -500,13 +657,6 @@ export type RoleListResponse = {
   role: Array<RoleResponse>;
 };
 
-export enum RoleName {
-  Admin = 'ADMIN',
-  Custom = 'CUSTOM',
-  SuperAdmin = 'SUPER_ADMIN',
-  User = 'USER'
-}
-
 export type RolePrivilegeResponse = {
   __typename?: 'RolePrivilegeResponse';
   group: Scalars['String']['output'];
@@ -519,16 +669,17 @@ export type RoleResponse = {
   __typename?: 'RoleResponse';
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
   title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
 export type RoleUpdateInput = {
   createPrivileges: Array<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
-  name?: RoleName;
   removePrivileges: Array<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
@@ -567,6 +718,12 @@ export type UnAssignRoleInput = {
 export type UnAssignRoleResponse = {
   __typename?: 'UnAssignRoleResponse';
   success: Scalars['Boolean']['output'];
+};
+
+export type UpdateFolderInput = {
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  parentId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdatePostInput = {
@@ -732,14 +889,14 @@ export type RoleListQueryVariables = Exact<{
 }>;
 
 
-export type RoleListQuery = { __typename?: 'Query', roleList: { __typename?: 'RoleListResponse', role: Array<{ __typename?: 'RoleResponse', title: string, name: string, id: string, deletedAt?: any | null }>, pagination: { __typename?: 'BaseListResponse', totalPage: number, currentPage: number, perPage: number } } };
+export type RoleListQuery = { __typename?: 'Query', roleList: { __typename?: 'RoleListResponse', role: Array<{ __typename?: 'RoleResponse', title: string, description?: string | null, type: string, id: string, deletedAt?: any | null }>, pagination: { __typename?: 'BaseListResponse', totalPage: number, currentPage: number, perPage: number } } };
 
 export type GetRoleQueryVariables = Exact<{
   roleGetInput: RoleGetInput;
 }>;
 
 
-export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, name: string, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: string, group: string, id: string, type: string }> } };
+export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, type: string, description?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: string, group: string, id: string, type: string }> } };
 
 export type GetUsersQueryVariables = Exact<{
   getUsersInput?: InputMaybe<GetUsersInput>;
@@ -760,7 +917,7 @@ export type LoginQueryVariables = Exact<{
 }>;
 
 
-export type LoginQuery = { __typename?: 'Query', login: { __typename?: 'LoginResponse', id: string, token: string, refreshToken: string } };
+export type LoginQuery = { __typename?: 'Query', login: { __typename?: 'LoginResponse', id: string, token?: string | null, refreshToken?: string | null } };
 
 export type ResetPasswordMutationVariables = Exact<{
   resetPassword: PasswordResetInput;
@@ -856,8 +1013,8 @@ export const DeleteRoleDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const DeleteWorkSpaceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteWorkSpace"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"deleteWorkspaceInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"WorkspaceDeleteInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteWorkSpace"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"deleteWorkspaceInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"deleteWorkspaceInput"}}}]}]}}]} as unknown as DocumentNode<DeleteWorkSpaceMutation, DeleteWorkSpaceMutationVariables>;
 export const GetPostListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPostList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"getPostListInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"GetPostListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getPostList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"getPostListInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"getPostListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"posts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"published"}},{"kind":"Field","name":{"kind":"Name","value":"author"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<GetPostListQuery, GetPostListQueryVariables>;
 export const GetPostDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPost"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"getPostInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"GetPostInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getPost"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"getPostInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"getPostInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"published"}},{"kind":"Field","name":{"kind":"Name","value":"authorId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]}}]} as unknown as DocumentNode<GetPostQuery, GetPostQueryVariables>;
-export const RoleListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RoleList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"roleList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleListInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<RoleListQuery, RoleListQueryVariables>;
-export const GetRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleGetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleGetInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}},{"kind":"Field","name":{"kind":"Name","value":"privilege"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}}]} as unknown as DocumentNode<GetRoleQuery, GetRoleQueryVariables>;
+export const RoleListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RoleList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"roleList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleListInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<RoleListQuery, RoleListQueryVariables>;
+export const GetRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleGetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleGetInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}},{"kind":"Field","name":{"kind":"Name","value":"privilege"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}}]} as unknown as DocumentNode<GetRoleQuery, GetRoleQueryVariables>;
 export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"getUsersInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"GetUsersInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUsers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"getUsersInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"getUsersInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
 export const ListWorkSpaceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListWorkSpace"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listWorkspaceInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ListWorkSpaceInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listWorkSpace"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"listWorkspaceInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listWorkspaceInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"workspace"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<ListWorkSpaceQuery, ListWorkSpaceQueryVariables>;
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"loginInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"loginInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"loginInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"refreshToken"}}]}}]}}]} as unknown as DocumentNode<LoginQuery, LoginQueryVariables>;

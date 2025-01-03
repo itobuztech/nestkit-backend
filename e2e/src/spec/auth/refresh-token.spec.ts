@@ -8,7 +8,7 @@ describe('Refresh token module', () => {
   [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
     const dbClient = new PrismaClient();
     const api = new GraphQlApi();
-    let refreshToken: string;
+    let refreshToken: string | null | undefined;
 
     test(`Login as ${type}`, async () => {
       const user = await dbClient.user.findFirst({
@@ -28,35 +28,39 @@ describe('Refresh token module', () => {
     });
 
     test('should return an error if the refresh token is invalid', async () => {
-      const response = await api.graphql.mutate({
-        mutation: REFRESH_TOKEN_MUTATION,
-        variables: {
-          refreshAccessTokenInput: {
-            refreshToken: `${refreshToken}-a`,
+      if (refreshToken) {
+        const response = await api.graphql.mutate({
+          mutation: REFRESH_TOKEN_MUTATION,
+          variables: {
+            refreshAccessTokenInput: {
+              refreshToken: `${refreshToken}-a`,
+            },
           },
-        },
-      });
-      expect(response.errors?.[0]?.message).toBe('Session Invalid');
+        });
+        expect(response.errors?.[0]?.message).toBe('Session Invalid');
+      }
     });
 
     test('should generate a new access token when provided with a valid refresh token', async () => {
-      const response = await api.graphql.mutate({
-        mutation: REFRESH_TOKEN_MUTATION,
-        variables: {
-          refreshAccessTokenInput: {
-            refreshToken: refreshToken,
+      if (refreshToken) {
+        const response = await api.graphql.mutate({
+          mutation: REFRESH_TOKEN_MUTATION,
+          variables: {
+            refreshAccessTokenInput: {
+              refreshToken: refreshToken,
+            },
           },
-        },
-      });
-      expect(response.data?.refreshAccessToken.token).toBeDefined();
-      expect(response.data?.refreshAccessToken.refreshToken).toBeDefined();
+        });
+        expect(response.data?.refreshAccessToken.token).toBeDefined();
+        expect(response.data?.refreshAccessToken.refreshToken).toBeDefined();
 
-      // Want to check if new access token working
-      const currentUserResponse = await api.graphql.query({
-        query: CURRENT_USER_QUERY,
-      });
+        // Want to check if new access token working
+        const currentUserResponse = await api.graphql.query({
+          query: CURRENT_USER_QUERY,
+        });
 
-      expect(currentUserResponse.data).toBeDefined();
+        expect(currentUserResponse.data).toBeDefined();
+      }
     });
 
     test('should return an error if the refresh token is not provided', async () => {

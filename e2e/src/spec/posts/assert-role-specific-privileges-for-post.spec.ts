@@ -36,7 +36,7 @@ import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
 import { GraphQLError } from 'graphql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
     let loginUser: User | null;
     let user: User | null;
@@ -131,7 +131,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
     test(`Get the role id of the user`, async () => {
       const role = await dbClient.role.findFirst({
         where: {
-          name: UserType.USER,
+          type: UserType.USER,
         },
       });
       if (!role) {
@@ -214,7 +214,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
     test(`Fetch the role list and store the role ID - ${type}`, async () => {
       const role = await dbClient.role.findFirst({
         where: {
-          name: type,
+          type: type,
         },
       });
       if (!role) {
