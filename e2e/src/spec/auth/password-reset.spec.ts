@@ -78,7 +78,11 @@ describe('Password Reset', () => {
       invitationLink = invitationLink
         ?.replace(/=/g, '')
         .replace(/[\r\n]+/gm, '');
-      onboardingToken = invitationLink?.substring(48);
+      onboardingToken = invitationLink?.replace(
+        'http://localhost:3020/password-reset?token&#x3D;',
+        '',
+      );
+
       expect(invitationLink).toContain('password-reset');
     }
   }, 10000);

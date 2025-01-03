@@ -49,7 +49,11 @@ describe('User Sign up', () => {
 
   test('Should create a verification URL', async () => {
     invitationLink = await fetchEmailsMailHog('Welcome');
-    onboardingToken = invitationLink?.substring(49);
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/verify-email?token&#x3D;',
+      '',
+    );
     expect(invitationLink).toContain('verify-email');
   });
 

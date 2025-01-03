@@ -66,7 +66,10 @@ describe('Membership invitation module', () => {
   test('Should create a verification URL', async () => {
     invitationLink = await fetchEmailsMailHog('Welcome');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(46);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/verify-email?token&#x3D;',
+      '',
+    );
     expect(invitationLink).toContain('verify-email');
   }, 9000);
 
@@ -141,7 +144,11 @@ describe('Membership invitation module', () => {
   test('Get the invitation link', async () => {
     invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(51);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/membership-verify?token&#x3D;',
+      '',
+    );
+    console.log(onboardingToken, invitationLink);
     expect(invitationLink).toContain('membership-verify');
   }, 7000);
 
@@ -219,7 +226,11 @@ describe('Membership invitation module', () => {
   test('Get the invitation link', async () => {
     invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(51);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/membership-verify?token&#x3D;',
+      '',
+    );
+    console.log(onboardingToken, invitationLink);
     expect(invitationLink).toContain('membership-verify');
   });
 
