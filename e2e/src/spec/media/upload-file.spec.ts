@@ -1,7 +1,7 @@
 import { appEnv } from '../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
 import { GraphQlApi } from '../../lib/graphql-api';
-import { CreateWorkspaceMutation, CreateWorkspaceMutationVariables, LoginQuery, LoginResponse } from '../../gql/graphql';
+import { CreateWorkspaceMutation, CreateWorkspaceMutationVariables, FileQuery, FileQueryVariables, LoginQuery } from '../../gql/graphql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 import { faker } from '@faker-js/faker';
 import FormData from 'form-data';
@@ -9,8 +9,8 @@ import fs from "fs";
 import path from 'path';
 import { UploadFile } from '../../../interface/upload-media-interface';
 import axios from 'axios';
-import { CLIENT_RENEG_LIMIT } from 'tls';
 import { ApolloQueryResult } from '@apollo/client';
+import { FILE_LIST_QUERY } from '../../graphql/list-file-query.gql';
 
 
 const userArrays = [UserType.SUPER_ADMIN];
@@ -76,10 +76,26 @@ userArrays.forEach((userTypeRole) => {
      } catch (err) {
       console.error(err);
      }
+    });
+
+    test('List of media file', async () => {
+              const fileList = await api.graphql.query<
+              FileQuery,
+              FileQueryVariables
+              >({
+                query: FILE_LIST_QUERY,
     
+                context: {
+                  headers: {
+                    current_workspace_id: workspaceId,
+                    Authorization: `Bearer ${loginResponse.data.login.token}`
+                  },
+                },
+              });
+      
+              expect(fileList.data.listMedia.file).toBeDefined();
+              expect(fileList.data.listMedia.file[0].id).not.toHaveLength(0);
+          });
     });
     
   });
-});
-
-

@@ -26,6 +26,7 @@ const documents = {
     "\n  query RoleList($roleListInput: RoleListInput) {\n    roleList(roleListInput: $roleListInput) {\n      role {\n        title\n        type\n        id\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.RoleListDocument,
     "\n  query GetRole($roleGetInput: RoleGetInput!) {\n    getRole(roleGetInput: $roleGetInput) {\n      id\n      title\n      type\n      createdAt\n      updatedAt\n      deletedAt\n      privilege {\n        name\n        group\n        id\n        type\n      }\n    }\n  }\n": types.GetRoleDocument,
     "\n  query GetUsers($getUsersInput: GetUsersInput) {\n    getUsers(getUsersInput: $getUsersInput) {\n      email\n      id\n      name\n    }\n  }\n": types.GetUsersDocument,
+    "\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n": types.FileDocument,
     "\n  query ListWorkSpace($listWorkspaceInput: ListWorkSpaceInput) {\n    listWorkSpace(listWorkspaceInput: $listWorkspaceInput) {\n      workspace {\n        name\n        id\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.ListWorkSpaceDocument,
     "\n  query Login($loginInput: LoginInput!) {\n    login(loginInput: $loginInput) {\n      id\n      token\n      refreshToken\n    }\n  }\n": types.LoginDocument,
     "\n  mutation ResetPassword($resetPassword: PasswordResetInput!) {\n    resetPassword(resetPassword: $resetPassword) {\n      message\n    }\n  }\n": types.ResetPasswordDocument,
@@ -108,6 +109,10 @@ export function graphql(source: "\n  query GetRole($roleGetInput: RoleGetInput!)
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query GetUsers($getUsersInput: GetUsersInput) {\n    getUsers(getUsersInput: $getUsersInput) {\n      email\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query GetUsers($getUsersInput: GetUsersInput) {\n    getUsers(getUsersInput: $getUsersInput) {\n      email\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n"): (typeof documents)["\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
