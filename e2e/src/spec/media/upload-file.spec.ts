@@ -25,7 +25,7 @@ import { ApolloQueryResult } from '@apollo/client';
 import { FILE_LIST_QUERY } from '../../graphql/list-file-query.gql';
 import { GET_FILE_QUERY } from '../../graphql/get-file-query.gql';
 import { RESIZE_MEDIA_MUTATION } from '../../graphql/resize-media-mutation.gql';
-import { DELETE_MEDIA_MUTATION } from 'e2e/src/graphql/delete-media-mutation.gql';
+import { DELETE_MEDIA_MUTATION } from '../../graphql/delete-media-mutation.gql';
 
 describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
   let user: User | null;

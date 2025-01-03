@@ -311,6 +311,8 @@ export type Mutation = {
   requestPasswordReset: PassWordResetRequestResponse;
   resetPassword: PassWordResetResponse;
   resizeFile: Scalars['JSON']['output'];
+  restore: Scalars['Boolean']['output'];
+  restoreWorkSpace: Scalars['Boolean']['output'];
   sendInvitation: SendInvitationResponse;
   signup: SignupResponse;
   unAssignRole: UnAssignRoleResponse;
@@ -396,6 +398,16 @@ export type MutationResetPasswordArgs = {
 
 export type MutationResizeFileArgs = {
   resizeFileInput?: InputMaybe<ResizeFileInput>;
+};
+
+
+export type MutationRestoreArgs = {
+  postRestoreInput?: InputMaybe<PostRestoreInput>;
+};
+
+
+export type MutationRestoreWorkSpaceArgs = {
+  restoreWorkspaceInput?: InputMaybe<WorkspaceRestoreInput>;
 };
 
 
@@ -504,6 +516,10 @@ export type PostResponse = {
   published: Scalars['Boolean']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PostRestoreInput = {
+  id: Scalars['String']['input'];
 };
 
 export type PrivilegeListResponse = {
@@ -786,6 +802,10 @@ export type WorkSpaceResponse = {
 
 export type WorkspaceDeleteInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type WorkspaceRestoreInput = {
   id: Scalars['String']['input'];
 };
 
