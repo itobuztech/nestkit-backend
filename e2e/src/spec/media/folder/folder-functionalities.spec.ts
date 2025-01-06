@@ -88,8 +88,8 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         },
       },
     });
-    console.log(folderId);
     folderId = createFolder.data?.createFolder.id;
+
     expect(createFolder.data?.createFolder.id).not.toBeNull();
     expect(createFolder.data?.createFolder.name).toBe(name);
   });
