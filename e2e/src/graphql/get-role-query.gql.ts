@@ -6,6 +6,7 @@ export const GET_ROLE_QUERY = graphql(`
       id
       title
       type
+      description
       createdAt
       updatedAt
       deletedAt

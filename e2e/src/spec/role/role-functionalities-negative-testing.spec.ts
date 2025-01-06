@@ -191,7 +191,6 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
 
       roleList.data.roleList.role.forEach((role) => {
         expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
         expect(role.title).toBeDefined();
       });
       roleId = sample(roleList.data.roleList.role)?.id;
@@ -287,9 +286,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
       if (!updateRole.errors) {
         throw new Error('Expected an error, but none was returned');
       }
-      expect(updateRole.errors[0].message).toContain(
-        'Record to update not found',
-      );
+      expect(updateRole.errors[0].message).toContain('Role not found');
     });
 
     test(`Get Role for user ${type} with wrong role id`, async () => {
@@ -359,9 +356,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         if (!assignRole.errors) {
           throw new Error('Expected an error, but none was returned');
         }
-        expect(assignRole.errors[0].message).toContain(
-          'Foreign key constraint violated: `UserRole_roleId_fkey (index)`',
-        );
+        expect(assignRole.errors[0].message).toContain('Role not found');
       } else {
         throw new Error(
           'User ID not found! User list might not have been fetched properly',

@@ -10,7 +10,6 @@ export const GET_POST_LIST_QUERY = graphql(`
         published
         author {
           id
-          name
         }
         createdAt
         updatedAt

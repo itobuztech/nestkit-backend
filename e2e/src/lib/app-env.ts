@@ -7,9 +7,10 @@ export const appEnv = cleanEnv(process.env, {
     choices: ['development', 'production', 'test'],
   }),
   DATABASE_URL: str({ desc: 'Please provide DB URL' }),
+  MAILHOG_API_ROOT: str({ default: 'http://localhost:8025' }),
   SEED_PASSWORD: str({ default: 'SamLauncher@123' }),
   TESTINATOR_TEAM_ID: str({ default: 'team930312.testinator.com' }),
-  SEED_EMAIL: email({ default: 'example@team930312.testinator.com' }),
+  SEED_EMAIL: email({ default: 'zenia@itobuz.com' }),
   TIMEOUT: num({ default: 5000 }),
   TESTINATOR_API_KEY: str({ default: '6fd5ed52adf94184a9b562da180ea4f9' }),
   FETCH_EMAILS_INBOX: str({

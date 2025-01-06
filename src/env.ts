@@ -31,7 +31,10 @@ export const appEnv = cleanEnv(process.env, {
   SMTP_USER: str({ desc: 'SMTP User', default: 'test' }),
   SMTP_PASSWORD: str({ desc: 'SMTP Password', default: 'test' }),
   SMTP_PORT: num({ desc: 'SMTP Port', default: 1025 }),
-  SMTP_SENDER: str({ desc: 'Sender Email', default: 'nest-starter@example.com' }),
+  SMTP_SENDER: str({
+    desc: 'Sender Email',
+    default: 'nest-starter@example.com',
+  }),
 
   //  Mail sending
   MAIL_FROM_USER: str({ desc: 'Mail from user' }),
@@ -56,7 +59,7 @@ export const appEnv = cleanEnv(process.env, {
 
   PRISMA_DEBUG: bool({ default: false }),
 
-  // Rate Limit 
+  // Rate Limit
   THROTTLE_TTL: num({ default: 60000 }),
   THROTTLE_LIMIT: num({ default: 50 }),
   RATE_LIMIT_ENABLED: bool({ default: true }),
