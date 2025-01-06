@@ -3,7 +3,6 @@ import { VERIFY_EMAIL_MUTATION } from '../../graphql/verify-email-mutation.gql';
 import { LOGIN_QUERY } from '../../graphql/login-query.gql';
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsImap } from '../../lib/fetchEmailsImap';
 import { appEnv } from '../../lib/app-env';
 import { PrismaClient, User } from '@prisma/client';
 import {
@@ -16,21 +15,19 @@ import {
   VerifyEmailMutation,
   VerifyEmailMutationVariables,
 } from '../../gql/graphql';
-import { DbUserOperations } from '../../lib/dbUserOperations';
+import { fetchEmailsMailHog } from '../../lib/fetchEmailsMailHog';
+import { faker } from '@faker-js/faker/.';
 
 describe('User Sign up', () => {
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
   let addedUser: User | null;
   let userId: string | undefined;
-  const userEmail = appEnv.IMAP_EMAIL;
+  const userEmail = faker.internet.email();
   const api = new GraphQlApi();
-  const dbUserOperations = new DbUserOperations();
   const prisma = new PrismaClient();
 
   test('Add a new user', async () => {
-    await dbUserOperations.checkExistingUserAndUpdate();
-
     const signUpData = await api.graphql.mutate<
       SignupMutation,
       SignupMutationVariables
@@ -50,17 +47,22 @@ describe('User Sign up', () => {
     await waitForTime(30000);
   }, 50000);
 
-  test('Should hash the password correctly', async () => {
-    addedUser = await prisma.user.findUnique({
-      where: { email: userEmail },
-    });
-    expect(addedUser?.password).not.toBe(appEnv.SEED_PASSWORD);
+  test('Should create a verification URL', async () => {
+    invitationLink = await fetchEmailsMailHog('Welcome');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/verify-email?token&#x3D;',
+      '',
+    );
+    expect(invitationLink).toContain('verify-email');
   });
 
-  test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
-    onboardingToken = invitationLink?.substring(49);
-    expect(invitationLink).toContain('verify-email');
+  test('Should hash the password correctly', async () => {
+    addedUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    expect(addedUser?.password).not.toBe(appEnv.SEED_PASSWORD);
   });
 
   test('Should check if the user already exists', () => {
@@ -122,7 +124,5 @@ describe('User Sign up', () => {
     });
 
     expect(user?.isVerified).toBe(true);
-
-    await dbUserOperations.revertDbOperations();
   });
 });

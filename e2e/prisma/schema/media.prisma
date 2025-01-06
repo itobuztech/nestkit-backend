@@ -8,30 +8,38 @@ model Folder {
   name String
 
   parentId   String?
-  parent     Folder?  @relation("subFolders", fields: [parentId], references: [id])
-  subFolders Folder[] @relation("subFolders")
+  parent     Folder?  @relation("folderRelation", fields: [parentId], references: [id])
+  subFolders Folder[] @relation("folderRelation")
 
-  files File[]
+  files File[] @relation("fileFolderRelation")
 
   authorId String
-  author   User   @relation(name: "FolderUserRelation", fields: [authorId], references: [id])
+  author   User   @relation(name: "FolderUserRelation", fields: [authorId], references: [id], onDelete: Cascade)
+
+  workspaceId String?
+  workspace   Workspace? @relation(name: "workspaceIdFolderRelation", fields: [workspaceId], references: [id], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@unique([name, parentId]) // Prevent duplicate folder names under the same parent
 }
 
 model File {
   id       String  @id @default(uuid())
   name     String
   description String?
+
+  resizeImageId   String?
+  resizeImagesRef     File?  @relation("resizeImagesRelation", fields: [resizeImageId], references: [id])
+  resizeImages File[] @relation("resizeImagesRelation")
+
+
   size     Int // File size in kb
   mimeType String // MIME type (e.g., "image/png", "application/pdf")
   url      String // Path or URL to the file
   folderId String?
-  folder   Folder? @relation(fields: [folderId], references: [id])
+  folder   Folder? @relation(name: "fileFolderRelation", fields: [folderId], references: [id])
 
   accessLevel AccessLevel? @default(RESTRICTED)
 
@@ -46,30 +54,18 @@ model File {
   workspace   Workspace? @relation(name: "workspaceIdFileRelation", fields: [workspaceId], references: [id], onDelete: Cascade)
 
   S3AccessSession S3AccessSession[] @relation("fileS3AccessSession")
-  assets    FileAsset[]     @relation("fileAssets")
 
   @@unique([name, folderId]) // Prevent duplicate file names in the same folder
-}
-
-model FileAsset {
-  id        String   @id @default(uuid())
-  size      Int      // File size in kb
-  mimeType  String   // MIME type (e.g., "image/png", "application/pdf")
-  url       String   // Path or URL to the file
-  fileId    String
-  file      File     @relation(name: "fileAssets", fields: [fileId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([fileId, size]) // Ensure unique size for each file
 }
 
 model S3AccessSession {
   id        String   @id @default(uuid())
   signedUrl String
   expiresAt DateTime
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt       DateTime?
 
   fileId String
   file   File   @relation(name: "fileS3AccessSession", fields: [fileId], references: [id])
