@@ -53,7 +53,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(loginResponse.data).toBeDefined();
   });
 
-  test('New Workspace created', async () => {
+  test(`New Workspace created as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     const createWorkspace = await api.graphql.mutate<
       CreateWorkspaceMutation,
       CreateWorkspaceMutationVariables
@@ -70,7 +70,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
   });
 
-  test('Create a folder', async () => {
+  test(`Create a folder as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     const createFolder = await api.graphql.mutate<
       CreateFolderMutation,
       CreateFolderMutationVariables
@@ -94,7 +94,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(createFolder.data?.createFolder.name).toBe(name);
   });
 
-  test('List folder', async () => {
+  test(`List folder as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     const listFolder = await api.graphql.query<
       ListFolderQuery,
       ListFolderQueryVariables
@@ -117,7 +117,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(listFolder.data.listFolder.folder.length).toBeGreaterThan(0);
   });
 
-  test('Update the folder', async () => {
+  test(`Update the folder as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     if (folderId) {
       const updateFolder = await api.graphql.mutate<
         UpdateFolderMutation,
@@ -142,7 +142,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     }
   });
 
-  test('Get folder', async () => {
+  test(`Get folder as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     if (folderId) {
       const getFolder = await api.graphql.query<
         GetFolderQuery,
@@ -167,7 +167,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     }
   });
 
-  test('Delete the folder not from stash', async () => {
+  test(`Delete the folder not from stash as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     if (folderId) {
       const deleteFolder = await api.graphql.mutate<
         DeleteFolderMutation,
@@ -192,7 +192,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     }
   });
 
-  test('List folder', async () => {
+  test(`List folder as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     const listFolder = await api.graphql.query<
       ListFolderQuery,
       ListFolderQueryVariables
@@ -213,7 +213,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(createdFolder).not.toBeDefined();
   });
 
-  test('Delete the folder from stash', async () => {
+  test(`Delete the folder from stash as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     if (folderId) {
       const deleteFolder = await api.graphql.mutate<
         DeleteFolderMutation,
