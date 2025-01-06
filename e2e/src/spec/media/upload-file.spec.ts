@@ -161,13 +161,16 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
   });
 
   test('Delete media file', async () => {
-    const deleteFile = await api.graphql.query<DeleteFileMutation, DeleteFileMutationVariables>({
+    const deleteFile = await api.graphql.query<
+      DeleteFileMutation,
+      DeleteFileMutationVariables
+    >({
       query: DELETE_MEDIA_MUTATION,
       variables: {
         fileDeleteInput: {
-    id: fileId,
-    fromStash: true
-  }
+          id: fileId,
+          fromStash: false,
+        },
       },
       context: {
         headers: {
