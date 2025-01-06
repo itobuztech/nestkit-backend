@@ -34,6 +34,8 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
   const api = new GraphQlApi();
   let loginResponse: ApolloQueryResult<LoginQuery>;
   let fileId: any;
+  let fileName: string | undefined;
+  let resizeFileId: string | undefined;
 
   test(`Login as a ${UserType.SUPER_ADMIN.toUpperCase()}`, async () => {
     const dbClient = new PrismaClient();
@@ -90,6 +92,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       const fileResponse: UploadFile = uploadFileResponse.data;
       console.log(fileResponse);
       fileId = fileResponse.id;
+      fileName = fileResponse.name;
       console.log(fileId);
       expect(fileResponse.id).toBeDefined();
     } catch (err) {
@@ -111,6 +114,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
     expect(fileList.data.listMedia.file).toBeDefined();
     expect(fileList.data.listMedia.file[0].id).not.toHaveLength(0);
+    expect(fileList.data.listMedia.file[0].name).toContain(fileName);
   });
 
   test('Get media file', async () => {
@@ -130,6 +134,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
     });
 
     expect(getFile.data.getFile?.id).toBeDefined();
+    expect(getFile.data.getFile?.name).toContain(fileName);
   });
 
   test('Resize media file', async () => {
@@ -156,8 +161,31 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
         },
       },
     });
+    resizeFileId = resizeFile.data?.resizeFile.id;
+    console.log(resizeFileId);
     expect(resizeFile.data).toBeDefined();
     expect(resizeFile.data?.resizeFile.url).toBeDefined();
+  });
+
+  test('Get media file for assert the resize photo', async () => {
+    const getFile = await api.graphql.query<QueryQuery, QueryQueryVariables>({
+      query: GET_FILE_QUERY,
+      variables: {
+        getFileInput: {
+          id: fileId,
+        },
+      },
+      context: {
+        headers: {
+          current_workspace_id: workspaceId,
+          Authorization: `Bearer ${loginResponse.data.login.token}`,
+        },
+      },
+    });
+    if (getFile.data.getFile?.resizeImages) {
+      expect(getFile.data.getFile?.id).toBeDefined();
+      expect(getFile.data.getFile?.resizeImages[0]?.id).toContain(resizeFileId);
+    }
   });
 
   test('Delete media file', async () => {
@@ -179,7 +207,6 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
         },
       },
     });
-
     expect(deleteFile.data.deleteFile.valueOf()).toBeDefined();
   });
 });
