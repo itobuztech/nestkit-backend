@@ -1,6 +1,6 @@
-import { appEnv } from '../../lib/app-env';
+import { appEnv } from '../../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
-import { GraphQlApi } from '../../lib/graphql-api';
+import { GraphQlApi } from '../../../lib/graphql-api';
 import {
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
@@ -13,19 +13,19 @@ import {
   QueryQueryVariables,
   ResizeFileMutation,
   ResizeFileMutationVariables,
-} from '../../gql/graphql';
-import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+} from '../../../gql/graphql';
+import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
 import { faker } from '@faker-js/faker';
 import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
-import { UploadFile } from '../../../interface/upload-media-interface';
+import { UploadFile } from '../../../../interface/upload-media-interface';
 import axios from 'axios';
 import { ApolloQueryResult } from '@apollo/client';
-import { FILE_LIST_QUERY } from '../../graphql/list-file-query.gql';
-import { GET_FILE_QUERY } from '../../graphql/get-file-query.gql';
-import { RESIZE_MEDIA_MUTATION } from '../../graphql/resize-media-mutation.gql';
-import { DELETE_MEDIA_MUTATION } from '../../graphql/delete-media-mutation.gql';
+import { FILE_LIST_QUERY } from '../../../graphql/list-file-query.gql';
+import { GET_FILE_QUERY } from '../../../graphql/get-file-query.gql';
+import { RESIZE_MEDIA_MUTATION } from '../../../graphql/resize-media-mutation.gql';
+import { DELETE_MEDIA_MUTATION } from '../../../graphql/delete-media-mutation.gql';
 
 describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
   let user: User | null;
