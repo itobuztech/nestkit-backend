@@ -8,6 +8,7 @@ import { CreateAppError } from 'src/shared/create-error/create-error';
 import { ResizeFileInput } from './resize-file.input';
 import { FileService } from '../file.service';
 import GraphQLJSON from 'graphql-type-json';
+import { AwsService } from 'src/aws/aws.service';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
@@ -15,6 +16,7 @@ export class ResizeFileService {
   constructor(
     private prismaService: PrismaService,
     private fileService: FileService,
+    private awsService: AwsService,
   ) {}
 
   @Mutation(() => GraphQLJSON)
@@ -72,6 +74,13 @@ export class ResizeFileService {
       },
     });
 
+    const fileS3Key = await this.awsService.uploadFile({
+      originalname: file.name,
+      mimetype: file.mimeType,
+      path: filePath,
+      accessLevel: file.accessLevel!,
+    });
+
     const media = await this.prismaService.file.create({
       data: {
         resizeImageId: file.id,
@@ -80,7 +89,7 @@ export class ResizeFileService {
         size: file.size,
         url: filePath,
         workspaceId: file.workspaceId,
-        s3Key: filePath,
+        s3Key: fileS3Key,
       },
     });
 

@@ -25,7 +25,12 @@ export class FileService {
     accessLevel?: AccessLevel;
   }): Promise<File> {
     // Save file information to the database
-    const fileS3Key = await this.awsService.uploadFile(file, accessLevel);
+    const fileS3Key = await this.awsService.uploadFile({
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      path: file.path,
+      accessLevel: accessLevel,
+    });
     const media = await this.prisma.file.create({
       data: {
         name: file.originalname,

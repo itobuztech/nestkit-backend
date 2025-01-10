@@ -40,6 +40,9 @@ export class DeleteFileService {
 
     try {
       if (fileDeleteInput.fromStash) {
+        await this.prismaService.s3AccessSession.deleteMany({
+          where: { fileId: fileDeleteInput.id },
+        });
         await this.prismaService.file.delete({
           where: { id: fileDeleteInput.id },
         });

@@ -11,6 +11,7 @@ import { AccessLevel } from '@prisma/client';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import * as path from 'path';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { uploadFileInput } from './upload-file.input.dto';
 
 @Injectable()
 export class AwsService {
@@ -26,7 +27,7 @@ export class AwsService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File, accessLevel?: AccessLevel) {
+  async uploadFile(file: uploadFileInput) {
     // creating key for storing file in aws
     const fileName = file.originalname.replace(/[^\w.](?=.*\.)/g, '_');
     const key = `${Date.now().toString()}-${fileName.trim()}`;
@@ -44,7 +45,7 @@ export class AwsService {
 
     const command = new PutObjectCommand({
       Bucket:
-        accessLevel === AccessLevel.PUBLIC
+        file.accessLevel === AccessLevel.PUBLIC
           ? appEnv.AWS_PUBLIC_BUCKET
           : appEnv.AWS_SECURE_BUCKET,
       Key: key,
