@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -9,6 +10,7 @@ import * as fs from 'fs';
 import { AccessLevel } from '@prisma/client';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import * as path from 'path';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class AwsService {
@@ -39,7 +41,6 @@ export class AwsService {
         .on('end', () => resolve(Buffer.concat(chunks)))
         .on('error', reject);
     });
-    const expiryTime = new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY);
 
     const command = new PutObjectCommand({
       Bucket:
@@ -48,7 +49,6 @@ export class AwsService {
           : appEnv.AWS_SECURE_BUCKET,
       Key: key,
       Body: buffer,
-      Expires: AccessLevel.PUBLIC ? undefined : expiryTime,
       ContentType: file.mimetype,
     });
 
@@ -72,5 +72,20 @@ export class AwsService {
     });
     const res = await this.s3Client.send(command);
     return res;
+  }
+
+  async getfileUrl(s3Key: string, accessLevel: AccessLevel) {
+    if (accessLevel === AccessLevel.PUBLIC) {
+      return `https://${appEnv.AWS_PUBLIC_BUCKET}.s3.amazonaws.com/${s3Key}`;
+    } else {
+      const command = new GetObjectCommand({
+        Bucket: appEnv.AWS_SECURE_BUCKET,
+        Key: s3Key,
+      });
+      const response = await getSignedUrl(this.s3Client, command, {
+        expiresIn: appEnv.SIGNED_URL_EXPIRY,
+      });
+      return response;
+    }
   }
 }

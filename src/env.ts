@@ -73,7 +73,7 @@ export const appEnv = cleanEnv(process.env, {
   AWS_SECRET_ACCESS_KEY: str(),
   AWS_PUBLIC_BUCKET: str(),
   AWS_SECURE_BUCKET: str(),
-  SIGNED_URL_EXPIRY: num({ default: 4 * 60 * 60 * 1000 }),
+  SIGNED_URL_EXPIRY: num({ default: 3600 }),
 });
 
 // Read an environment variable, which is validated and cleaned during
