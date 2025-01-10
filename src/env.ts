@@ -31,7 +31,10 @@ export const appEnv = cleanEnv(process.env, {
   SMTP_USER: str({ desc: 'SMTP User', default: 'test' }),
   SMTP_PASSWORD: str({ desc: 'SMTP Password', default: 'test' }),
   SMTP_PORT: num({ desc: 'SMTP Port', default: 1025 }),
-  SMTP_SENDER: str({ desc: 'Sender Email', default: 'nest-starter@example.com' }),
+  SMTP_SENDER: str({
+    desc: 'Sender Email',
+    default: 'nest-starter@example.com',
+  }),
 
   //  Mail sending
   MAIL_FROM_USER: str({ desc: 'Mail from user' }),
@@ -56,13 +59,21 @@ export const appEnv = cleanEnv(process.env, {
 
   PRISMA_DEBUG: bool({ default: false }),
 
-  // Rate Limit 
+  // Rate Limit
   THROTTLE_TTL: num({ default: 60000 }),
   THROTTLE_LIMIT: num({ default: 50 }),
   RATE_LIMIT_ENABLED: bool({ default: true }),
 
   // Pagination
   PAGE_SIZE: num({ default: 10 }),
+
+  // AWS
+  AWS_REGION: str({ default: 'ap-south-1' }),
+  AWS_ACCESS_KEY_ID: str(),
+  AWS_SECRET_ACCESS_KEY: str(),
+  AWS_PUBLIC_BUCKET: str(),
+  AWS_SECURE_BUCKET: str(),
+  SIGNED_URL_EXPIRY: num({ default: 4 * 60 * 60 * 1000 }),
 });
 
 // Read an environment variable, which is validated and cleaned during

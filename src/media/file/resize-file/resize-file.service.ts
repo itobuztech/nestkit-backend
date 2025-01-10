@@ -1,13 +1,13 @@
-import { HttpStatus, UseGuards } from "@nestjs/common";
-import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
-import { Request } from "express";
+import { HttpStatus, UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Request } from 'express';
 
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
-import { PrismaService } from "src/prisma/prisma.service";
-import { CreateAppError } from "src/shared/create-error/create-error";
-import { ResizeFileInput } from "./resize-file.input";
-import { FileService } from "../file.service";
-import GraphQLJSON from "graphql-type-json";
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateAppError } from 'src/shared/create-error/create-error';
+import { ResizeFileInput } from './resize-file.input';
+import { FileService } from '../file.service';
+import GraphQLJSON from 'graphql-type-json';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
@@ -20,12 +20,11 @@ export class ResizeFileService {
   @Mutation(() => GraphQLJSON)
   async resizeFile(
     @Context('req') req: Request,
-    @Args('resizeFileInput', { nullable: true }) resizeFileInput: ResizeFileInput,
+    @Args('resizeFileInput', { nullable: true })
+    resizeFileInput: ResizeFileInput,
   ) {
-
-
     const file = await this.prismaService.file.findUnique({
-      where: { id: resizeFileInput.id,  },
+      where: { id: resizeFileInput.id },
     });
 
     if (!file) {
@@ -35,8 +34,12 @@ export class ResizeFileService {
       });
     }
 
-
-    const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const imageMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ];
 
     if (!imageMimeTypes.includes(file.mimeType)) {
       throw new CreateAppError({
@@ -46,20 +49,28 @@ export class ResizeFileService {
 
     let filePath = '';
 
-    if (resizeFileInput.resizeOptions.left && resizeFileInput.resizeOptions.top) {
-      filePath = await this.fileService.cropImage(file, resizeFileInput.resizeOptions);
+    if (
+      resizeFileInput.resizeOptions.left &&
+      resizeFileInput.resizeOptions.top
+    ) {
+      filePath = await this.fileService.cropImage(
+        file,
+        resizeFileInput.resizeOptions,
+      );
     } else {
-      filePath = await this.fileService.resizeImage(file, resizeFileInput.resizeOptions);
+      filePath = await this.fileService.resizeImage(
+        file,
+        resizeFileInput.resizeOptions,
+      );
     }
-    
 
     await this.prismaService.file.deleteMany({
       where: {
         resizeImageId: file.id,
         workspaceId: file.workspaceId,
-        url: filePath
-      }
-    })
+        url: filePath,
+      },
+    });
 
     const media = await this.prismaService.file.create({
       data: {
@@ -68,7 +79,8 @@ export class ResizeFileService {
         mimeType: file.mimeType,
         size: file.size,
         url: filePath,
-        workspaceId: file.workspaceId
+        workspaceId: file.workspaceId,
+        s3Key: filePath,
       },
     });
 

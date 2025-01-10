@@ -6,10 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { AccessLevel, File } from '@prisma/client';
 import * as sharp from 'sharp';
+import { AwsService } from 'src/aws/aws.service';
 
 @Injectable()
 export class FileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly awsService: AwsService,
+  ) {}
 
   async uploadMedia({
     file,
@@ -21,6 +25,7 @@ export class FileService {
     accessLevel?: AccessLevel;
   }): Promise<File> {
     // Save file information to the database
+    const fileS3Key = await this.awsService.uploadFile(file, accessLevel);
     const media = await this.prisma.file.create({
       data: {
         name: file.originalname,
@@ -29,6 +34,7 @@ export class FileService {
         url: file.path,
         workspaceId,
         accessLevel: accessLevel ?? AccessLevel.RESTRICTED,
+        s3Key: fileS3Key,
       },
     });
 
