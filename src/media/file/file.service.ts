@@ -4,17 +4,22 @@ import { join, dirname } from 'path';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
-import { File } from '@prisma/client';
+import { AccessLevel, File } from '@prisma/client';
 import * as sharp from 'sharp';
-
 
 @Injectable()
 export class FileService {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async uploadMedia(file: Express.Multer.File, { workspaceId }: { workspaceId: string }): Promise<File> {
+  async uploadMedia({
+    file,
+    workspaceId,
+    accessLevel,
+  }: {
+    file: Express.Multer.File;
+    workspaceId: string;
+    accessLevel?: AccessLevel;
+  }): Promise<File> {
     // Save file information to the database
     const media = await this.prisma.file.create({
       data: {
@@ -22,7 +27,8 @@ export class FileService {
         mimeType: file.mimetype,
         size: file.size,
         url: file.path,
-        workspaceId
+        workspaceId,
+        accessLevel: accessLevel ?? AccessLevel.RESTRICTED,
       },
     });
 
@@ -33,16 +39,9 @@ export class FileService {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    const uploadPath = this.uploadPath(join(
-      'uploads',
-      file.originalname,
-    ))
+    const uploadPath = this.uploadPath(join('uploads', file.originalname));
 
-    const absUploadPath = join(
-      process.cwd(),
-      'public',
-      uploadPath
-    );
+    const absUploadPath = join(process.cwd(), 'public', uploadPath);
     const uploadDir = dirname(absUploadPath);
 
     // Ensure the uploads directory exists
@@ -62,15 +61,12 @@ export class FileService {
   }
 
   async deleteFile(path: string): Promise<void> {
-
     // Delete file from the filesystem
     await fs.unlink(join(process.cwd(), 'public', path));
   }
 
-
   async cropImage(file: File, cropInput: sharp.Region) {
-
-    const originalFilePath = join(process.cwd(), 'public',file.url);
+    const originalFilePath = join(process.cwd(), 'public', file.url);
 
     const extension = path.extname(originalFilePath);
     const basePath = originalFilePath.replace(extension, '');
@@ -101,13 +97,12 @@ export class FileService {
     if (metadata.width && metadata.height) {
       await sharp(originalFilePath).extract(cropInput).toFile(newFilePath);
     }
-    
+
     return newFilePath.replace(join(process.cwd(), 'public'), '');
   }
 
   async resizeImage(file: File, resizeInput: sharp.Region) {
-
-    const originalFilePath = join(process.cwd(), 'public',file.url);
+    const originalFilePath = join(process.cwd(), 'public', file.url);
 
     const extension = path.extname(originalFilePath);
     const basePath = originalFilePath.replace(extension, '');
@@ -127,7 +122,7 @@ export class FileService {
     if (metadata.width && metadata.height) {
       await sharp(originalFilePath).resize(resizeInput).toFile(newFilePath);
     }
-    
+
     return newFilePath.replace(join(process.cwd(), 'public'), '');
   }
 }

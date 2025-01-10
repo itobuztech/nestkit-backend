@@ -1,11 +1,17 @@
-import { Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { Request } from "express";
+import {
+  Controller,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
-import { FileService } from "../file/file.service";
-import { UpdateProfileImageService } from "./update-profile-image.service";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
-
+import { FileService } from '../file/file.service';
+import { UpdateProfileImageService } from './update-profile-image.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('media')
@@ -22,7 +28,13 @@ export class UpdateProfileImageController {
     @Req() req: Request,
   ) {
     const filePath = await this.uploadMediaService.saveFile(file);
-    const media = await this.uploadMediaService.uploadMedia({ ...file, path: filePath }, { workspaceId: req.currentWorkspaceId as string });
-    return await this.updateProfileImage.updateProfileMedia(media, req.user?.id || '');
+    const media = await this.uploadMediaService.uploadMedia({
+      file: { ...file, path: filePath },
+      workspaceId: req.currentWorkspaceId as string,
+    });
+    return await this.updateProfileImage.updateProfileMedia(
+      media,
+      req.user?.id || '',
+    );
   }
 }
