@@ -27,10 +27,10 @@ export class AwsService {
     });
   }
 
-  async uploadFile(file: uploadFileInput) {
+  async uploadFile(file: uploadFileInput, workspaceId: string) {
     // creating key for storing file in aws
     const fileName = file.originalname.replace(/[^\w.](?=.*\.)/g, '_');
-    const key = `${Date.now().toString()}-${fileName.trim()}`;
+    const key = `${workspaceId}/${Date.now().toString()}-${fileName.trim()}`;
 
     // creating file buffer
     const buffer = await new Promise<Buffer>((resolve, reject) => {

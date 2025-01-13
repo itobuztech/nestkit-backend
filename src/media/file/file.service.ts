@@ -28,12 +28,15 @@ export class FileService {
     //store file in s3 ad get its address
     let fileS3Key: string | null = null;
     if (appEnv.isS3Enabled) {
-      fileS3Key = await this.awsService.uploadFile({
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        path: file.path,
-        accessLevel: accessLevel,
-      });
+      fileS3Key = await this.awsService.uploadFile(
+        {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          path: file.path,
+          accessLevel: accessLevel,
+        },
+        workspaceId,
+      );
     }
 
     // Save file information to the database

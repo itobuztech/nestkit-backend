@@ -1,4 +1,4 @@
-import { HttpStatus, UseGuards } from '@nestjs/common';
+import { HttpStatus, Req, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 
@@ -78,12 +78,15 @@ export class ResizeFileService {
     let fileS3Key: string | null = null;
 
     if (appEnv.isS3Enabled) {
-      fileS3Key = await this.awsService.uploadFile({
-        originalname: file.name,
-        mimetype: file.mimeType,
-        path: filePath,
-        accessLevel: file.accessLevel!,
-      });
+      fileS3Key = await this.awsService.uploadFile(
+        {
+          originalname: file.name,
+          mimetype: file.mimeType,
+          path: filePath,
+          accessLevel: file.accessLevel!,
+        },
+        req.currentWorkspaceId as string,
+      );
     }
 
     const media = await this.prismaService.file.create({
