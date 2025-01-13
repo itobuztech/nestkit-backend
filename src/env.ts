@@ -74,6 +74,7 @@ export const appEnv = cleanEnv(process.env, {
   AWS_PUBLIC_BUCKET: str(),
   AWS_SECURE_BUCKET: str(),
   SIGNED_URL_EXPIRY: num({ default: 3600 }),
+  isS3Enabled: bool({ default: true }),
 });
 
 // Read an environment variable, which is validated and cleaned during

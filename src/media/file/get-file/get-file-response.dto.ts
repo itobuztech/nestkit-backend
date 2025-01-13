@@ -8,7 +8,7 @@ export class GetFileResponse {
   @Field(() => Int) size: number;
   @Field(() => String) mimeType: string;
   @Field(() => String) url: string;
-  @Field(() => String) s3Url: string;
+  @Field(() => String, { nullable: true }) s3Url?: string;
   @Field(() => String, { nullable: true }) folderId?: string;
   @Field(() => String, { nullable: true }) authorId?: string;
   @Field(() => Date) createdAt: Date;

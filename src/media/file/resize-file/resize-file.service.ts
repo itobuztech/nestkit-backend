@@ -9,6 +9,7 @@ import { ResizeFileInput } from './resize-file.input';
 import { FileService } from '../file.service';
 import GraphQLJSON from 'graphql-type-json';
 import { AwsService } from 'src/aws/aws.service';
+import appEnv from 'src/env';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
@@ -74,12 +75,16 @@ export class ResizeFileService {
       },
     });
 
-    const fileS3Key = await this.awsService.uploadFile({
-      originalname: file.name,
-      mimetype: file.mimeType,
-      path: filePath,
-      accessLevel: file.accessLevel!,
-    });
+    let fileS3Key: string | null = null;
+
+    if (appEnv.isS3Enabled) {
+      fileS3Key = await this.awsService.uploadFile({
+        originalname: file.name,
+        mimetype: file.mimeType,
+        path: filePath,
+        accessLevel: file.accessLevel!,
+      });
+    }
 
     const media = await this.prismaService.file.create({
       data: {

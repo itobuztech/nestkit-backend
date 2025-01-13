@@ -41,46 +41,48 @@ export class GetFileService {
         httpStatus: HttpStatus.NOT_FOUND,
       });
     }
-    if (
-      !file.s3Url ||
-      (file.accessLevel === AccessLevel.RESTRICTED &&
-        (await this.isUrlExpired(file)))
-    ) {
-      const fileUrl = await this.awsService.getfileUrl(
-        file.s3Key,
-        file.accessLevel!,
-      );
+    if (file.s3Key) {
+      if (
+        !file.s3Url ||
+        (file.accessLevel === AccessLevel.RESTRICTED &&
+          (await this.isUrlExpired(file)))
+      ) {
+        const fileUrl = await this.awsService.getfileUrl(
+          file.s3Key!,
+          file.accessLevel!,
+        );
 
-      await this.prismaService.file.update({
-        where: {
-          workspaceId: req.currentWorkspaceId,
-          id: getFileInput.id,
-          deletedAt: getFileInput.fromStash ? { not: null } : null,
-        },
-        data: {
-          s3Url: fileUrl,
-        },
-      });
-
-      if (file.accessLevel === AccessLevel.RESTRICTED) {
-        await this.prismaService.s3AccessSession.upsert({
+        await this.prismaService.file.update({
           where: {
-            fileId_signedUrl: {
-              fileId: file.id,
-              signedUrl: file.s3Url ?? fileUrl,
-            },
+            workspaceId: req.currentWorkspaceId,
+            id: getFileInput.id,
+            deletedAt: getFileInput.fromStash ? { not: null } : null,
           },
-          update: {
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-          },
-          create: {
-            signedUrl: fileUrl,
-            fileId: file.id,
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          data: {
+            s3Url: fileUrl,
           },
         });
+
+        if (file.accessLevel === AccessLevel.RESTRICTED) {
+          await this.prismaService.s3AccessSession.upsert({
+            where: {
+              fileId_signedUrl: {
+                fileId: file.id,
+                signedUrl: file.s3Url ?? fileUrl,
+              },
+            },
+            update: {
+              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+            },
+            create: {
+              signedUrl: fileUrl,
+              fileId: file.id,
+              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+            },
+          });
+        }
+        file.s3Url = fileUrl;
       }
-      file.s3Url = fileUrl;
     }
 
     return file;

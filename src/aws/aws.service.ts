@@ -36,13 +36,14 @@ export class AwsService {
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       const filePath = path.join(process.cwd(), 'public', file.path);
-      const readStream = fs.createReadStream(filePath);
+      const readStream = fs.createReadStream(filePath); //reading the required file
       readStream
         .on('data', (chunk: Buffer) => chunks.push(chunk))
         .on('end', () => resolve(Buffer.concat(chunks)))
         .on('error', reject);
     });
 
+    // creating object to sed to s3 bucket
     const command = new PutObjectCommand({
       Bucket:
         file.accessLevel === AccessLevel.PUBLIC
@@ -52,7 +53,6 @@ export class AwsService {
       Body: buffer,
       ContentType: file.mimetype,
     });
-
     const res = await this.s3Client.send(command);
     if (res.$metadata.httpStatusCode === 200) {
       const url = key;

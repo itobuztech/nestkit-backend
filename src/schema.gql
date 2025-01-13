@@ -237,7 +237,7 @@ type GetFileResponse {
   size: Int!
   mimeType: String!
   url: String!
-  s3Url: String!
+  s3Url: String
   folderId: String
   authorId: String
   createdAt: DateTime!

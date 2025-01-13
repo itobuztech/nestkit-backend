@@ -7,6 +7,7 @@ import * as path from 'path';
 import { AccessLevel, File } from '@prisma/client';
 import * as sharp from 'sharp';
 import { AwsService } from 'src/aws/aws.service';
+import appEnv from 'src/env';
 
 @Injectable()
 export class FileService {
@@ -24,13 +25,18 @@ export class FileService {
     workspaceId: string;
     accessLevel?: AccessLevel;
   }): Promise<File> {
+    //store file in s3 ad get its address
+    let fileS3Key: string | null = null;
+    if (appEnv.isS3Enabled) {
+      fileS3Key = await this.awsService.uploadFile({
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        path: file.path,
+        accessLevel: accessLevel,
+      });
+    }
+
     // Save file information to the database
-    const fileS3Key = await this.awsService.uploadFile({
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      path: file.path,
-      accessLevel: accessLevel,
-    });
     const media = await this.prisma.file.create({
       data: {
         name: file.originalname,

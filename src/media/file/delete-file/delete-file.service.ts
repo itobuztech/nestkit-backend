@@ -8,6 +8,7 @@ import { CreateAppError } from 'src/shared/create-error/create-error';
 import { FileDeleteInput } from './delete-file.input';
 import { FileService } from '../file.service';
 import { AwsService } from 'src/aws/aws.service';
+import appEnv from 'src/env';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
@@ -47,7 +48,9 @@ export class DeleteFileService {
           where: { id: fileDeleteInput.id },
         });
         await this.fileService.deleteFile(file.url);
-        await this.awsService.deleteFile(file.s3Key, file.accessLevel!);
+        if (file.s3Key) {
+          await this.awsService.deleteFile(file.s3Key, file.accessLevel!);
+        }
       } else {
         await this.prismaService.file.update({
           where: { id: fileDeleteInput.id, deletedAt: null },
