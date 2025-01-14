@@ -15,7 +15,8 @@ import { FileService } from '../file.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
 import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
-import { AccessLevel } from '@prisma/client';
+import { AccessLevel, File } from '@prisma/client';
+import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Controller('media')
@@ -36,12 +37,21 @@ export class UploadMediaController {
     req: Request,
   ) {
     const workspaceId = req.currentWorkspaceId as string;
-    const filePath = await this.uploadMediaService.saveFile(file);
-    const media = await this.uploadMediaService.uploadMedia({
-      file: { ...file, path: filePath },
-      workspaceId,
-      accessLevel,
-    });
+    let media: File;
+    if (appEnv.isS3Enabled) {
+      media = await this.uploadMediaService.uploadMedia({
+        file,
+        workspaceId,
+        accessLevel,
+      });
+    } else {
+      media = await this.uploadMediaService.saveFile({
+        file,
+        workspaceId,
+        accessLevel,
+      });
+    }
+
     return media;
   }
 }

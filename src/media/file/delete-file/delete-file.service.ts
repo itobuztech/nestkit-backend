@@ -47,9 +47,10 @@ export class DeleteFileService {
         await this.prismaService.file.delete({
           where: { id: fileDeleteInput.id },
         });
-        await this.fileService.deleteFile(file.url);
         if (file.s3Key) {
           await this.awsService.deleteFile(file.s3Key, file.accessLevel!);
+        } else {
+          await this.fileService.deleteFile(file.url!);
         }
       } else {
         await this.prismaService.file.update({

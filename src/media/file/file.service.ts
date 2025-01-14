@@ -27,17 +27,15 @@ export class FileService {
   }): Promise<File> {
     //store file in s3 ad get its address
     let fileS3Key: string | null = null;
-    if (appEnv.isS3Enabled) {
-      fileS3Key = await this.awsService.uploadFile(
-        {
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          path: file.path,
-          accessLevel: accessLevel,
-        },
-        workspaceId,
-      );
-    }
+    fileS3Key = await this.awsService.uploadFile(
+      {
+        name: file.originalname,
+        mimetype: file.mimetype,
+        fileBuffer: file.buffer,
+      },
+      workspaceId,
+      accessLevel,
+    );
 
     // Save file information to the database
     const media = await this.prisma.file.create({
@@ -45,7 +43,6 @@ export class FileService {
         name: file.originalname,
         mimeType: file.mimetype,
         size: file.size,
-        url: file.path,
         workspaceId,
         accessLevel: accessLevel ?? AccessLevel.RESTRICTED,
         s3Key: fileS3Key,
@@ -55,10 +52,19 @@ export class FileService {
     return media;
   }
 
-  async saveFile(file: Express.Multer.File): Promise<string> {
+  async saveFile({
+    file,
+    workspaceId,
+    accessLevel,
+  }: {
+    file: Express.Multer.File;
+    workspaceId: string;
+    accessLevel?: AccessLevel;
+  }): Promise<File> {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
+    console.log('reached');
     const uploadPath = this.uploadPath(join('uploads', file.originalname));
 
     const absUploadPath = join(process.cwd(), 'public', uploadPath);
@@ -70,7 +76,18 @@ export class FileService {
     // Save the file
     await fs.writeFile(absUploadPath, file.buffer);
 
-    return `/${uploadPath}`;
+    const media = await this.prisma.file.create({
+      data: {
+        name: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: uploadPath,
+        workspaceId,
+        accessLevel: accessLevel ?? AccessLevel.RESTRICTED,
+      },
+    });
+
+    return media;
   }
 
   uploadPath(originalFilePath: string): string {
@@ -85,8 +102,9 @@ export class FileService {
     await fs.unlink(join(process.cwd(), 'public', path));
   }
 
-  async cropImage(file: File, cropInput: sharp.Region) {
-    const originalFilePath = join(process.cwd(), 'public', file.url);
+  async cropImage(file: File, cropInput: sharp.Region, fileBuffer: Buffer) {
+    const fileUrl = this.uploadPath(join('uploads', file.name));
+    const originalFilePath = join(process.cwd(), 'public', fileUrl);
 
     const extension = path.extname(originalFilePath);
     const basePath = originalFilePath.replace(extension, '');
@@ -111,38 +129,86 @@ export class FileService {
       filePath += 'h-' + cropInput.height;
     }
 
-    const metadata = await sharp(originalFilePath).metadata();
     const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
 
+    const metadata = await sharp(fileBuffer).metadata();
     if (metadata.width && metadata.height) {
-      await sharp(originalFilePath).extract(cropInput).toFile(newFilePath);
+      cropInput.width = metadata.width;
+      cropInput.height = metadata.height;
+      cropInput.top = cropInput.top ?? 0;
+      cropInput.left = cropInput.left ?? 0;
     }
 
-    return newFilePath.replace(join(process.cwd(), 'public'), '');
+    const croppedBuffer = await sharp(fileBuffer).extract(cropInput).toBuffer();
+
+    if (appEnv.isS3Enabled) {
+      const path = newFilePath.replace(join(process.cwd(), 'public'), '');
+      const fileName = path.split('/');
+      return await this.awsService.uploadFile(
+        {
+          name: fileName[1],
+          mimetype: file.mimeType,
+          fileBuffer: croppedBuffer,
+        },
+        file.workspaceId!,
+        file.accessLevel!,
+      );
+    } else {
+      await fs.writeFile(newFilePath, croppedBuffer);
+      return newFilePath.replace(join(process.cwd(), 'public'), '');
+    }
   }
 
-  async resizeImage(file: File, resizeInput: sharp.Region) {
-    const originalFilePath = join(process.cwd(), 'public', file.url);
+  async resizeImage(file: File, resizeInput: sharp.Region, fileBuffer: Buffer) {
+    const fileUrl = this.uploadPath(join('uploads', file.name));
+    const originalFilePath = join(process.cwd(), 'public', fileUrl);
 
     const extension = path.extname(originalFilePath);
     const basePath = originalFilePath.replace(extension, '');
 
     let filePath = '';
-
     if (resizeInput.width) {
       filePath += 'w-' + resizeInput.width;
     }
     if (resizeInput.height) {
       filePath += 'h-' + resizeInput.height;
     }
-
-    const metadata = await sharp(originalFilePath).metadata();
     const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
 
+    const metadata = await sharp(fileBuffer).metadata();
     if (metadata.width && metadata.height) {
-      await sharp(originalFilePath).resize(resizeInput).toFile(newFilePath);
+      const aspectRatio = metadata.width / metadata.height;
+
+      if (!resizeInput.width && resizeInput.height) {
+        resizeInput.width = Math.ceil(resizeInput.height * aspectRatio);
+      }
+
+      if (!resizeInput.height && resizeInput.width) {
+        resizeInput.height = Math.ceil(resizeInput.width / aspectRatio);
+      }
+      resizeInput.top = 0;
+      resizeInput.left = 0;
     }
 
-    return newFilePath.replace(join(process.cwd(), 'public'), '');
+    const resizedBuffer = await sharp(fileBuffer)
+      .extract(resizeInput)
+      .toBuffer();
+
+    if (appEnv.isS3Enabled) {
+      const path = newFilePath.replace(join(process.cwd(), 'public'), '');
+      const fileName = path.split('/');
+      return await this.awsService.uploadFile(
+        {
+          name: fileName[1],
+          mimetype: file.mimeType,
+          fileBuffer: resizedBuffer,
+        },
+        file.workspaceId!,
+        file.accessLevel!,
+      );
+    } else {
+      await fs.writeFile(newFilePath, resizedBuffer);
+      return newFilePath.replace(join(process.cwd(), 'public'), '');
+    }
   }
 }

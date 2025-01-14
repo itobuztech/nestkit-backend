@@ -6,10 +6,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import appEnv from 'src/env';
-import * as fs from 'fs';
-import { AccessLevel } from '@prisma/client';
+import { AccessLevel, File } from '@prisma/client';
 import { CreateAppError } from 'src/shared/create-error/create-error';
-import * as path from 'path';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { uploadFileInput } from './upload-file.input.dto';
 
@@ -27,30 +25,23 @@ export class AwsService {
     });
   }
 
-  async uploadFile(file: uploadFileInput, workspaceId: string) {
+  async uploadFile(
+    file: uploadFileInput,
+    workspaceId: string,
+    accessLevel?: AccessLevel,
+  ) {
     // creating key for storing file in aws
-    const fileName = file.originalname.replace(/[^\w.](?=.*\.)/g, '_');
+    const fileName = file.name.replace(/[^\w.](?=.*\.)/g, '_');
     const key = `${workspaceId}/${Date.now().toString()}-${fileName.trim()}`;
-
-    // creating file buffer
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      const filePath = path.join(process.cwd(), 'public', file.path);
-      const readStream = fs.createReadStream(filePath); //reading the required file
-      readStream
-        .on('data', (chunk: Buffer) => chunks.push(chunk))
-        .on('end', () => resolve(Buffer.concat(chunks)))
-        .on('error', reject);
-    });
 
     // creating object to sed to s3 bucket
     const command = new PutObjectCommand({
       Bucket:
-        file.accessLevel === AccessLevel.PUBLIC
+        accessLevel === AccessLevel.PUBLIC
           ? appEnv.AWS_PUBLIC_BUCKET
           : appEnv.AWS_SECURE_BUCKET,
       Key: key,
-      Body: buffer,
+      Body: file.fileBuffer,
       ContentType: file.mimetype,
     });
     const res = await this.s3Client.send(command);
@@ -87,6 +78,29 @@ export class AwsService {
         expiresIn: appEnv.SIGNED_URL_EXPIRY,
       });
       return response;
+    }
+  }
+
+  async getUploadedFile(s3Key: string, accessLevel: AccessLevel) {
+    const command = new GetObjectCommand({
+      Bucket:
+        accessLevel === AccessLevel.PUBLIC
+          ? appEnv.AWS_PUBLIC_BUCKET
+          : appEnv.AWS_SECURE_BUCKET,
+      Key: s3Key,
+    });
+    const response = await this.s3Client.send(command);
+
+    if (response.Body) {
+      const fileBuffer = Buffer.from(
+        await response.Body.transformToByteArray(),
+      );
+
+      return fileBuffer;
+    } else {
+      throw new CreateAppError({
+        message: 'Error in getting Files',
+      });
     }
   }
 }

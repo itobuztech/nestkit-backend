@@ -4,14 +4,11 @@ import { AccessLevel } from '@prisma/client';
 @InputType()
 export class uploadFileInput {
   @Field(() => String)
-  originalname: string;
-
-  @Field(() => String)
-  path: string;
+  name: string;
 
   @Field(() => String)
   mimetype: string;
 
-  @Field(() => AccessLevel, { nullable: true })
-  accessLevel?: AccessLevel;
+  @Field(() => String)
+  fileBuffer: Buffer;
 }
