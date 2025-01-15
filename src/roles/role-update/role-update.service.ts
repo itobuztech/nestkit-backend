@@ -43,11 +43,11 @@ export class RoleUpdateService {
     }
 
     if (req.user?.userType === UserType.SUPER_ADMIN && role.type === RoleType.SUPER_ADMIN) {
-      throw new CreateAppError({ message: 'You are not allowed to update this role.' });
+      throw new CreateAppError({ message: 'This is highest level role and can not be modified' });
     }
 
     if (req.user?.userType !== UserType.SUPER_ADMIN && role?.type !== RoleType.CUSTOM) {
-      throw new CreateAppError({ message: 'You are not allowed to update this role. Only Custom role can be modified.'});
+      throw new CreateAppError({ message: 'Global role can be modified by only super admin' });
     }
 
     const updatedRole = await this.prisma.role.update({
