@@ -86,8 +86,7 @@ export class GetFileService {
         file.url = file.s3Url;
       }
     }
-    const { s3Url, ...rest } = file;
-    return rest;
+    return file;
   }
 
   async isUrlExpired(file: File) {

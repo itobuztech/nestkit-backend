@@ -8,7 +8,6 @@ import { CreateAppError } from 'src/shared/create-error/create-error';
 import { FileDeleteInput } from './delete-file.input';
 import { FileService } from '../file.service';
 import { AwsService } from 'src/aws/aws.service';
-import appEnv from 'src/env';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)

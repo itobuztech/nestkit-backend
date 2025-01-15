@@ -9,7 +9,7 @@ import appEnv from 'src/env';
 import { AccessLevel } from '@prisma/client';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { uploadFileInput } from './upload-file.input.dto';
+import { UploadFileInput } from './upload-file.input.dto';
 
 @Injectable()
 export class AwsService {
@@ -26,7 +26,7 @@ export class AwsService {
   }
 
   async uploadFile(
-    file: uploadFileInput,
+    file: UploadFileInput,
     workspaceId: string,
     accessLevel?: AccessLevel,
   ) {

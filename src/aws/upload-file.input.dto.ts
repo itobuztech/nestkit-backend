@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class uploadFileInput {
+export class UploadFileInput {
   @Field(() => String)
   name: string;
 
