@@ -209,4 +209,19 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
     });
     expect(deleteFile.data.deleteFile.valueOf()).toBeDefined();
   });
+
+  test('After deleting with fromStash false then fetch the list and check the file will not exist', async () => {
+    const fileList = await api.graphql.query<FileQuery, FileQueryVariables>({
+      query: FILE_LIST_QUERY,
+
+      context: {
+        headers: {
+          current_workspace_id: workspaceId,
+          Authorization: `Bearer ${loginResponse.data.login.token}`,
+        },
+      },
+    });
+
+    expect(fileList.data.listMedia.file[0].id).not.toContain(fileId);
+  });
 });
