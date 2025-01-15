@@ -19,6 +19,7 @@ export class RoleUpdateService {
   @UseGuards(RoleGuard)
   @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
   @SetMetadata('privilegeName', PrivilegeName.UPDATE)
+  
   async updateRole(
     @Args('roleUpdateInput') roleUpdateInput: RoleUpdateInput,
     @Context('req') req: Request,
@@ -29,12 +30,16 @@ export class RoleUpdateService {
       },
     });
 
-      if (!role) {
-        throw new CreateAppError({
-          message: 'Role not found',
-          httpStatus: HttpStatus.NOT_FOUND,
-        });
-      }
+    if (!role) {
+      throw new CreateAppError({
+        message: 'Role not found',
+        httpStatus: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    if (req.user?.userType === UserType.SUPER_ADMIN && role.type === RoleType.SUPER_ADMIN) {
+      throw new CreateAppError({ message: 'You are not allowed to update this role.' });
+    }
 
     if (req.user?.userType !== UserType.SUPER_ADMIN && role?.type !== RoleType.CUSTOM) {
       throw new CreateAppError({ message: 'You are not allowed to update this role. Only Custom role can be modified.'});
