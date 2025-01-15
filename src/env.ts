@@ -69,10 +69,16 @@ export const appEnv = cleanEnv(process.env, {
 
   // AWS
   AWS_REGION: str({ default: 'ap-south-1' }),
-  AWS_ACCESS_KEY_ID: str(),
-  AWS_SECRET_ACCESS_KEY: str(),
-  AWS_PUBLIC_BUCKET: str(),
-  AWS_SECURE_BUCKET: str(),
+  AWS_ACCESS_KEY_ID:
+    process.env.isS3Enabled === 'true' ? str() : str({ default: '' }),
+  AWS_SECRET_ACCESS_KEY:
+    process.env.isS3Enabled === 'true' ? str() : str({ default: '' }),
+  AWS_PUBLIC_BUCKET:
+    process.env.isS3Enabled === 'true' ? str() : str({ default: '' }),
+  AWS_SECURE_BUCKET:
+    process.env.isS3Enabled === 'true' ? str() : str({ default: '' }),
+  AWS_PUBLIC_BUCKET_URL:
+    process.env.isS3Enabled === 'true' ? str() : str({ default: '' }),
   SIGNED_URL_EXPIRY: num({ default: 3600 }),
   isS3Enabled: bool({ default: true }),
 });

@@ -1,5 +1,4 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { AccessLevel } from '@prisma/client';
 
 @InputType()
 export class uploadFileInput {

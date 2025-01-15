@@ -1,4 +1,4 @@
-import { HttpStatus, Req, UseGuards } from '@nestjs/common';
+import { HttpStatus, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 
@@ -18,9 +18,9 @@ import { join } from 'path';
 @UseGuards(JwtAuthGuard)
 export class ResizeFileService {
   constructor(
-    private prismaService: PrismaService,
-    private fileService: FileService,
-    private awsService: AwsService,
+    private readonly prismaService: PrismaService,
+    private readonly fileService: FileService,
+    private readonly awsService: AwsService,
   ) {}
 
   @Mutation(() => GraphQLJSON)

@@ -6,14 +6,14 @@ import {
 } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import appEnv from 'src/env';
-import { AccessLevel, File } from '@prisma/client';
+import { AccessLevel } from '@prisma/client';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { uploadFileInput } from './upload-file.input.dto';
 
 @Injectable()
 export class AwsService {
-  private s3Client: S3Client;
+  private readonly s3Client: S3Client;
 
   constructor() {
     this.s3Client = new S3Client({
@@ -68,7 +68,7 @@ export class AwsService {
 
   async getfileUrl(s3Key: string, accessLevel: AccessLevel) {
     if (accessLevel === AccessLevel.PUBLIC) {
-      return `https://${appEnv.AWS_PUBLIC_BUCKET}.s3.amazonaws.com/${s3Key}`;
+      return `${appEnv.AWS_PUBLIC_BUCKET_URL}/${s3Key}`;
     } else {
       const command = new GetObjectCommand({
         Bucket: appEnv.AWS_SECURE_BUCKET,

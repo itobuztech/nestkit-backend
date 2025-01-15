@@ -15,7 +15,7 @@ import appEnv from 'src/env';
 @UseGuards(JwtAuthGuard)
 export class GetFileService {
   constructor(
-    private prismaService: PrismaService,
+    private readonly prismaService: PrismaService,
     private readonly awsService: AwsService,
   ) {}
 
@@ -81,11 +81,13 @@ export class GetFileService {
             },
           });
         }
-        file.s3Url = fileUrl;
+        file.url = fileUrl;
+      } else {
+        file.url = file.s3Url;
       }
     }
-
-    return file;
+    const { s3Url, ...rest } = file;
+    return rest;
   }
 
   async isUrlExpired(file: File) {
