@@ -198,6 +198,7 @@ type User {
 }
 
 type MembershipResponse {
+  id: String!
   workspaceId: String!
   isOwner: Boolean!
   isAccepted: Boolean!
@@ -324,6 +325,14 @@ input ListMembershipInput {
   orderBy: Order = DESC
   fromStash: Boolean = false
   search: String
+  orderByField: membershipListOrderByField = createdAt
+  workspaceId: String
+}
+
+enum membershipListOrderByField {
+  createdAt
+  isOwner
+  isAccepted
 }
 
 input RoleListInput {
@@ -420,8 +429,11 @@ type Mutation {
   createWorkspace(createWorkspaceInput: CreateWorkspaceInput!): CreateWorkspaceResponse!
   updateWorkspace(updateWorkspaceInput: UpdateWorkspaceInput!): UpdateWorkspaceResponse!
   deleteWorkSpace(deleteWorkspaceInput: WorkspaceDeleteInput): Boolean!
+  restoreWorkSpace(restoreWorkspaceInput: WorkspaceRestoreInput): Boolean!
   sendInvitation(sendInvitationInput: SendInvitationInput!): SendInvitationResponse!
   acceptInvitation(acceptInvitationInput: AcceptInvitationInput!): Boolean!
+  deleteMembership(membershipDeleteInput: MembershipDeleteInput): Boolean!
+  restoreMembership(membershipDeleteInput: MemberShipRestoreInput): Boolean!
   createRole(roleCreateInput: RoleCreateInput!): RoleCreateResponse!
   updateRole(roleUpdateInput: RoleUpdateInput!): RoleUpdateResponse!
   deleteRole(roleDeleteInput: RoleDeleteInput): Boolean!
@@ -430,6 +442,7 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
+  restore(postRestoreInput: PostRestoreInput): Boolean!
   updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
   deleteFile(fileDeleteInput: FileDeleteInput): Boolean!
   resizeFile(resizeFileInput: ResizeFileInput): JSON!
@@ -479,6 +492,10 @@ input WorkspaceDeleteInput {
   fromStash: Boolean
 }
 
+input WorkspaceRestoreInput {
+  id: String!
+}
+
 input SendInvitationInput {
   userId: String!
   workspaceId: String!
@@ -487,6 +504,15 @@ input SendInvitationInput {
 input AcceptInvitationInput {
   token: String!
   accept: Boolean!
+}
+
+input MembershipDeleteInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input MemberShipRestoreInput {
+  id: String!
 }
 
 input RoleCreateInput {
@@ -537,6 +563,10 @@ input PostDeleteInput {
   fromStash: Boolean
 }
 
+input PostRestoreInput {
+  id: String!
+}
+
 input UpdateProfileInput {
   name: String
   password: String
@@ -559,9 +589,9 @@ input ResizeFileInput {
 
 input ImageResizeOptions {
   width: Int!
-  height: Int!
-  left: Int!
-  top: Int!
+  height: Int
+  left: Int
+  top: Int
 }
 
 input CreateFolderInput {

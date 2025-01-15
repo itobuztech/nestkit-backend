@@ -1,6 +1,5 @@
 # Install dependency in mac  
-- brew install python3 
-- brew install python-setuptools
+- Node - v20.12.2
 - npm install -g corepack 
 - Install docker 
 
@@ -19,10 +18,9 @@
 
 
 ## Sonar Analysis 
-docker run --name sonarqube-custom -p 9000:9000 sonarqube:community
 docker run \
     --rm \
-    -e SONAR_HOST_URL="http://${SONARQUBE_URL}"  \
+    -e SONAR_HOST_URL="http://localhost:9000"  \
     -e SONAR_TOKEN="myAuthenticationToken" \
     -v "${YOUR_REPO}:/usr/src" \
     sonarsource/sonar-scanner-cli

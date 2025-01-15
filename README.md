@@ -15,19 +15,12 @@
 - Multi tenancy
 - Email Template 
 - File manager 
-- Subscription 
-- Payment gateway implementation 
-- DB based translation 
-- Audit 
-- App notification 
-- Mailer transport 
-  - Node mailer 
-  - SES 
 - Sentry Error handling 
-- Google analytics 
 - Documentation 
 - E2E
 
-## Docs 
+## Development Docs 
 - Development notes - docs/development.md
-  
+
+## API Documentation 
+https://documenter.getpostman.com/view/180560/2sAXqv6MQQ
