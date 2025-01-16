@@ -11,7 +11,7 @@ import { FileService } from '../file.service';
 import GraphQLJSON from 'graphql-type-json';
 import { AwsService } from 'src/aws/aws.service';
 import appEnv from 'src/env';
-import { File } from '@prisma/client';
+import { AccessLevel, File } from '@prisma/client';
 import { join } from 'path';
 
 @Resolver()
@@ -73,11 +73,16 @@ export class ResizeFileService {
       );
     }
 
+    let fileUrl = filePath;
+    if (appEnv.isS3Enabled) {
+      fileUrl = await this.awsService.getfileUrl(filePath, file.accessLevel!);
+    }
+
     await this.prismaService.file.deleteMany({
       where: {
         resizeImageId: file.id,
         workspaceId: file.workspaceId,
-        url: filePath,
+        url: fileUrl,
       },
     });
 
@@ -87,11 +92,21 @@ export class ResizeFileService {
         name: file.name,
         mimeType: file.mimeType,
         size: file.size,
-        url: appEnv.isS3Enabled ? null : filePath,
+        url: fileUrl,
         workspaceId: file.workspaceId,
         s3Key: appEnv.isS3Enabled ? filePath : null,
       },
     });
+
+    if (media.accessLevel === AccessLevel.RESTRICTED) {
+      await this.prismaService.s3AccessSession.create({
+        data: {
+          signedUrl: fileUrl,
+          fileId: media.id,
+          expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+        },
+      });
+    }
 
     return media;
   }

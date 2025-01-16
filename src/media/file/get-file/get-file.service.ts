@@ -43,9 +43,8 @@ export class GetFileService {
     }
     if (file.s3Key) {
       if (
-        !file.s3Url ||
-        (file.accessLevel === AccessLevel.RESTRICTED &&
-          (await this.isUrlExpired(file)))
+        file.accessLevel === AccessLevel.RESTRICTED &&
+        (await this.isUrlExpired(file))
       ) {
         const fileUrl = await this.awsService.getfileUrl(
           file.s3Key!,
@@ -59,7 +58,7 @@ export class GetFileService {
             deletedAt: getFileInput.fromStash ? { not: null } : null,
           },
           data: {
-            s3Url: fileUrl,
+            url: fileUrl,
           },
         });
 
@@ -68,7 +67,7 @@ export class GetFileService {
             where: {
               fileId_signedUrl: {
                 fileId: file.id,
-                signedUrl: file.s3Url ?? fileUrl,
+                signedUrl: fileUrl,
               },
             },
             update: {
@@ -82,8 +81,6 @@ export class GetFileService {
           });
         }
         file.url = fileUrl;
-      } else {
-        file.url = file.s3Url;
       }
     }
     return file;
@@ -94,7 +91,7 @@ export class GetFileService {
       where: {
         fileId_signedUrl: {
           fileId: file.id,
-          signedUrl: file.s3Url!,
+          signedUrl: file.url,
         },
       },
     });

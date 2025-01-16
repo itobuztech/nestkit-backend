@@ -37,6 +37,8 @@ export class FileService {
       accessLevel,
     );
 
+    const fileUrl = await this.awsService.getfileUrl(fileS3Key!, accessLevel!);
+
     // Save file information to the database
     const media = await this.prisma.file.create({
       data: {
@@ -46,8 +48,19 @@ export class FileService {
         workspaceId,
         accessLevel: accessLevel ?? AccessLevel.RESTRICTED,
         s3Key: fileS3Key,
+        url: fileUrl,
       },
     });
+
+    if (media.accessLevel === AccessLevel.RESTRICTED) {
+      await this.prisma.s3AccessSession.create({
+        data: {
+          signedUrl: fileUrl,
+          fileId: media.id,
+          expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+        },
+      });
+    }
 
     return media;
   }
@@ -64,9 +77,7 @@ export class FileService {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    console.log('reached');
     const uploadPath = this.uploadPath(join('uploads', file.originalname));
-
     const absUploadPath = join(process.cwd(), 'public', uploadPath);
     const uploadDir = dirname(absUploadPath);
 

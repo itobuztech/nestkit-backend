@@ -37,8 +37,7 @@ model File {
 
   size     Int // File size in kb
   mimeType String // MIME type (e.g., "image/png", "application/pdf")
-  url      String? // Path or URL to the file
-  s3Url    String? //url to s3 file
+  url      String // Path or URL to the file
   s3Key    String?
   folderId String?
   folder   Folder? @relation(name: "fileFolderRelation", fields: [folderId], references: [id])
