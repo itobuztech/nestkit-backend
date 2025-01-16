@@ -82,6 +82,17 @@ type UnAssignRoleResponse {
   success: Boolean!
 }
 
+type AssignedUser {
+  id: String!
+  name: String
+  email: String!
+}
+
+type AssignRoleUserResponse {
+  users: [AssignedUser!]!
+  pagination: BaseListResponse!
+}
+
 type PostAuthor {
   id: String!
   name: String!
@@ -440,6 +451,7 @@ type Mutation {
   deleteRole(roleDeleteInput: RoleDeleteInput): Boolean!
   assignRole(assignRoleInput: AssignRoleInput!): AssignRoleResponse!
   unAssignRole(unAssignRoleInput: UnAssignRoleInput!): UnAssignRoleResponse!
+  getAssignUsers(assignRoleUserInput: AssignRoleUserInput!): AssignRoleUserResponse!
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
@@ -543,6 +555,15 @@ input AssignRoleInput {
 input UnAssignRoleInput {
   roleId: String!
   userId: String!
+}
+
+input AssignRoleUserInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  roleId: String!
+  search: String
 }
 
 input CreatePostInput {
