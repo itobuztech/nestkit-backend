@@ -6,8 +6,6 @@ import {
   AcceptInvitationMutationVariables,
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
-  GetUsersQuery,
-  GetUsersQueryVariables,
   ListWorkSpaceQuery,
   ListWorkSpaceQueryVariables,
   SendInvitationMutation,
@@ -16,8 +14,6 @@ import {
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
 import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutation.gql';
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
-import { USER_LIST } from '../../../graphql/get-user-list.gql';
-import { sample } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
 
@@ -56,15 +52,14 @@ describe('Membership invitation module', () => {
     expect(response.data).toBeDefined();
   });
 
-  test(`Get user list and fetch a random user id Admin`, async () => {
-    const userList = await api.graphql.query<
-      GetUsersQuery,
-      GetUsersQueryVariables
-    >({
-      query: USER_LIST,
+  test(`Fetch a random user id`, async () => {
+    const randomUser = await dbClient.user.findFirst({
+      where: {
+        email: { not: user?.email },
+        isVerified: true,
+      },
     });
-    userId = sample(userList.data.getUsers)?.id;
-    expect(userList.data.getUsers.length).not.toBe(0);
+    userId = randomUser?.id;
   });
 
   test(`Send invitation with a user Id who is already in the workspace Admin`, async () => {
@@ -152,7 +147,7 @@ describe('Membership invitation module', () => {
     }
   }, 9000);
 
-  test(`Verify invitation Admin`, async () => {
+  test(`Verify invitation Admin with invalid token`, async () => {
     const verifyInvitation = await api.graphql.mutate<
       AcceptInvitationMutation,
       AcceptInvitationMutationVariables
@@ -204,7 +199,7 @@ describe('Membership invitation module', () => {
           },
         },
       });
-
+      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
   });
@@ -220,6 +215,7 @@ describe('Membership invitation module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
+      console.log(response);
       expect(response.data).toBeDefined();
     }
   });

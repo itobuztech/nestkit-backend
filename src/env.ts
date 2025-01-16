@@ -1,9 +1,6 @@
 import { cleanEnv, str, email, num, bool } from 'envalid';
 
 export const appEnv = cleanEnv(process.env, {
-  RATE_LIMIT_DURATION: num({ default: 10 }),
-
-
   DATABASE_URL: str({
     default:
       'postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter',
@@ -15,7 +12,7 @@ export const appEnv = cleanEnv(process.env, {
     choices: ['development', 'test', 'production', 'staging'],
   }),
   SEED_PASSWORD: str({ default: 'SamLauncher@123' }),
-  SEED_EMAIL: email({ default: 'example@team930312.testinator.com' }),
+  SEED_EMAIL: email({ default: 'example@example.com' }),
   JSON_TOKEN_SECRET: str({ default: 'SamLauncher@123' }),
   CORS_ORIGIN: str({
     default: '*',
@@ -25,13 +22,19 @@ export const appEnv = cleanEnv(process.env, {
   FRONTEND_URL: str({ default: 'http://localhost:3020' }),
   ACCESS_TOKEN_EXPIRY: str({ default: '30m' }),
   REFRESH_TOKEN_EXPIRY: num({ default: 7 }),
+  OTP_FEATURE: bool({ default: false }),
+  ACCOUNT_LOCK_TIME: num({ desc: 'Account lock time, in Min', default: 30 }),
+  ACCOUNT_LOCK_ATTEMPT: num({ desc: 'Account lock attempts', default: 5 }),
 
   // SMTP
-  SMTP_HOST: str({ desc: 'SMTP HOST' }),
-  SMTP_USER: str({ desc: 'SMTP User' }),
-  SMTP_PASSWORD: str({ desc: 'SMTP Password' }),
-  SMTP_PORT: num({ desc: 'SMTP Port' }),
-  SMTP_SENDER: str({ desc: 'Sender Email' }),
+  SMTP_HOST: str({ desc: 'SMTP HOST', default: 'localhost' }),
+  SMTP_USER: str({ desc: 'SMTP User', default: 'test' }),
+  SMTP_PASSWORD: str({ desc: 'SMTP Password', default: 'test' }),
+  SMTP_PORT: num({ desc: 'SMTP Port', default: 1025 }),
+  SMTP_SENDER: str({
+    desc: 'Sender Email',
+    default: 'nest-starter@example.com',
+  }),
 
   //  Mail sending
   MAIL_FROM_USER: str({ desc: 'Mail from user' }),
@@ -55,6 +58,14 @@ export const appEnv = cleanEnv(process.env, {
   SENTRY_URL: str({ desc: 'Please provide SENTRY URL' }),
 
   PRISMA_DEBUG: bool({ default: false }),
+
+  // Rate Limit
+  THROTTLE_TTL: num({ default: 60000 }),
+  THROTTLE_LIMIT: num({ default: 50 }),
+  RATE_LIMIT_ENABLED: bool({ default: true }),
+
+  // Pagination
+  PAGE_SIZE: num({ default: 10 }),
 });
 
 // Read an environment variable, which is validated and cleaned during
@@ -67,4 +78,5 @@ appEnv.isProduction; // true if NODE_ENV === 'production'
 appEnv.isTest; // true if NODE_ENV === 'test'
 appEnv.isDev; // true if NODE_ENV === 'development'
 
+console.log(appEnv); // console
 export default appEnv;

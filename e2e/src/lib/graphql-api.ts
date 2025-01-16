@@ -13,7 +13,7 @@ import { LoginInput, LoginQuery } from '../gql/graphql';
 
 export class GraphQlApi {
   public graphql: ApolloClient<NormalizedCacheObject>;
-  private token: string | null = null;
+  private token?: string | null = null;
 
   constructor() {
     this.graphql = new ApolloClient({
@@ -60,7 +60,7 @@ export class GraphQlApi {
         loginInput,
       },
     });
-
+    console.log(response);
     // Store the token in local storage for future use
     this.token = response.data.login.token;
 

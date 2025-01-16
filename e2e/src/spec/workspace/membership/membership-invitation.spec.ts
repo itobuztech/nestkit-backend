@@ -2,7 +2,6 @@ import { SIGN_UP_MUTATION } from '../../../graphql/sign-up-mutation.gql';
 import { VERIFY_EMAIL_MUTATION } from '../../../graphql/verify-email-mutation.gql';
 import { GraphQlApi } from '../../../lib/graphql-api';
 import { waitForTime } from '../../../lib/wait-for-time';
-import { fetchEmailsImap } from '../../../lib/fetchEmailsImap';
 import { appEnv } from '../../../lib/app-env';
 import { PrismaClient, User, UserType } from '@prisma/client';
 import {
@@ -25,10 +24,10 @@ import {
 import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutation.gql';
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
-import { DbUserOperations } from '../../../lib/dbUserOperations';
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
 import { LIST_MEMBERSHIP_QUERY } from '../../../graphql/membership-list-query.gql';
 import { faker } from '@faker-js/faker';
+import { fetchEmailsMailHog } from '../../../lib/fetchEmailsMailHog';
 
 describe('Membership invitation module', () => {
   let workspaceID: string | undefined;
@@ -36,11 +35,10 @@ describe('Membership invitation module', () => {
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
   let userId: string | undefined;
-  const userEmail = appEnv.IMAP_EMAIL;
+  const userEmail = faker.internet.email();
   let adminEmail: string | undefined;
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
-  const dbUserOperations = new DbUserOperations();
   let user: User | null;
   const dbClient = new PrismaClient();
 
@@ -49,8 +47,6 @@ describe('Membership invitation module', () => {
   });
 
   test('Add a new user', async () => {
-    await dbUserOperations.checkExistingUserAndUpdate();
-
     const signUpData = await api.graphql.mutate<
       SignupMutation,
       SignupMutationVariables
@@ -65,17 +61,18 @@ describe('Membership invitation module', () => {
     });
 
     const data = signUpData.data?.signup;
-    console.log(signUpData, 'signup');
     userId = data?.id;
     expect(data?.id).not.toBe(null);
     await waitForTime(60000);
   }, 80000);
 
   test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsImap('Welcome to Nest Starter Template!');
+    invitationLink = await fetchEmailsMailHog('Welcome');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(46);
-    console.log(invitationLink, onboardingToken);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/verify-email?token&#x3D;',
+      '',
+    );
     expect(invitationLink).toContain('verify-email');
   }, 9000);
 
@@ -92,7 +89,6 @@ describe('Membership invitation module', () => {
       },
     });
     const data = verifyEmailData.data?.verifyEmail;
-    console.log(verifyEmailData);
     expect(data?.refreshToken).not.toBe(null);
   }, 9000);
 
@@ -109,7 +105,6 @@ describe('Membership invitation module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
-      console.log(response);
       expect(response.data).toBeDefined();
     }
   });
@@ -126,7 +121,6 @@ describe('Membership invitation module', () => {
         },
       },
     });
-    console.log(createWorkspace);
     workspaceID = createWorkspace.data?.createWorkspace.id;
     expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
   });
@@ -145,17 +139,19 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
     await waitForTime(65000);
   }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(60);
-    console.log(invitationLink, onboardingToken);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/membership-verify?token&#x3D;',
+      '',
+    );
+    console.log(onboardingToken, invitationLink);
     expect(invitationLink).toContain('membership-verify');
   }, 7000);
 
@@ -173,7 +169,6 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log(verifyInvitation);
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
   });
@@ -183,7 +178,6 @@ describe('Membership invitation module', () => {
       email: userEmail,
       password: appEnv.SEED_PASSWORD,
     });
-    console.log(response);
     expect(response.data).toBeDefined();
   });
 
@@ -194,7 +188,6 @@ describe('Membership invitation module', () => {
     >({
       query: LIST_WORKSPACE_QUERY,
     });
-    console.log(listWorkspace);
 
     const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
       (workspace) => workspace.id === workspaceID,
@@ -228,17 +221,19 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
     await waitForTime(65000);
   }, 80000);
 
   test('Get the invitation link', async () => {
-    invitationLink = await fetchEmailsImap('New membership invitation!');
+    invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
-    onboardingToken = invitationLink?.substring(60);
-    console.log(invitationLink, onboardingToken);
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/membership-verify?token&#x3D;',
+      '',
+    );
+    console.log(onboardingToken, invitationLink);
     expect(invitationLink).toContain('membership-verify');
   });
 
@@ -256,7 +251,6 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log(verifyInvitation);
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
   });
@@ -306,6 +300,5 @@ describe('Membership invitation module', () => {
     );
 
     expect(addedWorkspace?.name).toBe(workspaceName);
-    await dbUserOperations.revertDbOperations();
   });
 });

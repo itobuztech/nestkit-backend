@@ -6,7 +6,7 @@ import * as sanitizeHtml from 'sanitize-html';
 
 import { UpdatePostResponse } from './update-post-response.dto';
 import { UpdatePostInput } from './update-post.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PostMemberShipValidation } from '../post-membership-validation';
@@ -35,7 +35,7 @@ export class PostUpdateService {
     @Context('req') req: Request,
   ) {
 
-    this.postMemberShipValidation.validateAuthorMembership(req.memberships, (updatePostInput?.authorId || req?.user?.id) || '');
+    this.postMemberShipValidation.validateAuthorMembership(req.currentUserMemberships, (updatePostInput?.authorId || req?.user?.id) || '');
 
     const existingPost = await this.prisma.post.findUnique({
       where: { id: postId },

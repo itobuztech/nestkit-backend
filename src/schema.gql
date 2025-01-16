@@ -11,8 +11,9 @@ type BaseListResponse {
 
 type RoleResponse {
   title: String!
-  name: String!
+  type: String!
   id: String!
+  description: String
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
@@ -63,7 +64,8 @@ type RolePrivilegeResponse {
 
 type RoleGetResponse {
   title: String!
-  name: String!
+  type: String!
+  description: String
   id: String!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -149,9 +151,10 @@ type PassWordResetResponse {
 }
 
 type LoginResponse {
-  token: String!
-  refreshToken: String!
+  token: String
+  refreshToken: String
   id: String!
+  twoFA: Boolean
 }
 
 type SignupResponse {
@@ -226,7 +229,55 @@ type ListMediaResponse {
   pagination: BaseListResponse!
 }
 
+type GetFileResponse {
+  id: String!
+  name: String!
+  description: String
+  size: Int!
+  mimeType: String!
+  url: String!
+  folderId: String
+  authorId: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  workspaceId: String
+  resizeImages: [GetFileResponse!]
+}
+
+type CreateFolderResponse {
+  id: String!
+  name: String!
+  parentId: String
+}
+
+type GetFolderResponse {
+  name: String!
+  id: String!
+  parentId: String
+  subFolders: [GetFolderResponse!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type FolderResponse {
+  name: String!
+  id: String!
+  parentId: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type FolderListResponse {
+  folder: [FolderResponse!]!
+  pagination: BaseListResponse!
+}
+
 type Query {
+  login(loginInput: LoginInput!): LoginResponse!
+  rateLimitGlobal: String!
   listWorkSpace(listWorkspaceInput: ListWorkSpaceInput): ListWorkSpaceResponse!
   listMemberships(listMembershipsInput: ListMembershipInput!): ListMembershipResponse!
   roleList(roleListInput: RoleListInput): RoleListResponse!
@@ -237,7 +288,14 @@ type Query {
   getUsers(getUsersInput: GetUsersInput): [GetUserResponse!]!
   currentUser: CurrentUserResponse!
   listMedia(listMediaInput: ListMediaInput): ListMediaResponse!
-  login(loginInput: LoginInput!): LoginResponse!
+  getFile(getFileInput: GetFileInput): GetFileResponse
+  getFolder(getFolderInput: GetFolderInput!): GetFolderResponse!
+  listFolder(listFolderInput: ListFolderInput): FolderListResponse!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
 }
 
 input ListWorkSpaceInput {
@@ -246,7 +304,7 @@ input ListWorkSpaceInput {
   orderBy: Order = DESC
   fromStash: Boolean = false
   name: String
-  authorId: Int
+  authorId: String
   orderByField: workspaceOrderByField = createdAt
 }
 
@@ -292,7 +350,7 @@ input GetPostListInput {
   orderBy: Order = DESC
   fromStash: Boolean = false
   title: String
-  authorId: Int
+  authorId: String
   orderByField: orderByField = id
 }
 
@@ -325,15 +383,44 @@ enum mediaOrderByField {
   size
 }
 
-input LoginInput {
-  email: String!
-  password: String!
+input GetFileInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input GetFolderInput {
+  id: String!
+}
+
+input ListFolderInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  name: String
+  orderByField: FolderOrderByField = id
+}
+
+enum FolderOrderByField {
+  id
+  title
+  authorId
+  published
 }
 
 type Mutation {
+  requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
+  resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
+  signup(signupInput: SignupInput!): SignupResponse!
+  verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
+  refreshAccessToken(refreshAccessTokenInput: RefreshAccessTokenInput!): VerifyEmailResponse!
+  verifyOtp(otpLoginInput: OtpLoginInput!): LoginResponse!
+  rateLimitSkip: String!
+  rateLimitCustomize: String!
   createWorkspace(createWorkspaceInput: CreateWorkspaceInput!): CreateWorkspaceResponse!
   updateWorkspace(updateWorkspaceInput: UpdateWorkspaceInput!): UpdateWorkspaceResponse!
   deleteWorkSpace(deleteWorkspaceInput: WorkspaceDeleteInput): Boolean!
+  restoreWorkSpace(restoreWorkspaceInput: WorkspaceRestoreInput): Boolean!
   sendInvitation(sendInvitationInput: SendInvitationInput!): SendInvitationResponse!
   acceptInvitation(acceptInvitationInput: AcceptInvitationInput!): Boolean!
   createRole(roleCreateInput: RoleCreateInput!): RoleCreateResponse!
@@ -344,13 +431,40 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
+  restore(postRestoreInput: PostRestoreInput): Boolean!
   updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
   deleteFile(fileDeleteInput: FileDeleteInput): Boolean!
-  requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
-  resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
-  signup(signupInput: SignupInput!): SignupResponse!
-  verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
-  refreshAccessToken(refreshAccessTokenInput: RefreshAccessTokenInput!): VerifyEmailResponse!
+  resizeFile(resizeFileInput: ResizeFileInput): JSON!
+  createFolder(createFolderInput: CreateFolderInput): CreateFolderResponse!
+  deleteFolder(folderDeleteInput: DeleteFolderInput): Boolean!
+  updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
+}
+
+input PasswordResetRequestInput {
+  email: String!
+}
+
+input PasswordResetInput {
+  password: String!
+}
+
+input SignupInput {
+  name: String
+  email: String!
+  password: String!
+}
+
+input VerifyEmailInput {
+  token: String!
+}
+
+input RefreshAccessTokenInput {
+  refreshToken: String!
+}
+
+input OtpLoginInput {
+  email: String!
+  otp: Float!
 }
 
 input CreateWorkspaceInput {
@@ -367,6 +481,10 @@ input WorkspaceDeleteInput {
   fromStash: Boolean
 }
 
+input WorkspaceRestoreInput {
+  id: String!
+}
+
 input SendInvitationInput {
   userId: String!
   workspaceId: String!
@@ -380,21 +498,13 @@ input AcceptInvitationInput {
 input RoleCreateInput {
   title: String!
   description: String
-  name: RoleName! = CUSTOM
   privileges: [String!]!
-}
-
-enum RoleName {
-  SUPER_ADMIN
-  ADMIN
-  USER
-  CUSTOM
 }
 
 input RoleUpdateInput {
   id: String!
   title: String!
-  name: RoleName! = CUSTOM
+  description: String
   createPrivileges: [String!]!
   removePrivileges: [String!]!
 }
@@ -433,6 +543,10 @@ input PostDeleteInput {
   fromStash: Boolean
 }
 
+input PostRestoreInput {
+  id: String!
+}
+
 input UpdateProfileInput {
   name: String
   password: String
@@ -443,24 +557,35 @@ input FileDeleteInput {
   fromStash: Boolean
 }
 
-input PasswordResetRequestInput {
-  email: String!
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input ResizeFileInput {
+  id: String!
+  resizeOptions: ImageResizeOptions!
 }
 
-input PasswordResetInput {
-  password: String!
+input ImageResizeOptions {
+  width: Int!
+  height: Int!
+  left: Int!
+  top: Int!
 }
 
-input SignupInput {
+input CreateFolderInput {
+  name: String!
+  parentId: String
+}
+
+input DeleteFolderInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input UpdateFolderInput {
+  id: String!
   name: String
-  email: String!
-  password: String!
-}
-
-input VerifyEmailInput {
-  token: String!
-}
-
-input RefreshAccessTokenInput {
-  refreshToken: String!
+  parentId: String
 }

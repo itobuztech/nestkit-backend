@@ -1,12 +1,12 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { GetUserResponse } from './get-users.response.dto';
 import { GetUsersInput } from './get-users-input.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { appConfig } from 'src/app.config';
 import { Prisma } from '@prisma/client';
+import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -37,7 +37,7 @@ export class GetUserService {
 
     const users = await this.prisma.user.findMany({
       where: getUsersInput?.search ? userQuery : undefined,
-      take: appConfig.pageSize,
+      take: appEnv.PAGE_SIZE,
     });
     return users;
   }
