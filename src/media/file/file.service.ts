@@ -197,12 +197,10 @@ export class FileService {
       if (!resizeInput.height && resizeInput.width) {
         resizeInput.height = Math.ceil(resizeInput.width / aspectRatio);
       }
-      resizeInput.top = 0;
-      resizeInput.left = 0;
     }
 
     const resizedBuffer = await sharp(fileBuffer)
-      .extract(resizeInput)
+      .resize(resizeInput)
       .toBuffer();
 
     if (appEnv.isS3Enabled) {
