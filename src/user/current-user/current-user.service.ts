@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolePrivilegeResponse } from 'src/roles/get-role/role-get-response.dto';
 import { orderBy, unionBy } from 'lodash';
 import { CurrentUserResponse } from './current-user.response.dto';
+import { RoleType } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -14,6 +15,7 @@ export class CurrentUserService {
 
   @Query(() => CurrentUserResponse)
   async currentUser(@Context('req') req: Request): Promise<CurrentUserResponse> {
+    
     const user = await this.prisma.user.findFirst({ 
       where: {
         id: req.jwt.userId
@@ -27,9 +29,31 @@ export class CurrentUserService {
       throw new Error('User not found');
     }
 
+    const ownerMembership = await this.prisma.workspaceMembership.findFirst({
+      where: {
+        isAccepted: true,
+        isOwner: true,
+        userId: user.id,
+        deletedAt: null,
+        workspaceId: req.currentWorkspaceId
+      },
+    });
+
+    let adminRoleId = null;
+
+    if (ownerMembership) {
+      const adminRole = await this.prisma.role.findFirst({
+        where: {
+          type: RoleType.ADMIN,
+        }
+      });
+
+      adminRoleId = adminRole?.id;
+    }
+
     const roles = await this.prisma.userRole.findMany({
       where: {
-        userId: req.jwt.userId
+        userId: user.id
       }
     });
 
@@ -37,7 +61,7 @@ export class CurrentUserService {
 
     const privileges = await this.prisma.rolePrivilege.findMany({
       where: { roleId: {
-        in: roles.map(role => role.roleId)
+        in: adminRoleId ? roles.map(role => role.roleId).concat(adminRoleId) : roles.map(role => role.roleId)
       } },
       include: { privilege: true },
     });

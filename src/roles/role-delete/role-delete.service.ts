@@ -8,6 +8,8 @@ import { CreateAppError } from 'src/shared/create-error/create-error';
 import { RoleDeleteInput } from './role-delete-input.dto';
 import { RoleGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
+import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -18,6 +20,10 @@ export class RoleDeleteService {
   @UseGuards(RoleGuard)
   @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
   @SetMetadata('privilegeName', PrivilegeName.DELETE)
+
+  @UseGuards(WorkspaceMemberShipGuard)
+  @SetMetadata('memberShipValidationType', MemberShipValidationType.MEMBERSHIP_VALIDITY)
+  
   async deleteRole(
     @Args('roleDeleteInput', { nullable: true }) roleDeleteInput: RoleDeleteInput,
     @Context('req') req: Request,
