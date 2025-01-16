@@ -1,17 +1,18 @@
 import { Context, Query, Resolver } from '@nestjs/graphql';
-import { Request } from 'express';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { RoleType } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolePrivilegeResponse } from 'src/roles/get-role/role-get-response.dto';
-import { orderBy, unionBy } from 'lodash';
 import { CurrentUserResponse } from './current-user.response.dto';
-import { RoleType } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
 export class CurrentUserService {
   constructor(private prisma: PrismaService) {}
+
 
   @Query(() => CurrentUserResponse)
   async currentUser(@Context('req') req: Request): Promise<CurrentUserResponse> {
@@ -76,11 +77,24 @@ export class CurrentUserService {
       });
     });
 
+    const membership = await this.prisma.workspaceMembership.findMany({
+      where: {
+        userId: req?.user?.id,
+        isAccepted: true,
+        deletedAt: null,
+      },
+      include: {
+        workspace: true
+      }
+    });
+
+    const workspace = membership.map(m => m.workspace);
+
+
     return  {
       ...user,
       sessionCount: user.session.length,
-      privilege: orderBy(unionBy(transformPrivileges,  item => `${item.group}-${item.name}`), ['group'], ['asc']),
-      roles: roles.map(role => role.roleId)
+      workspace,
     };
   }
 
