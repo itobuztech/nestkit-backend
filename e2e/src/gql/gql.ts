@@ -18,7 +18,7 @@ const documents = {
     "\n  mutation CreatePost($createPostInput: CreatePostInput!) {\n    createPost(createPostInput: $createPostInput) {\n      id\n    }\n  }\n": types.CreatePostDocument,
     "\n  mutation CreateRole($roleCreateInput: RoleCreateInput!) {\n    createRole(roleCreateInput: $roleCreateInput) {\n      id\n    }\n  }\n": types.CreateRoleDocument,
     "\n  mutation CreateWorkspace($createWorkspaceInput: CreateWorkspaceInput!) {\n  createWorkspace(createWorkspaceInput: $createWorkspaceInput) {\n    id\n  }\n}\n\n": types.CreateWorkspaceDocument,
-    "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n": types.CurrentUserDocument,
+    "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      profileImage\n      workspace {\n        id\n        name\n      }\n    }\n  }\n": types.CurrentUserDocument,
     "\n  mutation DeleteFolder($folderDeleteInput: DeleteFolderInput!) {\n    deleteFolder(folderDeleteInput: $folderDeleteInput)\n  }\n": types.DeleteFolderDocument,
     "\n  mutation DeleteFile($fileDeleteInput: FileDeleteInput) {\n  deleteFile(fileDeleteInput: $fileDeleteInput)\n}\n": types.DeleteFileDocument,
     "\n  mutation DeletePost($postDeleteInput: PostDeleteInput) {\n    deletePost(postDeleteInput: $postDeleteInput)\n  }\n": types.DeletePostDocument,
@@ -89,7 +89,7 @@ export function graphql(source: "\n  mutation CreateWorkspace($createWorkspaceIn
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"): (typeof documents)["\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      roles\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      profileImage\n      workspace {\n        id\n        name\n      }\n    }\n  }\n"): (typeof documents)["\n  query CurrentUser {\n    currentUser {\n      id\n      name\n      email\n      userType\n      sessionCount\n      profileImage\n      workspace {\n        id\n        name\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

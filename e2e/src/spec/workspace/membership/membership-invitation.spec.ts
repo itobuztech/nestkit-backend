@@ -59,7 +59,7 @@ describe('Membership invitation module', () => {
         },
       },
     });
-    console.log('SIGNUP::', signUpData);
+
     const data = signUpData.data?.signup;
     userId = data?.id;
     expect(data?.id).not.toBe(null);
@@ -89,7 +89,7 @@ describe('Membership invitation module', () => {
         } as VerifyEmailInput,
       },
     });
-    console.log('VERIFY EMAIL SIGNUP::', verifyEmailData);
+
     const data = verifyEmailData.data?.verifyEmail;
     expect(data?.refreshToken).not.toBe(null);
   }, 9000);
@@ -97,7 +97,7 @@ describe('Membership invitation module', () => {
   test('Login with the admin', async () => {
     user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
         isVerified: true,
       },
     });
@@ -107,7 +107,7 @@ describe('Membership invitation module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
-      console.log('LOGIN::', response);
+
       expect(response.data).toBeDefined();
     }
   });
@@ -124,7 +124,7 @@ describe('Membership invitation module', () => {
         },
       },
     });
-    console.log('CREATE WORKSPACE::', createWorkspace);
+
     workspaceID = createWorkspace.data?.createWorkspace.id;
     expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
   });
@@ -143,7 +143,7 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log('SEND INVITATION::', sendInvitation);
+
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
     await waitForTime(65000);
@@ -174,7 +174,7 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log('VERIFY INVITATION::', verifyInvitation);
+
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
     }
   });
@@ -199,7 +199,7 @@ describe('Membership invitation module', () => {
     const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
       (workspace) => workspace.id === workspaceID,
     );
-    console.log('LIST WORKSPACE::', listWorkspace);
+
     expect(addedWorkspace).toBe(undefined);
   });
 
@@ -209,7 +209,7 @@ describe('Membership invitation module', () => {
         email: adminEmail,
         password: appEnv.SEED_PASSWORD,
       });
-      console.log('LOGN::', response);
+
       expect(response.data).toBeDefined();
     }
   });
@@ -228,7 +228,7 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log('SEND INVITATION::', sendInvitation);
+
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
     await waitForTime(65000);
@@ -241,7 +241,7 @@ describe('Membership invitation module', () => {
       'http://localhost:3020/membership-verify?token&#x3D;',
       '',
     );
-    console.log(onboardingToken, invitationLink);
+
     expect(invitationLink).toContain('membership-verify');
   });
 
@@ -259,7 +259,7 @@ describe('Membership invitation module', () => {
           },
         },
       });
-      console.log('ACCEPT INVITE::', verifyInvitation);
+
       expect(verifyInvitation.data?.acceptInvitation).toBe(true);
       await waitForTime(5000);
     }
@@ -284,11 +284,6 @@ describe('Membership invitation module', () => {
         },
       });
 
-      console.log(
-        'MEMBERSHIP LIST::',
-        membershipList.data.listMemberships.memberships,
-        userId,
-      );
       let flag = false;
       membershipList.data.listMemberships.memberships.forEach((membership) => {
         expect(membership.workspaceId).toBe(workspaceID);
@@ -308,7 +303,6 @@ describe('Membership invitation module', () => {
     expect(response.data).toBeDefined();
   });
 
-  //This test has an issue - NST-77
   test(' View the List of Workspace and the user should be able to view the workspace', async () => {
     const listWorkspace = await api.graphql.query<
       ListWorkSpaceQuery,

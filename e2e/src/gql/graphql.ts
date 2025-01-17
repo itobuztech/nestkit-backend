@@ -35,6 +35,28 @@ export type AssignRoleResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type AssignRoleUserInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<Order>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  roleId: Scalars['String']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AssignRoleUserResponse = {
+  __typename?: 'AssignRoleUserResponse';
+  pagination: BaseListResponse;
+  users: Array<AssignedUser>;
+};
+
+export type AssignedUser = {
+  __typename?: 'AssignedUser';
+  email: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export type BaseListResponse = {
   __typename?: 'BaseListResponse';
   currentPage: Scalars['Float']['output'];
@@ -81,11 +103,16 @@ export type CurrentUserResponse = {
   email: Scalars['String']['output'];
   id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
-  privilege: Array<RolePrivilegeResponse>;
   profileImage?: Maybe<Scalars['String']['output']>;
-  roles: Array<Scalars['String']['output']>;
   sessionCount: Scalars['Float']['output'];
   userType?: Maybe<Scalars['String']['output']>;
+  workspace: Array<CurrentUserWorkspace>;
+};
+
+export type CurrentUserWorkspace = {
+  __typename?: 'CurrentUserWorkspace';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type DeleteFolderInput = {
@@ -200,6 +227,12 @@ export type GetPostResponse = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type GetUserPermissionResponse = {
+  __typename?: 'GetUserPermissionResponse';
+  privilege: Array<RolePrivilegeResponse>;
+  roles: Array<GetUserRole>;
+};
+
 export type GetUserResponse = {
   __typename?: 'GetUserResponse';
   email: Scalars['String']['output'];
@@ -207,14 +240,20 @@ export type GetUserResponse = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
+export type GetUserRole = {
+  __typename?: 'GetUserRole';
+  id: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
 export type GetUsersInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ImageResizeOptions = {
-  height: Scalars['Int']['input'];
-  left: Scalars['Int']['input'];
-  top: Scalars['Int']['input'];
+  height?: InputMaybe<Scalars['Int']['input']>;
+  left?: InputMaybe<Scalars['Int']['input']>;
+  top?: InputMaybe<Scalars['Int']['input']>;
   width: Scalars['Int']['input'];
 };
 
@@ -244,9 +283,11 @@ export type ListMediaResponse = {
 export type ListMembershipInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<MembershipListOrderByField>;
   page?: InputMaybe<Scalars['Int']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+  workspaceId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ListMembershipResponse = {
@@ -284,8 +325,18 @@ export type LoginResponse = {
   twoFA?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type MemberShipRestoreInput = {
+  id: Scalars['String']['input'];
+};
+
+export type MembershipDeleteInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
 export type MembershipResponse = {
   __typename?: 'MembershipResponse';
+  id: Scalars['String']['output'];
   isAccepted: Scalars['Boolean']['output'];
   isOwner: Scalars['Boolean']['output'];
   user: User;
@@ -302,9 +353,11 @@ export type Mutation = {
   createWorkspace: CreateWorkspaceResponse;
   deleteFile: Scalars['Boolean']['output'];
   deleteFolder: Scalars['Boolean']['output'];
+  deleteMembership: Scalars['Boolean']['output'];
   deletePost: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteWorkSpace: Scalars['Boolean']['output'];
+  getAssignUsers: AssignRoleUserResponse;
   rateLimitCustomize: Scalars['String']['output'];
   rateLimitSkip: Scalars['String']['output'];
   refreshAccessToken: VerifyEmailResponse;
@@ -312,6 +365,7 @@ export type Mutation = {
   resetPassword: PassWordResetResponse;
   resizeFile: Scalars['JSON']['output'];
   restore: Scalars['Boolean']['output'];
+  restoreMembership: Scalars['Boolean']['output'];
   restoreWorkSpace: Scalars['Boolean']['output'];
   sendInvitation: SendInvitationResponse;
   signup: SignupResponse;
@@ -366,6 +420,11 @@ export type MutationDeleteFolderArgs = {
 };
 
 
+export type MutationDeleteMembershipArgs = {
+  membershipDeleteInput?: InputMaybe<MembershipDeleteInput>;
+};
+
+
 export type MutationDeletePostArgs = {
   postDeleteInput?: InputMaybe<PostDeleteInput>;
 };
@@ -378,6 +437,11 @@ export type MutationDeleteRoleArgs = {
 
 export type MutationDeleteWorkSpaceArgs = {
   deleteWorkspaceInput?: InputMaybe<WorkspaceDeleteInput>;
+};
+
+
+export type MutationGetAssignUsersArgs = {
+  assignRoleUserInput: AssignRoleUserInput;
 };
 
 
@@ -403,6 +467,11 @@ export type MutationResizeFileArgs = {
 
 export type MutationRestoreArgs = {
   postRestoreInput?: InputMaybe<PostRestoreInput>;
+};
+
+
+export type MutationRestoreMembershipArgs = {
+  membershipDeleteInput?: InputMaybe<MemberShipRestoreInput>;
 };
 
 
@@ -546,6 +615,7 @@ export type Query = {
   getPost?: Maybe<GetPostResponse>;
   getPostList: PostListResponse;
   getRole: RoleGetResponse;
+  getUserPermission: GetUserPermissionResponse;
   getUsers: Array<GetUserResponse>;
   listBasePrivilege: PrivilegeListResponse;
   listFolder: FolderListResponse;
@@ -686,6 +756,7 @@ export type RoleResponse = {
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
+  editable: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
@@ -778,7 +849,7 @@ export type User = {
   __typename?: 'User';
   email: Scalars['String']['output'];
   id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type VerifyEmailInput = {
@@ -813,6 +884,12 @@ export enum MediaOrderByField {
   CreatedAt = 'createdAt',
   Size = 'size',
   UpdatedAt = 'updatedAt'
+}
+
+export enum MembershipListOrderByField {
+  CreatedAt = 'createdAt',
+  IsAccepted = 'isAccepted',
+  IsOwner = 'isOwner'
 }
 
 export enum OrderByField {
@@ -874,7 +951,7 @@ export type CreateWorkspaceMutation = { __typename?: 'Mutation', createWorkspace
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { __typename?: 'Query', currentUser: { __typename?: 'CurrentUserResponse', id: string, name?: string | null, email: string, userType?: string | null, sessionCount: number, roles: Array<string>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: string, name: string, id: string, type: string }> } };
+export type CurrentUserQuery = { __typename?: 'Query', currentUser: { __typename?: 'CurrentUserResponse', id: string, name?: string | null, email: string, userType?: string | null, sessionCount: number, profileImage?: string | null, workspace: Array<{ __typename?: 'CurrentUserWorkspace', id: string, name: string }> } };
 
 export type DeleteFolderMutationVariables = Exact<{
   folderDeleteInput: DeleteFolderInput;
@@ -993,7 +1070,7 @@ export type ListMembershipsQueryVariables = Exact<{
 }>;
 
 
-export type ListMembershipsQuery = { __typename?: 'Query', listMemberships: { __typename?: 'ListMembershipResponse', memberships: Array<{ __typename?: 'MembershipResponse', workspaceId: string, isOwner: boolean, isAccepted: boolean, user: { __typename?: 'User', id: string, name: string, email: string } }>, pagination: { __typename?: 'BaseListResponse', totalPage: number, currentPage: number, perPage: number } } };
+export type ListMembershipsQuery = { __typename?: 'Query', listMemberships: { __typename?: 'ListMembershipResponse', memberships: Array<{ __typename?: 'MembershipResponse', workspaceId: string, isOwner: boolean, isAccepted: boolean, user: { __typename?: 'User', id: string, name?: string | null, email: string } }>, pagination: { __typename?: 'BaseListResponse', totalPage: number, currentPage: number, perPage: number } } };
 
 export type ResetPasswordMutationVariables = Exact<{
   resetPassword: PasswordResetInput;
@@ -1098,7 +1175,7 @@ export const CreateFolderDocument = {"kind":"Document","definitions":[{"kind":"O
 export const CreatePostDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePost"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createPostInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePostInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPost"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createPostInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createPostInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreatePostMutation, CreatePostMutationVariables>;
 export const CreateRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleCreateInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleCreateInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleCreateInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreateRoleMutation, CreateRoleMutationVariables>;
 export const CreateWorkspaceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateWorkspace"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createWorkspaceInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateWorkspaceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createWorkspace"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createWorkspaceInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createWorkspaceInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreateWorkspaceMutation, CreateWorkspaceMutationVariables>;
-export const CurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"userType"}},{"kind":"Field","name":{"kind":"Name","value":"sessionCount"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}},{"kind":"Field","name":{"kind":"Name","value":"privilege"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"group"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}}]} as unknown as DocumentNode<CurrentUserQuery, CurrentUserQueryVariables>;
+export const CurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"userType"}},{"kind":"Field","name":{"kind":"Name","value":"sessionCount"}},{"kind":"Field","name":{"kind":"Name","value":"profileImage"}},{"kind":"Field","name":{"kind":"Name","value":"workspace"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<CurrentUserQuery, CurrentUserQueryVariables>;
 export const DeleteFolderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFolder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"folderDeleteInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteFolderInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFolder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"folderDeleteInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"folderDeleteInput"}}}]}]}}]} as unknown as DocumentNode<DeleteFolderMutation, DeleteFolderMutationVariables>;
 export const DeleteFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fileDeleteInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"FileDeleteInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fileDeleteInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fileDeleteInput"}}}]}]}}]} as unknown as DocumentNode<DeleteFileMutation, DeleteFileMutationVariables>;
 export const DeletePostDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePost"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"postDeleteInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PostDeleteInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePost"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"postDeleteInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"postDeleteInput"}}}]}]}}]} as unknown as DocumentNode<DeletePostMutation, DeletePostMutationVariables>;
