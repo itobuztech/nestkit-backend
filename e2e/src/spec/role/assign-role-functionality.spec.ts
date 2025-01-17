@@ -30,7 +30,7 @@ import { CREATE_ROLE_MUTATION } from '../../graphql/create-role-mutation.gql';
 import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
 import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-[UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
   describe(`Assign Role functionalities for user : ${type}`, () => {
     let dbUser: User | null;
     let user: User | null;
