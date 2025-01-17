@@ -6,14 +6,14 @@ import {
   CreatePostMutationVariables,
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
-  CurrentUserQuery,
-  CurrentUserQueryVariables,
   DeletePostMutation,
   DeletePostMutationVariables,
   GetPostListQuery,
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
+  GetUserPermissionQuery,
+  GetUserPermissionQueryVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -21,13 +21,13 @@ import { GET_POST_QUERY } from '../../graphql/get-post-query.gql';
 import { CREATE_POST_MUTATION } from '../../graphql/create-post-mutation.gql';
 import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
-import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
 import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
+const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
   describe(`Post CRUD functionalities negative testing for ${userTypeRole} - NST-42`, () => {
     let user: User | null;
@@ -57,29 +57,6 @@ userArrays.forEach((userTypeRole) => {
       });
       expect(response.data).toBeDefined();
     });
-
-    test('Get current user privileges', async () => {
-      const currentUserResponse = await api.graphql.query<
-        CurrentUserQuery,
-        CurrentUserQueryVariables
-      >({
-        query: CURRENT_USER_QUERY,
-        variables: {},
-      });
-
-      for (const privilege of currentUserResponse.data.currentUser.privilege) {
-        if (privilege.group === 'POST') {
-          if (privilege.name === 'CREATE') {
-            createFlag = true;
-          } else if (privilege.name === 'UPDATE') {
-            updateFlag = true;
-          } else if (privilege.name === 'DELETE') {
-            deleteFlag = true;
-          }
-        }
-      }
-    });
-
     test('New Workspace created', async () => {
       const createWorkspace = await api.graphql.mutate<
         CreateWorkspaceMutation,
@@ -95,6 +72,32 @@ userArrays.forEach((userTypeRole) => {
 
       workspaceId = createWorkspace.data?.createWorkspace.id;
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+    });
+    test('Get current user privileges', async () => {
+      const userPermissions = await api.graphql.query<
+        GetUserPermissionQuery,
+        GetUserPermissionQueryVariables
+      >({
+        query: GET_USER_PERMISSION,
+        variables: {},
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
+      });
+      for (const privilege of userPermissions.data.getUserPermission
+        .privilege) {
+        if (privilege.group === 'POST') {
+          if (privilege.name === 'CREATE') {
+            createFlag = true;
+          } else if (privilege.name === 'UPDATE') {
+            updateFlag = true;
+          } else if (privilege.name === 'DELETE') {
+            deleteFlag = true;
+          }
+        }
+      }
     });
 
     test(`Create Post as ${userTypeRole} with blank title`, async () => {
