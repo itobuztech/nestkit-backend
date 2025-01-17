@@ -47,43 +47,6 @@ export async function userSeed() {
     });
   }
 
-  // Create Admin users
-  for (const i of _.range(0, 2)) {
-    const email = `${appEnv.SEED_EMAIL.split('@')[0]}+admin-${i}@${appEnv.SEED_EMAIL.split('@')[1]}`;
-    await prismaClient.user.create({
-      data: {
-        name: faker.person.fullName(),
-        email,
-        password: hashedPassword,
-        userType: UserType.ADMIN,
-        isVerified: true,
-      },
-    });
-  }
-  
-
-
-  // get admin roles
-  const adminRole = await prismaClient.role.findFirst({
-    where: { type: RoleType.ADMIN },
-  });
-
-  // Get Admin User
-  const adminUsers = await prismaClient.user.findMany({
-    where: { userType: UserType.ADMIN },
-  });
-
-  // Attach Role 
-  if (adminUsers && adminRole) {
-    adminUsers.forEach(async (user) => {
-      await prismaClient.userRole.create({
-        data: {
-          userId: user?.id,
-          roleId: adminRole?.id,
-        },
-      });
-    });
-  }
 
 
   // Create  users

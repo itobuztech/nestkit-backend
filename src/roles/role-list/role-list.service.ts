@@ -36,9 +36,6 @@ export class RoleListService {
       roleTypeQuery = [RoleType.SUPER_ADMIN, RoleType.ADMIN, RoleType.USER, RoleType.CUSTOM];
     }
 
-    if (req?.user?.userType === UserType.ADMIN) {
-      roleTypeQuery = [RoleType.ADMIN, RoleType.USER, RoleType.CUSTOM];
-    }
 
     if (req?.user?.userType === UserType.USER) {
       roleTypeQuery = [RoleType.USER, RoleType.CUSTOM];

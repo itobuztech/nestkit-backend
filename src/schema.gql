@@ -12,6 +12,7 @@ type BaseListResponse {
 type RoleResponse {
   title: String!
   type: String!
+  editable: Boolean!
   id: String!
   description: String
   createdAt: DateTime!
@@ -81,6 +82,17 @@ type UnAssignRoleResponse {
   success: Boolean!
 }
 
+type AssignedUser {
+  id: String!
+  name: String
+  email: String!
+}
+
+type AssignRoleUserResponse {
+  users: [AssignedUser!]!
+  pagination: BaseListResponse!
+}
+
 type PostAuthor {
   id: String!
   name: String!
@@ -121,6 +133,11 @@ type GetPostResponse {
   deletedAt: DateTime
 }
 
+type CurrentUserWorkspace {
+  id: String!
+  name: String!
+}
+
 type CurrentUserResponse {
   email: String!
   name: String
@@ -128,8 +145,7 @@ type CurrentUserResponse {
   profileImage: String
   userType: String
   sessionCount: Float!
-  roles: [String!]!
-  privilege: [RolePrivilegeResponse!]!
+  workspace: [CurrentUserWorkspace!]!
 }
 
 type GetUserResponse {
@@ -140,6 +156,16 @@ type GetUserResponse {
 
 type UpdateProfileResponse {
   success: Boolean!
+}
+
+type GetUserRole {
+  id: String!
+  title: String!
+}
+
+type GetUserPermissionResponse {
+  roles: [GetUserRole!]!
+  privilege: [RolePrivilegeResponse!]!
 }
 
 type PassWordResetRequestResponse {
@@ -193,11 +219,12 @@ type SendInvitationResponse {
 
 type User {
   id: String!
-  name: String!
+  name: String
   email: String!
 }
 
 type MembershipResponse {
+  id: String!
   workspaceId: String!
   isOwner: Boolean!
   isAccepted: Boolean!
@@ -287,6 +314,7 @@ type Query {
   getPost(getPostInput: GetPostInput!): GetPostResponse
   getUsers(getUsersInput: GetUsersInput): [GetUserResponse!]!
   currentUser: CurrentUserResponse!
+  getUserPermission: GetUserPermissionResponse!
   listMedia(listMediaInput: ListMediaInput): ListMediaResponse!
   getFile(getFileInput: GetFileInput): GetFileResponse
   getFolder(getFolderInput: GetFolderInput!): GetFolderResponse!
@@ -324,6 +352,14 @@ input ListMembershipInput {
   orderBy: Order = DESC
   fromStash: Boolean = false
   search: String
+  orderByField: membershipListOrderByField = createdAt
+  workspaceId: String
+}
+
+enum membershipListOrderByField {
+  createdAt
+  isOwner
+  isAccepted
 }
 
 input RoleListInput {
@@ -423,11 +459,14 @@ type Mutation {
   restoreWorkSpace(restoreWorkspaceInput: WorkspaceRestoreInput): Boolean!
   sendInvitation(sendInvitationInput: SendInvitationInput!): SendInvitationResponse!
   acceptInvitation(acceptInvitationInput: AcceptInvitationInput!): Boolean!
+  deleteMembership(membershipDeleteInput: MembershipDeleteInput): Boolean!
+  restoreMembership(membershipDeleteInput: MemberShipRestoreInput): Boolean!
   createRole(roleCreateInput: RoleCreateInput!): RoleCreateResponse!
   updateRole(roleUpdateInput: RoleUpdateInput!): RoleUpdateResponse!
   deleteRole(roleDeleteInput: RoleDeleteInput): Boolean!
   assignRole(assignRoleInput: AssignRoleInput!): AssignRoleResponse!
   unAssignRole(unAssignRoleInput: UnAssignRoleInput!): UnAssignRoleResponse!
+  getAssignUsers(assignRoleUserInput: AssignRoleUserInput!): AssignRoleUserResponse!
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
@@ -495,6 +534,15 @@ input AcceptInvitationInput {
   accept: Boolean!
 }
 
+input MembershipDeleteInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input MemberShipRestoreInput {
+  id: String!
+}
+
 input RoleCreateInput {
   title: String!
   description: String
@@ -522,6 +570,15 @@ input AssignRoleInput {
 input UnAssignRoleInput {
   roleId: String!
   userId: String!
+}
+
+input AssignRoleUserInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  roleId: String!
+  search: String
 }
 
 input CreatePostInput {
@@ -569,9 +626,9 @@ input ResizeFileInput {
 
 input ImageResizeOptions {
   width: Int!
-  height: Int!
-  left: Int!
-  top: Int!
+  height: Int
+  left: Int
+  top: Int
 }
 
 input CreateFolderInput {

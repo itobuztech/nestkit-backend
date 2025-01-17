@@ -1,8 +1,8 @@
-import { Args, Context, Query, Resolver } from '@nestjs/graphql';
-import { Request } from 'express';
+import { Args, Query, Resolver, Context } from '@nestjs/graphql';
 import { SetMetadata } from '@nestjs/common';
 import { Prisma, PrivilegeGroup, PrivilegeName } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ListMembershipResponse } from './list-membership-response.dto';
@@ -34,13 +34,25 @@ export class ListMembershipService {
   ): Promise<ListMembershipResponse> {
 
     const queryObject: Prisma.WorkspaceMembershipWhereInput = {
-      workspaceId: req.currentWorkspaceId,
+      workspaceId: listMembershipsInput.workspaceId || req.currentWorkspaceId,
       user: {
-        name: {
-          contains: listMembershipsInput.search,
-          mode: 'insensitive', 
-        },
+        OR: [
+          {
+            name: {
+              contains: listMembershipsInput.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name: null,
+          },
+        ],
       },
+      deletedAt: listMembershipsInput?.fromStash ? {
+        not: {
+          not: null,
+        }
+      } : null,
     };
     
 
@@ -74,8 +86,6 @@ export class ListMembershipService {
         user: true,
       }
     });
-
-
     return {
       memberships: memberships,
       pagination: {

@@ -1,11 +1,11 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 import { HttpStatus, SetMetadata, UseGuards } from '@nestjs/common';
-import { PrivilegeGroup, PrivilegeName, RoleType, UserType } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppError } from 'src/shared/create-error/create-error';
-import { RoleDeleteInput } from './role-delete-input.dto';
+import { MembershipDeleteInput } from './membership-delete-input.dto';
+import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
 import { RoleGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
@@ -13,45 +13,42 @@ import { MemberShipValidationType } from 'src/auth/membership-validation-type.en
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
-export class RoleDeleteService {
-  constructor(private prismaService: PrismaService) {}
+export class MembershipDeleteService {
+  constructor(
+    private prismaService: PrismaService,
+  ) {}
 
   @Mutation(() => Boolean)
   @UseGuards(RoleGuard)
-  @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
+  @SetMetadata('privilegeGroup', PrivilegeGroup.MEMBERSHIP)
   @SetMetadata('privilegeName', PrivilegeName.DELETE)
 
   @UseGuards(WorkspaceMemberShipGuard)
   @SetMetadata('memberShipValidationType', MemberShipValidationType.MEMBERSHIP_VALIDITY)
-  
-  async deleteRole(
-    @Args('roleDeleteInput', { nullable: true }) roleDeleteInput: RoleDeleteInput,
+
+  async deleteMembership(
     @Context('req') req: Request,
+    @Args('membershipDeleteInput', { nullable: true }) membershipDeleteInput: MembershipDeleteInput,
   ): Promise<boolean> {
 
-    const role = await this.prismaService.role.findUnique({
-      where: { id: roleDeleteInput.id, deletedAt: roleDeleteInput.fromStash ? { not: null } : null },
+    const membership = await this.prismaService.workspaceMembership.findUnique({
+      where: { id: membershipDeleteInput.id, deletedAt: membershipDeleteInput.fromStash ? { not: null } : null },
     });
 
-   
 
-    if (!role) {
+    if (!membership) {
       throw new CreateAppError({
-        message: 'Role not found',
+        message: 'Membership not found',
         httpStatus: HttpStatus.NOT_FOUND,
       });
     }
 
-    if (req.user?.userType !== UserType.SUPER_ADMIN && role?.type !== RoleType.CUSTOM) {
-      throw new CreateAppError({ message: 'You are not allowed to delete this role. Only Custom role can be deleted.'});
-    }
-
     try {
-      if (roleDeleteInput.fromStash) {
-        await this.prismaService.role.delete({ where: { id: roleDeleteInput.id } });
+      if (membershipDeleteInput.fromStash) {
+        await this.prismaService.workspaceMembership.delete({ where: { id: membershipDeleteInput.id } });
       } else {
-        await this.prismaService.role.update({
-          where: { id: roleDeleteInput.id, deletedAt: null },
+        await this.prismaService.workspaceMembership.update({
+          where: { id: membershipDeleteInput.id, deletedAt: null },
           data: { deletedAt: new Date() },
         });
       }
@@ -59,7 +56,7 @@ export class RoleDeleteService {
       return true;
     } catch (error) {
       throw new CreateAppError({
-        message: 'Unable to Delete Role',
+        message: 'Unable to Delete Post',
         httpStatus: HttpStatus.NOT_FOUND,
         error,
       });
