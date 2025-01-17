@@ -4,6 +4,7 @@ import { Field, ObjectType } from "@nestjs/graphql";
 export class RoleResponse {
   @Field() title: string;
   @Field() type: string;
+  @Field() editable: boolean;
   @Field() id: string;
   @Field({ nullable: true }) description: string;
   @Field() createdAt: Date;

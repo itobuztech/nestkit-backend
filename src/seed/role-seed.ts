@@ -34,11 +34,18 @@ export async function roleSeed() {
 
   // Create roles
   const rolesData: Prisma.RoleCreateManyInput | Prisma.RoleCreateManyInput[] = [];
-  [RoleType.SUPER_ADMIN, RoleType.ADMIN, RoleType.USER].forEach((type) => {
-    rolesData.push({
-      type,
-      title: type.toLowerCase().replace('_', ' '),
-    });
+ 
+  rolesData.push({
+    type: RoleType.SUPER_ADMIN,
+    title: "Super Admin Role",
+  });
+  rolesData.push({
+    type: RoleType.ADMIN,
+    title: "Workspace Admin Role",
+  });
+  rolesData.push({
+    type: RoleType.USER,
+    title: "User Role",
   });
   
   await prismaClient.role.createMany({
