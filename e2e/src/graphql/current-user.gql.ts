@@ -8,12 +8,10 @@ export const CURRENT_USER_QUERY = graphql(`
       email
       userType
       sessionCount
-      roles
-      privilege {
-        group
-        name
+      profileImage
+      workspace {
         id
-        type
+        name
       }
     }
   }
