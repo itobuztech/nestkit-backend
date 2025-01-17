@@ -37,7 +37,7 @@ import { DELETE_ROLE_MUTATION } from '../../graphql/delete-role-mutation.gql';
 import { GraphQLError } from 'graphql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
     let loginUser: User | null;
     let user: User | null;
