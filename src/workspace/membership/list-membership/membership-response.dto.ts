@@ -4,7 +4,7 @@ import { Field, ObjectType } from "@nestjs/graphql";
 @ObjectType()
 class User {
   @Field() id: string;
-  @Field() name: string;
+  @Field({ nullable: true }) name: string;
   @Field() email: string;
 }
 

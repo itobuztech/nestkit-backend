@@ -219,7 +219,7 @@ type SendInvitationResponse {
 
 type User {
   id: String!
-  name: String!
+  name: String
   email: String!
 }
 
