@@ -6,7 +6,7 @@ export enum AssignRoleUserOrder {
 }
 
 registerEnumType(AssignRoleUserOrder, {
-  name: 'Order',
+  name: 'AssignedUserOrder',
 });
 
 @InputType()

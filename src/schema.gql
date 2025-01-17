@@ -573,12 +573,16 @@ input UnAssignRoleInput {
 }
 
 input AssignRoleUserInput {
-  page: Int
-  pageSize: Int
-  orderBy: Order = DESC
-  fromStash: Boolean = false
   roleId: String!
   search: String
+  page: Int
+  pageSize: Int
+  orderBy: AssignedUserOrder = DESC
+}
+
+enum AssignedUserOrder {
+  ASC
+  DESC
 }
 
 input CreatePostInput {

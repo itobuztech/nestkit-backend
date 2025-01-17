@@ -83,6 +83,7 @@ export class CurrentUserService {
         isAccepted: true,
         deletedAt: null,
       },
+      distinct: ['workspaceId'],
       include: {
         workspace: true
       }
