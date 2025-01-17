@@ -41,7 +41,9 @@ export class GetFileService {
         httpStatus: HttpStatus.NOT_FOUND,
       });
     }
+
     if (file.s3Key) {
+      // checking if url is expired
       if (
         file.accessLevel === AccessLevel.RESTRICTED &&
         (await this.isUrlExpired(file))
@@ -63,19 +65,14 @@ export class GetFileService {
         });
 
         if (file.accessLevel === AccessLevel.RESTRICTED) {
-          await this.prismaService.s3AccessSession.upsert({
+          await this.prismaService.s3AccessSession.update({
             where: {
               fileId_signedUrl: {
                 fileId: file.id,
                 signedUrl: fileUrl,
               },
             },
-            update: {
-              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-            },
-            create: {
-              signedUrl: fileUrl,
-              fileId: file.id,
+            data: {
               expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
             },
           });

@@ -25,11 +25,12 @@ export class FileService {
     workspaceId: string;
     accessLevel?: AccessLevel;
   }): Promise<File> {
-    //store file in s3 ad get its address
+    //store file in s3 and get its address
     let fileS3Key: string | null = null;
+    const fileName = this.uploadPath(file.originalname);
     fileS3Key = await this.awsService.uploadFile(
       {
-        name: file.originalname,
+        name: fileName,
         mimetype: file.mimetype,
         fileBuffer: file.buffer,
       },
@@ -37,6 +38,7 @@ export class FileService {
       accessLevel,
     );
 
+    // Get file url
     const fileUrl = await this.awsService.getfileUrl(fileS3Key!, accessLevel!);
 
     // Save file information to the database
@@ -52,6 +54,7 @@ export class FileService {
       },
     });
 
+    // store signed url in database
     if (media.accessLevel === AccessLevel.RESTRICTED) {
       await this.prisma.s3AccessSession.create({
         data: {
@@ -114,12 +117,7 @@ export class FileService {
   }
 
   async cropImage(file: File, cropInput: sharp.Region, fileBuffer: Buffer) {
-    const fileUrl = this.uploadPath(join('uploads', file.name));
-    const originalFilePath = join(process.cwd(), 'public', fileUrl);
-
-    const extension = path.extname(originalFilePath);
-    const basePath = originalFilePath.replace(extension, '');
-
+    // creating file name/path
     let filePath = '';
 
     if (cropInput.left) {
@@ -140,9 +138,10 @@ export class FileService {
       filePath += 'h-' + cropInput.height;
     }
 
-    const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
-
+    // Fetching old file metadata
     const metadata = await sharp(fileBuffer).metadata();
+
+    // creating new file with cropped image
     if (metadata.width && metadata.height) {
       cropInput.width = metadata.width;
       cropInput.height = metadata.height;
@@ -152,12 +151,17 @@ export class FileService {
 
     const croppedBuffer = await sharp(fileBuffer).extract(cropInput).toBuffer();
 
+    // Storing the new file
     if (appEnv.isS3Enabled) {
-      const path = newFilePath.replace(join(process.cwd(), 'public'), '');
-      const fileName = path.split('/');
+      const fileName = this.uploadPath(file.name);
+      const extension = path.extname(fileName);
+
+      const baseName = fileName.replace(extension, '');
+      const newFileName = `${baseName}${filePath ? '-' + filePath : ''}${extension}`;
+
       return await this.awsService.uploadFile(
         {
-          name: fileName[1],
+          name: newFileName,
           mimetype: file.mimeType,
           fileBuffer: croppedBuffer,
         },
@@ -165,18 +169,21 @@ export class FileService {
         file.accessLevel!,
       );
     } else {
+      const fileUrl = this.uploadPath(join('uploads', file.name));
+      const originalFilePath = join(process.cwd(), 'public', fileUrl);
+
+      const extension = path.extname(originalFilePath);
+      const basePath = originalFilePath.replace(extension, '');
+
+      const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
+
       await fs.writeFile(newFilePath, croppedBuffer);
       return newFilePath.replace(join(process.cwd(), 'public'), '');
     }
   }
 
   async resizeImage(file: File, resizeInput: sharp.Region, fileBuffer: Buffer) {
-    const fileUrl = this.uploadPath(join('uploads', file.name));
-    const originalFilePath = join(process.cwd(), 'public', fileUrl);
-
-    const extension = path.extname(originalFilePath);
-    const basePath = originalFilePath.replace(extension, '');
-
+    // creating file name/path
     let filePath = '';
     if (resizeInput.width) {
       filePath += 'w-' + resizeInput.width;
@@ -184,9 +191,11 @@ export class FileService {
     if (resizeInput.height) {
       filePath += 'h-' + resizeInput.height;
     }
-    const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
 
+    // Fetching old file metadata
     const metadata = await sharp(fileBuffer).metadata();
+
+    // creating new file with cropped image
     if (metadata.width && metadata.height) {
       const aspectRatio = metadata.width / metadata.height;
 
@@ -203,12 +212,17 @@ export class FileService {
       .resize(resizeInput)
       .toBuffer();
 
+    // Storing the new file
     if (appEnv.isS3Enabled) {
-      const path = newFilePath.replace(join(process.cwd(), 'public'), '');
-      const fileName = path.split('/');
+      const fileName = this.uploadPath(file.name);
+      const extension = path.extname(fileName);
+
+      const baseName = fileName.replace(extension, '');
+      const newFileName = `${baseName}${filePath ? '-' + filePath : ''}${extension}`;
+
       return await this.awsService.uploadFile(
         {
-          name: fileName[1],
+          name: newFileName,
           mimetype: file.mimeType,
           fileBuffer: resizedBuffer,
         },
@@ -216,6 +230,14 @@ export class FileService {
         file.accessLevel!,
       );
     } else {
+      const fileUrl = this.uploadPath(join('uploads', file.name));
+      const originalFilePath = join(process.cwd(), 'public', fileUrl);
+
+      const extension = path.extname(originalFilePath);
+      const basePath = originalFilePath.replace(extension, '');
+
+      const newFilePath = `${basePath}${filePath ? '-' + filePath : ''}${extension}`;
+
       await fs.writeFile(newFilePath, resizedBuffer);
       return newFilePath.replace(join(process.cwd(), 'public'), '');
     }

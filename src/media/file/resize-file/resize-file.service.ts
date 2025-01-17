@@ -54,8 +54,10 @@ export class ResizeFileService {
 
     let filePath = '';
 
+    // Fetching old file
     const oldFileBuffer = await this.getOldFile(file);
 
+    // resizing image
     if (
       resizeFileInput.resizeOptions.left &&
       resizeFileInput.resizeOptions.top
@@ -98,6 +100,7 @@ export class ResizeFileService {
       },
     });
 
+    // store signed url
     if (media.accessLevel === AccessLevel.RESTRICTED) {
       await this.prismaService.s3AccessSession.create({
         data: {

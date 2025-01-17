@@ -31,8 +31,7 @@ export class AwsService {
     accessLevel?: AccessLevel,
   ) {
     // creating key for storing file in aws
-    const fileName = file.name.replace(/[^\w.](?=.*\.)/g, '_');
-    const key = `${workspaceId}/${Date.now().toString()}-${fileName.trim()}`;
+    const key = `${workspaceId}/${file.name}`;
 
     // creating object to sed to s3 bucket
     const command = new PutObjectCommand({
