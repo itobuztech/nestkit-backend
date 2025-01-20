@@ -36,10 +36,17 @@ export class ListMembershipService {
     const queryObject: Prisma.WorkspaceMembershipWhereInput = {
       workspaceId: listMembershipsInput.workspaceId || req.currentWorkspaceId,
       user: {
-        name: {
-          contains: listMembershipsInput.search,
-          mode: 'insensitive', 
-        },
+        OR: [
+          {
+            name: {
+              contains: listMembershipsInput.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name: null,
+          },
+        ],
       },
       deletedAt: listMembershipsInput?.fromStash ? {
         not: {
@@ -79,8 +86,6 @@ export class ListMembershipService {
         user: true,
       }
     });
-
-
     return {
       memberships: memberships,
       pagination: {
