@@ -84,18 +84,21 @@ export class CurrentUserService {
         deletedAt: null,
       },
       distinct: ['workspaceId'],
-      include: {
-        workspace: true
-      }
     });
 
-    const workspace = membership.map(m => m.workspace);
-
+    const workspaceList = await this.prisma.workspace.findMany({
+      where: {
+        id: {
+          in: membership.map(m => m.workspaceId)
+        },
+        deletedAt: null,
+      }
+    });
 
     return  {
       ...user,
       sessionCount: user.session.length,
-      workspace,
+      workspace: workspaceList,
     };
   }
 
