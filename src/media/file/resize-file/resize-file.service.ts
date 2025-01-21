@@ -90,7 +90,7 @@ export class ResizeFileService {
 
     const media = await this.prismaService.file.create({
       data: {
-        resizeImageId: file.id,
+        resizeImageId: file.resizeImageId ?  file.resizeImageId : file.id,
         name: file.name,
         mimeType: file.mimeType,
         size: file.size,

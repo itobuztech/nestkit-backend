@@ -7,6 +7,8 @@ import { RoleDeleteService } from './role-delete/role-delete.service';
 import { RoleGetService } from './get-role/role-get.service';
 import { AssignRoleService } from './assign-role/assign-role.service';
 import { UnAssignRoleService } from './unassign-role/unassign-role.service';
+import { AssignRoleUserService } from './assign-role-users/assign-role-user.service';
+import { GetUserForAssignService } from './get-available-user-for-assign/get-available-user-for-assign.service';
 
 @Module({
   providers: [
@@ -17,7 +19,9 @@ import { UnAssignRoleService } from './unassign-role/unassign-role.service';
     RoleDeleteService,
     RoleGetService,
     AssignRoleService,
-    UnAssignRoleService
+    UnAssignRoleService,
+    AssignRoleUserService,
+    GetUserForAssignService,
   ],
 })
 export class RoleModule {}

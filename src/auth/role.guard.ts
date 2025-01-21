@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { RoleType } from '@prisma/client';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -38,10 +39,33 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
+    const ownerMembership = await this.prisma.workspaceMembership.findFirst({
+      where: {
+        isAccepted: true,
+        isOwner: true,
+        userId: user.id,
+        deletedAt: null,
+        workspaceId: request.currentWorkspaceId
+      },
+    });
+
+    let adminRoleId = null;
+
+    if (ownerMembership) {
+      const adminRole = await this.prisma.role.findFirst({
+        where: {
+          type: RoleType.ADMIN,
+        }
+      });
+
+      adminRoleId = adminRole?.id;
+    }
+
+
     // console.log('user', user);
 
     // Retrieve roles data from database
-    const rolesData = await this.prisma.userRole.findMany({
+    const roles = await this.prisma.userRole.findMany({
       where: {
         userId: user.id
       }
@@ -51,7 +75,7 @@ export class RoleGuard implements CanActivate {
     const privileges = await this.prisma.rolePrivilege.findMany({
       where: {
         roleId: {
-          in: rolesData?.map(role => role.roleId)
+          in: adminRoleId ? roles.map(role => role.roleId).concat(adminRoleId) : roles.map(role => role.roleId)
         },
       },
       include: {
