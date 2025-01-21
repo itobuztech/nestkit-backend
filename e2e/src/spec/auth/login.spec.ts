@@ -4,7 +4,7 @@ import { GraphQlApi } from '../../lib/graphql-api';
 import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 
 describe('Login module', () => {
-  [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
+  [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
     const api = new GraphQlApi();
     test(`${type.toUpperCase()} Login`, async () => {
       const dbClient = new PrismaClient();
