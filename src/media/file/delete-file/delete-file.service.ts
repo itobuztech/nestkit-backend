@@ -47,7 +47,7 @@ export class DeleteFileService {
           },
         });
 
-        Promise.all(
+        await Promise.all(
           resizedFiles.map(async (file) => {
             this.removeFileFromStorage({
               fileId: file.id,

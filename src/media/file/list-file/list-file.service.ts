@@ -77,6 +77,7 @@ export class ListMediaService {
     const updatedFiles = await Promise.all(
       files.map(async (file) => {
         if (
+          file.s3Key &&
           file.accessLevel === AccessLevel.RESTRICTED &&
           (await this.getFileService.isUrlExpired(file))
         ) {
