@@ -49,8 +49,8 @@ export class GetFileService {
         (await this.isUrlExpired(file))
       ) {
         const fileUrl = await this.awsService.getfileUrl(
-          file.s3Key!,
-          file.accessLevel!,
+          file.s3Key,
+          file.accessLevel,
         );
 
         await this.prismaService.file.update({
@@ -64,19 +64,23 @@ export class GetFileService {
           },
         });
 
-        if (file.accessLevel === AccessLevel.RESTRICTED) {
-          await this.prismaService.s3AccessSession.update({
-            where: {
-              fileId_signedUrl: {
-                fileId: file.id,
-                signedUrl: fileUrl,
-              },
+        await this.prismaService.s3AccessSession.upsert({
+          where: {
+            fileId_signedUrl: {
+              fileId: file.id,
+              signedUrl: fileUrl,
             },
-            data: {
-              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-            },
-          });
-        }
+          },
+          update: {
+            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          },
+          create: {
+            signedUrl: fileUrl,
+            fileId: file.id,
+            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          },
+        });
+
         file.url = fileUrl;
       }
     }

@@ -90,7 +90,7 @@ export class ResizeFileService {
 
     const media = await this.prismaService.file.create({
       data: {
-        resizeImageId: file.resizeImageId ?  file.resizeImageId : file.id,
+        resizeImageId: file.resizeImageId ? file.resizeImageId : file.id,
         name: file.name,
         mimeType: file.mimeType,
         size: file.size,
@@ -101,7 +101,7 @@ export class ResizeFileService {
     });
 
     // store signed url
-    if (media.accessLevel === AccessLevel.RESTRICTED) {
+    if (media.s3Key && media.accessLevel === AccessLevel.RESTRICTED) {
       await this.prismaService.s3AccessSession.create({
         data: {
           signedUrl: fileUrl,
