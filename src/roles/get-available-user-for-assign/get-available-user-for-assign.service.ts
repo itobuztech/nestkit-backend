@@ -1,9 +1,6 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { SetMetadata, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
 
-import { AssignRoleUserResponse } from './assign-role-user-response.dto';
-import { AssignRoleUserInput } from './assign-role-user-input.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
@@ -11,13 +8,15 @@ import { Prisma, PrivilegeGroup, PrivilegeName } from '@prisma/client';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
 import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
 import { paginationInputTransformer } from 'src/shared/base-list/base-list-input-transform';
+import { GetUserForAssignInput } from './get-available-user-for-assign-input.dto';
+import { GetUserForAssignResponse } from './get-available-user-for-assign-response.dto';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
-export class AssignRoleUserService {
+export class GetUserForAssignService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  @Mutation(() => AssignRoleUserResponse)
+  @Mutation(() => GetUserForAssignResponse)
   @UseGuards(RoleGuard)
   @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
   @SetMetadata('privilegeName', PrivilegeName.UPDATE)
@@ -27,47 +26,47 @@ export class AssignRoleUserService {
     'memberShipValidationType',
     MemberShipValidationType.MEMBERSHIP_VALIDITY,
   )
-  async getAssignUsers(
-    @Args('assignRoleUserInput') assignRoleUserInput: AssignRoleUserInput,
-    @Context('req') req: Request,
-  ): Promise<AssignRoleUserResponse> {
-    const queryObject: Prisma.UserRoleWhereInput = {
-      roleId: assignRoleUserInput.roleId,
-      workspaceId: req.currentWorkspaceId,
-      deletedAt: null,
-      user: {
-        name: {
-          contains: assignRoleUserInput.search,
-          mode: 'insensitive', 
-        },
+  async getUsersForAssign(
+    @Args('assignRoleUserInput') assignRoleUserInput: GetUserForAssignInput,
+  ): Promise<GetUserForAssignResponse> {
+    // Get Users which is not assigned Yet 
+
+    const queryObject: Prisma.UserWhereInput = {
+      name: {
+        contains: assignRoleUserInput.search,
+        mode: 'insensitive',
       },
+      // Ensure user doesn't already have this role
+      roles: {
+        none: {
+          roleId: assignRoleUserInput.roleId,
+          deletedAt: null,
+        }
+      }
     };
 
-    const userRoleCount = await this.prismaService.userRole.count({
+    const userCount = await this.prismaService.user.count({
       where: queryObject,
     });
 
     const paginationMeta = paginationInputTransformer({
       page: assignRoleUserInput?.page,
       pageSize: assignRoleUserInput?.pageSize,
-      totalRowCount: userRoleCount,
+      totalRowCount: userCount,
     });
 
 
-    const userRole = await this.prismaService.userRole.findMany({
+    const user = await this.prismaService.user.findMany({
       where: queryObject,
       skip: paginationMeta.skip,
       take: paginationMeta.perPage,
-      include: {
-        user: true,
-      },
     });
    
-    const users = userRole.map((role) => {
+    const users = user.map((role) => {
       return {
-        id: role.user.id,
-        name: role.user.name || '',
-        email: role.user.email
+        id: role.id,
+        name: role.name || '',
+        email: role.email
       }
     });
 
@@ -77,7 +76,7 @@ export class AssignRoleUserService {
         currentPage: paginationMeta.page,
         totalPage: paginationMeta.totalPage,
         perPage: paginationMeta.perPage,
-        totalRows: userRoleCount,
+        totalRows: userCount,
       },
     };
   }

@@ -93,6 +93,17 @@ type AssignRoleUserResponse {
   pagination: BaseListResponse!
 }
 
+type AvailableForAssignUser {
+  id: String!
+  name: String
+  email: String!
+}
+
+type GetUserForAssignResponse {
+  users: [AvailableForAssignUser!]!
+  pagination: BaseListResponse!
+}
+
 type PostAuthor {
   id: String!
   name: String!
@@ -467,6 +478,7 @@ type Mutation {
   assignRole(assignRoleInput: AssignRoleInput!): AssignRoleResponse!
   unAssignRole(unAssignRoleInput: UnAssignRoleInput!): UnAssignRoleResponse!
   getAssignUsers(assignRoleUserInput: AssignRoleUserInput!): AssignRoleUserResponse!
+  getUsersForAssign(assignRoleUserInput: GetUserForAssignInput!): GetUserForAssignResponse!
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
@@ -581,6 +593,19 @@ input AssignRoleUserInput {
 }
 
 enum AssignedUserOrder {
+  ASC
+  DESC
+}
+
+input GetUserForAssignInput {
+  roleId: String!
+  search: String
+  page: Int
+  pageSize: Int
+  orderBy: GetUserForAssignOrder = DESC
+}
+
+enum GetUserForAssignOrder {
   ASC
   DESC
 }
