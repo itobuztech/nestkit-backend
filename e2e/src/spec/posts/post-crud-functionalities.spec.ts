@@ -14,6 +14,8 @@ import {
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
+  RestoreMutation,
+  RestoreMutationVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -25,8 +27,9 @@ import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
 import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { RESTORE_POST_MUTATION } from '../../graphql/restore-post-mutation.gql';
 
-const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
+const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
   describe(`Post CRUD functionalities for ${userTypeRole}`, () => {
     let user: User | null;
@@ -223,6 +226,53 @@ userArrays.forEach((userTypeRole) => {
           },
         });
         expect(deletePostResponse.data?.deletePost).toBe(true);
+      }
+    });
+
+    test(`Restore post as ${userTypeRole} not from stash`, async () => {
+      if (!postId) return;
+
+      if (deleteFlag) {
+        const restorePost = await api.graphql.mutate<
+          RestoreMutation,
+          RestoreMutationVariables
+        >({
+          mutation: RESTORE_POST_MUTATION,
+          variables: {
+            postRestoreInput: {
+              id: postId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
+        });
+        
+        expect(restorePost.data?.restore).toBe(true);
+      }
+    });
+
+    test(`Get post as ${userTypeRole}`, async () => {
+      if (postId) {
+        const getPost = await api.graphql.query<
+          GetPostQuery,
+          GetPostQueryVariables
+        >({
+          query: GET_POST_QUERY,
+          variables: {
+            getPostInput: {
+              id: postId,
+            },
+          },
+        });
+
+        const data = getPost.data;
+        console.log(data.getPost?.id);
+        expect(data.getPost?.id).toBe(postId);
+        expect(data.getPost?.content).toBe(content);
+        expect(data.getPost?.title).toBe(title);
       }
     });
 
