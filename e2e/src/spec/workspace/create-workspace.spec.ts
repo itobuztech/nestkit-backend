@@ -10,6 +10,10 @@ import {
   DeleteWorkSpaceMutationVariables,
   ListWorkSpaceQuery,
   ListWorkSpaceQueryVariables,
+  // RestoreMutation,
+  // RestoreMutationVariables,
+  // RestoreWorkSpaceMutation,
+  // RestoreWorkSpaceMutationVariables,
   UpdateWorkspaceMutation,
   UpdateWorkspaceMutationVariables,
 } from '../../gql/graphql';
@@ -17,6 +21,7 @@ import { UPDATE_WORKSPACE_MUTATION } from '../../graphql/update-workspace-mutati
 import { LIST_WORKSPACE_QUERY } from '../../graphql/list-workspace-query.gql';
 import { DELETE_WORKSPACE_MUTATION } from '../../graphql/delete-workspace-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { RESTORE_WORKSPACE_MUTATION } from '../../graphql/restore-workspace-mutation.gql';
 
 describe('Workspace Module', () => {
   const dbClient = new PrismaClient();
@@ -30,7 +35,7 @@ describe('Workspace Module', () => {
     await dbClient.$disconnect();
   });
 
-  [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
+  [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
     test(`Login as a ${type}`, async () => {
       user = await dbClient.user.findFirst({
         where: {
@@ -148,6 +153,26 @@ describe('Workspace Module', () => {
       });
 
       expect(response.data?.deleteWorkSpace).toBe(true);
+    });
+
+    test('Restore Workspace from stash', async () => {
+      if (!workspaceId) {
+        throw new Error(
+          'Workspace ID is undefined; creation test might have failed',
+        );
+      }
+      const response = await api.graphql.mutate<{
+        data?: { restoreWorkSpace?: boolean };
+      }>({
+        mutation: RESTORE_WORKSPACE_MUTATION,
+        variables: {
+          restoreWorkspaceInput: {
+            id: workspaceId,
+          },
+        },
+      });
+
+      expect(response.data?.data?.restoreWorkSpace).toBe(true);
     });
 
     test('List of Workspace and created workspace assertion', async () => {

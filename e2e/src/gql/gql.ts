@@ -41,6 +41,7 @@ const documents = {
     "\n  mutation RequestPasswordReset($passwordReset: PasswordResetRequestInput!) {\n    requestPasswordReset(passwordReset: $passwordReset) {\n      message\n    }\n  }\n": types.RequestPasswordResetDocument,
     "\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n": types.ResizeFileDocument,
     "\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n": types.RestoreDocument,
+    "\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n": types.RestoreWorkSpaceDocument,
     "\n  mutation SendInvitation($sendInvitationInput: SendInvitationInput!) {\n    sendInvitation(sendInvitationInput: $sendInvitationInput) {\n      success\n    }\n  }\n": types.SendInvitationDocument,
     "\n  mutation Signup($signupInput: SignupInput!) {\n    signup(signupInput: $signupInput) {\n      id\n    }\n  }\n": types.SignupDocument,
     "\n  mutation UnAssignRole($unAssignRoleInput: UnAssignRoleInput!) {\n    unAssignRole(unAssignRoleInput: $unAssignRoleInput) {\n      success\n    }\n  }\n": types.UnAssignRoleDocument,
@@ -178,6 +179,10 @@ export function graphql(source: "\n  mutation ResizeFile($resizeFileInput: Resiz
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n"): (typeof documents)["\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n"): (typeof documents)["\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
