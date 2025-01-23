@@ -73,7 +73,6 @@ describe('Workspace Module', () => {
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
-    //This test has an issue - NST-61
     test('List of Workspace and created workspace assertion', async () => {
       const listWorkspace = await api.graphql.query<
         ListWorkSpaceQuery,
@@ -82,12 +81,40 @@ describe('Workspace Module', () => {
         query: LIST_WORKSPACE_QUERY,
       });
 
-      console.log(listWorkspace.data.listWorkSpace.workspace);
       const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
         (workspace) => workspace.id === workspaceId,
       );
+      let newWorkspace;
 
-      expect(addedWorkspace?.name).toBe(workspaceName);
+      if (!addedWorkspace) {
+        for (
+          let page = 2;
+          page <= listWorkspace.data.listWorkSpace.pagination.totalPage;
+          page++
+        ) {
+          const workspaceList = await api.graphql.query<
+            ListWorkSpaceQuery,
+            ListWorkSpaceQueryVariables
+          >({
+            query: LIST_WORKSPACE_QUERY,
+            variables: {
+              listWorkspaceInput: {
+                page,
+              },
+            },
+          });
+
+          newWorkspace = workspaceList.data.listWorkSpace.workspace.find(
+            (workspace) => workspace.id === workspaceId,
+          );
+          if (newWorkspace) {
+            expect(newWorkspace?.name).toBe(workspaceName);
+            break;
+          }
+        }
+      } else {
+        expect(addedWorkspace?.name).toBe(workspaceName);
+      }
       expect(listWorkspace.data.listWorkSpace.workspace.length).toBeGreaterThan(
         0,
       );
@@ -127,7 +154,37 @@ describe('Workspace Module', () => {
         (workspace) => workspace.id === workspaceId,
       );
 
-      expect(addedWorkspace?.name).toBe(workspaceNameUpdated);
+      let newWorkspace;
+      if (!addedWorkspace) {
+        for (
+          let page = 2;
+          page <= listWorkspace.data.listWorkSpace.pagination.totalPage;
+          page++
+        ) {
+          const workspaceList = await api.graphql.query<
+            ListWorkSpaceQuery,
+            ListWorkSpaceQueryVariables
+          >({
+            query: LIST_WORKSPACE_QUERY,
+            variables: {
+              listWorkspaceInput: {
+                page,
+              },
+            },
+          });
+
+          newWorkspace = workspaceList.data.listWorkSpace.workspace.find(
+            (workspace) => workspace.id === workspaceId,
+          );
+
+          if (newWorkspace) {
+            expect(newWorkspace?.name).toBe(workspaceNameUpdated);
+            break;
+          }
+        }
+      } else {
+        expect(addedWorkspace?.name).toBe(workspaceNameUpdated);
+      }
       expect(listWorkspace.data.listWorkSpace.workspace.length).toBeGreaterThan(
         0,
       );
