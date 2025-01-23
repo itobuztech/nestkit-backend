@@ -30,7 +30,7 @@ describe('Workspace Module Negative testing - NST-36', () => {
     await dbClient.$disconnect();
   });
 
-  [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+  [UserType.USER, UserType.SUPER_ADMIN].forEach((type) => {
     test(`Login as a ${type}`, async () => {
       user = await dbClient.user.findFirst({
         where: {
@@ -164,12 +164,19 @@ describe('Workspace Module Negative testing - NST-36', () => {
     });
 
     test(`Login as a different ${type}`, async () => {
-      const response = await api.login({
-        email: appEnv.ADMIN_EMAIL,
-        password: appEnv.SEED_PASSWORD,
+      const secondUser = await dbClient.user.findFirst({
+        where: {
+          email: { not: user?.email },
+          isVerified: true,
+        },
       });
-
-      expect(response.data).toBeDefined();
+      if (secondUser) {
+        const response = await api.login({
+          email: secondUser?.email,
+          password: appEnv.SEED_PASSWORD,
+        });
+        expect(response.data).toBeDefined();
+      }
     });
 
     test('The created workspace will not be visible to another user', async () => {

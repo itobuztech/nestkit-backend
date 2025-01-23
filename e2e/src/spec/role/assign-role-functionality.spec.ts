@@ -8,10 +8,10 @@ import {
   CreateRoleMutationVariables,
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
-  CurrentUserQuery,
-  CurrentUserQueryVariables,
   GetRoleQuery,
   GetRoleQueryVariables,
+  GetUserPermissionQuery,
+  GetUserPermissionQueryVariables,
   GetUsersQuery,
   GetUsersQueryVariables,
   RoleQuery,
@@ -20,7 +20,6 @@ import {
   UnAssignRoleMutationVariables,
 } from '../../gql/graphql';
 import { USER_LIST } from '../../graphql/get-user-list.gql';
-import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
 import { sample } from 'lodash';
@@ -29,8 +28,9 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
 import { faker } from '@faker-js/faker';
 import { CREATE_ROLE_MUTATION } from '../../graphql/create-role-mutation.gql';
 import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
+import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
   describe(`Assign Role functionalities for user : ${type}`, () => {
     let dbUser: User | null;
     let user: User | null;
@@ -272,23 +272,54 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
       }
     });
 
+    test(`Add the membership of the workspace to the user`, async () => {
+      if (userId && workspaceId) {
+        await dbClient.workspaceMembership.create({
+          data: {
+            workspaceId,
+            userId,
+            isOwner: false,
+            isAccepted: true,
+          },
+        });
+      }
+    });
+
     test(`Fetch current user roles for user - ${type}`, async () => {
+      privilegeArrayForCurrentUser = await currentUserInfo();
       async function currentUserInfo() {
-        const currentUser = await api.graphql.query<
-          CurrentUserQuery,
-          CurrentUserQueryVariables
+        const userPermissions = await api.graphql.query<
+          GetUserPermissionQuery,
+          GetUserPermissionQueryVariables
         >({
-          query: CURRENT_USER_QUERY,
+          query: GET_USER_PERMISSION,
           variables: {},
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         const privileges: string[] = [];
-        currentUser.data.currentUser.privilege.forEach((privilege) => {
-          privileges?.push(privilege.id);
+        userPermissions.data.getUserPermission.privilege.forEach(
+          (privilege) => {
+            privileges?.push(privilege.id);
+          },
+        );
+
+        let flag1 = false,
+          flag2 = false;
+        userPermissions.data.getUserPermission.roles.forEach((role) => {
+          if (role.id === createdRoleId) {
+            flag1 = true;
+          }
+          if (role.id === createdRoleId2) {
+            flag2 = true;
+          }
         });
-        expect(currentUser.data.currentUser.userType).toBe(UserType.USER);
-        expect(currentUser.data.currentUser.roles).toContain(createdRoleId);
-        expect(currentUser.data.currentUser.roles).toContain(createdRoleId2);
+        expect(flag1).toBe(true);
+        expect(flag2).toBe(true);
 
         return privileges;
       }
@@ -397,17 +428,30 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
     });
 
     test(`Fetch current user roles for user - ${type}`, async () => {
-      const currentUser = await api.graphql.query<
-        CurrentUserQuery,
-        CurrentUserQueryVariables
+      const userPermissions = await api.graphql.query<
+        GetUserPermissionQuery,
+        GetUserPermissionQueryVariables
       >({
-        query: CURRENT_USER_QUERY,
+        query: GET_USER_PERMISSION,
         variables: {},
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
 
-      expect(currentUser.data.currentUser.userType).toBe(UserType.USER);
-      expect(currentUser.data.currentUser.roles).not.toContain(createdRoleId);
-      expect(currentUser.data.currentUser.roles).not.toContain(createdRoleId2);
+      const privileges: string[] = [];
+      userPermissions.data.getUserPermission.privilege.forEach((privilege) => {
+        privileges?.push(privilege.id);
+      });
+
+      expect(userPermissions.data.getUserPermission.roles).not.toContain(
+        createdRoleId,
+      );
+      expect(userPermissions.data.getUserPermission.roles).not.toContain(
+        createdRoleId2,
+      );
     });
   });
 });

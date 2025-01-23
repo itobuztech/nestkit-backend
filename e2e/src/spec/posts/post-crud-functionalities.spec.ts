@@ -6,14 +6,14 @@ import {
   CreatePostMutationVariables,
   CreateWorkspaceMutation,
   CreateWorkspaceMutationVariables,
-  CurrentUserQuery,
-  CurrentUserQueryVariables,
   DeletePostMutation,
   DeletePostMutationVariables,
   GetPostListQuery,
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
+  GetUserPermissionQuery,
+  GetUserPermissionQueryVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -22,11 +22,11 @@ import { GET_POST_QUERY } from '../../graphql/get-post-query.gql';
 import { CREATE_POST_MUTATION } from '../../graphql/create-post-mutation.gql';
 import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
-import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
+const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
   describe(`Post CRUD functionalities for ${userTypeRole}`, () => {
     let user: User | null;
@@ -78,16 +78,22 @@ userArrays.forEach((userTypeRole) => {
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
-    test('Get current user privileges', async () => {
-      const currentUserResponse = await api.graphql.query<
-        CurrentUserQuery,
-        CurrentUserQueryVariables
+    test(`Fetch User permissions - ${userTypeRole}`, async () => {
+      const userPermissions = await api.graphql.query<
+        GetUserPermissionQuery,
+        GetUserPermissionQueryVariables
       >({
-        query: CURRENT_USER_QUERY,
+        query: GET_USER_PERMISSION,
         variables: {},
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
 
-      for (const privilege of currentUserResponse.data.currentUser.privilege) {
+      for (const privilege of userPermissions.data.getUserPermission
+        .privilege) {
         if (privilege.group === 'POST') {
           if (privilege.name === 'CREATE') {
             createFlag = true;

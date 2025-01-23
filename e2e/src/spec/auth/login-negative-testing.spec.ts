@@ -31,7 +31,7 @@ describe('Login module negative testing', () => {
     const dbClient = new PrismaClient();
     const user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
       },
     });
     if (!user) {
@@ -156,7 +156,7 @@ describe('Login module negative testing', () => {
     const dbClient = new PrismaClient();
     const user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
       },
     });
     if (!user) {

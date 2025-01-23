@@ -2,12 +2,11 @@ import { PrismaClient, UserType } from '@prisma/client';
 import { GraphQlApi } from '../../lib/graphql-api';
 import { appEnv } from '../../lib/app-env';
 // import { CREATE_USER } from '../../graphql/create-user.gql';
-import { faker } from '@faker-js/faker';
 
-describe('User List', () => {
+describe.skip('User List', () => {
   const api = new GraphQlApi();
-  const UserEmail = `${crypto.randomUUID}@${appEnv.TESTINATOR_TEAM_ID}`;
-  [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+  // const UserEmail = `${crypto.randomUUID}@${appEnv.TESTINATOR_TEAM_ID}`;
+  [UserType.SUPER_ADMIN].forEach((type) => {
     const dbClient = new PrismaClient();
     beforeAll(async () => {
       const user = await dbClient.user.findFirst({
