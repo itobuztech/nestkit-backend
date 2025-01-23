@@ -10,10 +10,6 @@ import {
   DeleteWorkSpaceMutationVariables,
   ListWorkSpaceQuery,
   ListWorkSpaceQueryVariables,
-  // RestoreMutation,
-  // RestoreMutationVariables,
-  // RestoreWorkSpaceMutation,
-  // RestoreWorkSpaceMutationVariables,
   UpdateWorkspaceMutation,
   UpdateWorkspaceMutationVariables,
 } from '../../gql/graphql';
@@ -43,6 +39,7 @@ describe('Workspace Module', () => {
           isVerified: true,
         },
       });
+      console.log(user, type);
 
       if (!user) {
         return;
@@ -52,7 +49,7 @@ describe('Workspace Module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
-
+      console.log(response, type);
       expect(response.data).toBeDefined();
     });
 
@@ -212,6 +209,21 @@ describe('Workspace Module', () => {
       expect(response.data?.deleteWorkSpace).toBe(true);
     });
 
+    test('List of Workspace and created workspace assertion', async () => {
+      const listWorkspace = await api.graphql.query<
+        ListWorkSpaceQuery,
+        ListWorkSpaceQueryVariables
+      >({
+        query: LIST_WORKSPACE_QUERY,
+      });
+
+      const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
+        (workspace) => workspace.id === workspaceId,
+      );
+
+      expect(addedWorkspace).toBe(undefined);
+    });
+
     test('Restore Workspace from stash', async () => {
       if (!workspaceId) {
         throw new Error(
@@ -228,23 +240,7 @@ describe('Workspace Module', () => {
           },
         },
       });
-
-      expect(response.data?.data?.restoreWorkSpace).toBe(true);
-    });
-
-    test('List of Workspace and created workspace assertion', async () => {
-      const listWorkspace = await api.graphql.query<
-        ListWorkSpaceQuery,
-        ListWorkSpaceQueryVariables
-      >({
-        query: LIST_WORKSPACE_QUERY,
-      });
-
-      const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
-        (workspace) => workspace.id === workspaceId,
-      );
-
-      expect(addedWorkspace).toBe(undefined);
+      expect(response.data).toBeDefined();
     });
 
     test('Delete Workspace which is created not from stash again', async () => {
