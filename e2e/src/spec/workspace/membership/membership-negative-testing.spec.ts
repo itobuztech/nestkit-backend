@@ -35,7 +35,7 @@ describe('Membership invitation module', () => {
   test(`Login as a Admin`, async () => {
     user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
         isVerified: true,
       },
     });
