@@ -15,22 +15,15 @@
 - Multi tenancy
 - Email Template 
 - File manager 
-- Subscription 
-- Payment gateway implementation 
-- DB based translation 
-- Audit 
-- App notification 
-- Mailer transport 
-  - Node mailer 
-  - SES 
 - Sentry Error handling 
-- Google analytics 
 - Documentation 
 - E2E
 
-## Docs 
+## Development Docs 
 - Development notes - docs/development.md
-  
-### Development setup 
-docker-compose up -d --build --force-recreate --remove-orphans
-docker-compose  run app yarn
+
+## API Documentation 
+https://documenter.getpostman.com/view/180560/2sAYQZJsq5
+
+## Import Postman collection 
+https://api.postman.com/collections/180560-404b67ec-a243-4d0e-ad92-f5216d379cfc?access_key=PMAT-01JHSAGAXMNCQZ281A41S2X505

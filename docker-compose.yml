@@ -2,15 +2,6 @@ name: nest-starter
 version: '3.7'
 services:
 
-  # app:
-  #   container_name: app
-  #   build:
-  #     context: .
-  #   volumes:
-  #     - ./:/usr/src/app # Mount the local `src` folder to `/usr/src/app` in the container
-  #   ports:
-  #     - "4000:4000"
-
   mailhog:
     image: mailhog/mailhog:latest
     restart: always
@@ -20,7 +11,7 @@ services:
 
   postgres:
       container_name: postgres
-      image: postgres:15.4
+      image: postgres:latest
       volumes:
         - ./tmp/db/postgresql:/var/lib/postgresql/data
       environment:
@@ -30,16 +21,14 @@ services:
       ports:
         - '5433:5432'
       # postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter
-
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   ports:
-  #     - "8080:80" # Expose port 8080 on the host to port 80 in the container
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro # Mount your custom Nginx config
-  #     - ./html:/usr/share/nginx/html:ro # Serve static files
-
-  #   depends_on:
-  #     - app
+      
+  sonarqube:
+     image: sonarqube:community
+     ports:
+        - '9000:9000'
+     environment:
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
+  
       

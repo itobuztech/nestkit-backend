@@ -1,0 +1,48 @@
+# Stage 1: Build the application
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Enable corepack and install dependencies using yarn
+RUN corepack enable
+RUN apk add --no-cache openssl
+
+
+# Copy the source code
+COPY . .
+COPY .env.production ./.env
+
+RUN yarn install
+RUN npm run db:push
+
+# Build the application
+RUN yarn build
+
+
+# Stage 2: Run the application
+FROM node:20-alpine
+RUN apk add --no-cache openssl
+
+WORKDIR /app
+
+# Set environment variable to production ENV NODE_ENV=production
+
+# Enable corepack
+RUN corepack enable
+RUN npm install -g live-server
+
+# Copy built application from Stage 1
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./
+COPY --from=build /app/yarn.lock ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/public ./public
+COPY --from=build /app/public ./public
+
+# Install only production dependencies 
+# RUN yarn
+
+
+# Define the command to run the application
+CMD [ "node", "dist/main.js"]
+# CMD ["live-server"]

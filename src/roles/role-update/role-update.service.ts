@@ -9,6 +9,8 @@ import { RoleUpdateInput } from './role-update-input.dto';
 import { RoleGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateAppError } from 'src/shared/create-error/create-error';
+import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
+import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -19,6 +21,10 @@ export class RoleUpdateService {
   @UseGuards(RoleGuard)
   @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
   @SetMetadata('privilegeName', PrivilegeName.UPDATE)
+
+  @UseGuards(WorkspaceMemberShipGuard)
+  @SetMetadata('memberShipValidationType', MemberShipValidationType.MEMBERSHIP_VALIDITY)
+
   async updateRole(
     @Args('roleUpdateInput') roleUpdateInput: RoleUpdateInput,
     @Context('req') req: Request,
@@ -29,15 +35,19 @@ export class RoleUpdateService {
       },
     });
 
-      if (!role) {
-        throw new CreateAppError({
-          message: 'Role not found',
-          httpStatus: HttpStatus.NOT_FOUND,
-        });
-      }
+    if (!role) {
+      throw new CreateAppError({
+        message: 'Role not found',
+        httpStatus: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    if (req.user?.userType === UserType.SUPER_ADMIN && role.type === RoleType.SUPER_ADMIN) {
+      throw new CreateAppError({ message: 'This is highest level role and can not be modified' });
+    }
 
     if (req.user?.userType !== UserType.SUPER_ADMIN && role?.type !== RoleType.CUSTOM) {
-      throw new CreateAppError({ message: 'You are not allowed to update this role. Only Custom role can be modified.'});
+      throw new CreateAppError({ message: 'Global role can be modified by only super admin' });
     }
 
     const updatedRole = await this.prisma.role.update({

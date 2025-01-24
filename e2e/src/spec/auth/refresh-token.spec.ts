@@ -5,7 +5,7 @@ import { REFRESH_TOKEN_MUTATION } from '../../graphql/refresh-token.gql';
 import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 
 describe('Refresh token module', () => {
-  [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
+  [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
     const dbClient = new PrismaClient();
     const api = new GraphQlApi();
     let refreshToken: string | null | undefined;

@@ -28,7 +28,7 @@ import { sample } from 'lodash';
 import { GraphQLError } from 'graphql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.USER, UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Role functionalities for user : ${type}`, () => {
     let user: User | null;
     let randomPrivilege:
