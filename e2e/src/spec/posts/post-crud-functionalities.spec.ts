@@ -14,6 +14,8 @@ import {
   GetPostQueryVariables,
   GetUserPermissionQuery,
   GetUserPermissionQueryVariables,
+  RestoreMutation,
+  RestoreMutationVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -24,6 +26,7 @@ import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
 import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { RESTORE_POST_MUTATION } from '../../graphql/restore-post-mutation.gql';
 import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
 const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
@@ -133,6 +136,7 @@ userArrays.forEach((userTypeRole) => {
         expect(data?.createPost.id).toBeDefined();
 
         postId = createPostResponse.data?.createPost.id;
+        console.log('Post ID:', postId);
       }
     });
 
@@ -159,9 +163,7 @@ userArrays.forEach((userTypeRole) => {
     });
 
     test('Update Post', async () => {
-      if (!postId) return;
-
-      if (updateFlag) {
+      if (updateFlag && postId) {
         const updatePostResponse = await api.graphql.mutate<
           UpdatePostMutation,
           UpdatePostMutationVariables
@@ -208,9 +210,7 @@ userArrays.forEach((userTypeRole) => {
     });
 
     test(`Delete post as ${userTypeRole} not from stash`, async () => {
-      if (!postId) return;
-
-      if (deleteFlag) {
+      if (deleteFlag && postId) {
         const deletePostResponse = await api.graphql.mutate<
           DeletePostMutation,
           DeletePostMutationVariables
@@ -230,7 +230,82 @@ userArrays.forEach((userTypeRole) => {
         });
         expect(deletePostResponse.data?.deletePost).toBe(true);
       }
+    console.log('Post ID:', postId);
+
     });
+
+    test(`Restore post as ${userTypeRole} not from stash`, async () => {
+      if (deleteFlag && postId) {
+        const restorePost = await api.graphql.mutate<
+          RestoreMutation,
+          RestoreMutationVariables
+        >({
+          mutation: RESTORE_POST_MUTATION,
+          variables: {
+            postRestoreInput: {
+              id: postId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
+        });
+
+        expect(restorePost.data?.restore).toBe(true);
+      }
+      console.log('Post ID:', postId);
+    });
+
+    test(`Get post as ${userTypeRole}`, async () => {
+      if (postId) {
+        const getPost = await api.graphql.query<
+          GetPostQuery,
+          GetPostQueryVariables
+        >({
+          query: GET_POST_QUERY,
+          variables: {
+            getPostInput: {
+              id: postId,
+            },
+          },
+        });
+
+        const data = getPost.data;
+        console.log(data.getPost?.id);
+        expect(data.getPost?.id).toBe(postId);
+        console.log(data.getPost?.content);
+        expect(data.getPost?.content).toBe(updatedContent);
+        expect(data.getPost?.title).toBe(updatedTitle);
+      }
+    });
+
+    test(`Delete post as ${userTypeRole} not from stash`, async () => {
+      if (deleteFlag && postId) {
+        const deletePostResponse = await api.graphql.mutate<
+          DeletePostMutation,
+          DeletePostMutationVariables
+        >({
+          mutation: DELETE_POST_MUTATION,
+          variables: {
+            postDeleteInput: {
+              id: postId,
+              fromStash: false,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
+        });
+        expect(deletePostResponse.data?.deletePost).toBe(true);
+        console.log(deletePostResponse);
+      }
+
+    });
+
 
     test(`Delete post as ${userTypeRole} from stash`, async () => {
       if (!postId) return;
