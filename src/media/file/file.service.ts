@@ -39,7 +39,7 @@ export class FileService {
     );
 
     // Get file url
-    const fileUrl = await this.awsService.getfileUrl(fileS3Key!, accessLevel!);
+    const fileUrl = await this.awsService.getfileUrl(fileS3Key, accessLevel!);
 
     // Save file information to the database
     const media = await this.prisma.file.create({

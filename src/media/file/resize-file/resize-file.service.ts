@@ -94,6 +94,7 @@ export class ResizeFileService {
         name: file.name,
         mimeType: file.mimeType,
         size: file.size,
+        accessLevel: file.accessLevel,
         url: fileUrl,
         workspaceId: file.workspaceId,
         s3Key: appEnv.isS3Enabled ? filePath : null,
@@ -122,7 +123,7 @@ export class ResizeFileService {
       );
       return s3File;
     } else {
-      const originalFilePath = join(process.cwd(), 'public', file.url!);
+      const originalFilePath = join(process.cwd(), 'public', file.url);
 
       const buffer = await fs.readFile(originalFilePath);
       return buffer;

@@ -42,48 +42,16 @@ export class GetFileService {
       });
     }
 
-    if (file.s3Key) {
-      // checking if url is expired
-      if (
-        file.accessLevel === AccessLevel.RESTRICTED &&
-        (await this.isUrlExpired(file))
-      ) {
-        const fileUrl = await this.awsService.getfileUrl(
-          file.s3Key,
-          file.accessLevel,
-        );
+    file.url = await this.updateFileUrl(file); // update file url if stored in s3 and url is expired
 
-        await this.prismaService.file.update({
-          where: {
-            workspaceId: req.currentWorkspaceId,
-            id: getFileInput.id,
-            deletedAt: getFileInput.fromStash ? { not: null } : null,
-          },
-          data: {
-            url: fileUrl,
-          },
-        });
-
-        await this.prismaService.s3AccessSession.upsert({
-          where: {
-            fileId_signedUrl: {
-              fileId: file.id,
-              signedUrl: fileUrl,
-            },
-          },
-          update: {
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-          },
-          create: {
-            signedUrl: fileUrl,
-            fileId: file.id,
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-          },
-        });
-
-        file.url = fileUrl;
-      }
+    if (file.resizeImages.length) {
+      await Promise.all(
+        file.resizeImages.map(async (resizedFiles) => {
+          resizedFiles.url = await this.updateFileUrl(resizedFiles);
+        }),
+      );
     }
+
     return file;
   }
 
@@ -98,5 +66,51 @@ export class GetFileService {
     });
 
     return !fileExpiryData || fileExpiryData.expiresAt < new Date();
+  }
+
+  async updateFileUrl(file: File) {
+    if (file.s3Key) {
+      // checking if url is expired
+      if (
+        file.accessLevel === AccessLevel.RESTRICTED &&
+        (await this.isUrlExpired(file))
+      ) {
+        const fileUrl = await this.awsService.getfileUrl(
+          file.s3Key,
+          file.accessLevel,
+        );
+
+        await this.prismaService.s3AccessSession.upsert({
+          where: {
+            fileId_signedUrl: {
+              fileId: file.id,
+              signedUrl: file.url,
+            },
+          },
+          update: {
+            signedUrl: fileUrl,
+            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          },
+          create: {
+            signedUrl: fileUrl,
+            fileId: file.id,
+            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          },
+        });
+
+        await this.prismaService.file.update({
+          where: {
+            id: file.id,
+          },
+          data: {
+            url: fileUrl,
+          },
+        });
+
+        return fileUrl;
+      }
+    }
+
+    return file.url;
   }
 }

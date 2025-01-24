@@ -1,7 +1,7 @@
 import { Args, Context, Query, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 import { UseGuards } from '@nestjs/common';
-import { AccessLevel, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ListMediaInput } from './list-file.input.dto';
@@ -11,7 +11,6 @@ import { paginationInputTransformer } from 'src/shared/base-list/base-list-input
 import { Order } from 'src/shared/base-list/base-list-input.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { GetFileService } from '../get-file/get-file.service';
-import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -76,48 +75,7 @@ export class ListMediaService {
 
     const updatedFiles = await Promise.all(
       files.map(async (file) => {
-        if (
-          file.s3Key &&
-          file.accessLevel === AccessLevel.RESTRICTED &&
-          (await this.getFileService.isUrlExpired(file))
-        ) {
-          const fileUrl = await this.awsService.getfileUrl(
-            file.s3Key!,
-            file.accessLevel!,
-          );
-
-          // Update file URL and return the updated file
-          await this.prisma.file.update({
-            where: {
-              workspaceId: req.currentWorkspaceId,
-              id: file.id,
-            },
-            data: {
-              url: fileUrl,
-            },
-          });
-
-          // Upsert the session
-          await this.prisma.s3AccessSession.upsert({
-            where: {
-              fileId_signedUrl: {
-                fileId: file.id,
-                signedUrl: file.url,
-              },
-            },
-            update: {
-              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-            },
-            create: {
-              signedUrl: fileUrl,
-              fileId: file.id,
-              expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
-            },
-          });
-
-          file.url = fileUrl;
-        }
-
+        file.url = await this.getFileService.updateFileUrl(file);
         return file;
       }),
     );
