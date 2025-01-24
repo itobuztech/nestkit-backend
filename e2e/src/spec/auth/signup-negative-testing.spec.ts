@@ -165,7 +165,7 @@ describe('User Sign up negative testing - NST-46', () => {
     const dbClient = new PrismaClient();
     const user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
       },
     });
     if (!user) return;

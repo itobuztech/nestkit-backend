@@ -1,6 +1,4 @@
 import { bool, cleanEnv, email, num, str } from 'envalid';
-import dotenv from 'dotenv';
-dotenv.config();
 
 // Validate and load environment variables
 export const appEnv = cleanEnv(process.env, {
@@ -9,9 +7,10 @@ export const appEnv = cleanEnv(process.env, {
     choices: ['development', 'production', 'test'],
   }),
   DATABASE_URL: str({ desc: 'Please provide DB URL' }),
+  MAILHOG_API_ROOT: str({ default: 'http://localhost:8025' }),
   SEED_PASSWORD: str({ default: 'SamLauncher@123' }),
   TESTINATOR_TEAM_ID: str({ default: 'team930312.testinator.com' }),
-  SEED_EMAIL: email({ default: 'example@team930312.testinator.com' }),
+  SEED_EMAIL: email({ default: 'zenia@itobuz.com' }),
   TIMEOUT: num({ default: 5000 }),
   TESTINATOR_API_KEY: str({ default: '6fd5ed52adf94184a9b562da180ea4f9' }),
   FETCH_EMAILS_INBOX: str({
@@ -21,8 +20,10 @@ export const appEnv = cleanEnv(process.env, {
     default: 'https://mailinator.com/api/v2/domains/private/messages/',
   }),
   API_BASE_URL: str({ default: 'http://localhost:4000' }),
-  ADMIN_EMAIL: str({ default: 'example+admin-1@team930312.testinator.com' }),
+  ADMIN_EMAIL: str({ default: 'zenia+admin-1@itobuz.com' }),
   JEST_HTML_REPORTER_FILE_NAME: str({ default: 'test.html' }),
+  IMAP_EMAIL: str({ default: 'qa@itobuz.wordpress-studio.io' }),
+
   // s3
   AWS_REGION: str({ default: 'us-east-1' }),
   AWS_ACCESS_KEY_ID: str(),
@@ -32,8 +33,7 @@ export const appEnv = cleanEnv(process.env, {
   AWS_BUCKET_PUBLIC_URL: str(),
   AWS_REPORT_UPLOAD: bool({ default: false }),
 
-
-  // Imap 
+  // Imap
   IMAP_HOST: str({ default: 'imap.hostinger.com' }),
   IMAP_PORT: num({ default: 993 }),
   IMAP_TLS: bool({ default: true }),

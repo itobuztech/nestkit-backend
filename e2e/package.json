@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run prisma:generate && npm run gql:generate && jest",
-    "test:ci": "npm run prisma:generate && npm run gql:generate && jest --runInBand --ci --verbose=false",
-    "gql:generate": "graphql-codegen",
+    "test": "dotenv -e .env npm run prisma:generate && npm run gql:generate && jest",
+    "test:ci": "dotenv -e .env npm run prisma:generate && npm run gql:generate && jest --runInBand --ci --verbose=false",
+    "gql:generate": "dotenv -e .env graphql-codegen",
     "prisma:generate": "npm run prisma -- generate",
     "prisma": "prisma",
     "read-mails": "ts-node src/lib/imap-client.ts"
@@ -34,7 +34,8 @@
     "@faker-js/faker": "^9.0.2",
     "@prisma/client": "5.20.0",
     "axios": "^1.7.7",
-    "dotenv": "^16.4.5",
+    "date-fns": "^4.1.0",
+    "dotenv-cli": "^7.4.4",
     "graphql": "^16.9.0",
     "handlebars": "^4.7.8",
     "node-imap": "^0.9.6",

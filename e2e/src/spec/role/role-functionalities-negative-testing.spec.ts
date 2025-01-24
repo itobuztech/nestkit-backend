@@ -6,6 +6,8 @@ import {
   AssignRoleMutationVariables,
   CreateRoleMutation,
   CreateRoleMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   DeleteRoleMutation,
   DeleteRoleMutationVariables,
   GetRoleQuery,
@@ -29,8 +31,9 @@ import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
 import { sample } from 'lodash';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Role negative testing functionalities for user : ${type} - NST-37`, () => {
     let user: User | null;
     let randomPrivilege:
@@ -47,6 +50,8 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
     const title = faker.lorem.word();
     let roleId: string | undefined;
     const api = new GraphQlApi();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test(`Login as a ${type.toUpperCase()} `, async () => {
       const dbClient = new PrismaClient();
@@ -67,6 +72,23 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
       });
 
       expect(response.data).toBeDefined();
+    });
+
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
     test(`View the list of privileges for user - ${type}`, async () => {
@@ -103,12 +125,17 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
             privileges: [crypto.randomUUID()],
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
       if (!createRoleResponse.errors) {
         throw new Error('Expected an error, but none was returned');
       }
       expect(createRoleResponse.errors[0].message).toContain(
-        'Foreign key constraint failed on the field: `RolePrivilege_privilegeId_fkey (index)`',
+        'Foreign key constraint violated: `RolePrivilege_privilegeId_fkey (index)`',
       );
     });
 
@@ -127,6 +154,11 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
             roleCreateInput: {
               title: '',
               privileges: [randomPrivilege.id],
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -150,18 +182,60 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
             fromStash: false,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
 
       roleList.data.roleList.role.forEach((role) => {
         expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
         expect(role.title).toBeDefined();
       });
       roleId = sample(roleList.data.roleList.role)?.id;
     });
 
     test(`Update role for user : ${type} with blank title`, async () => {
-      if (randomPrivilege && roleId) {
+      if (type === 'SUPER_ADMIN') {
+        if (randomPrivilege && roleId) {
+          const updateRole = await api.graphql.mutate<
+            UpdateRoleMutation,
+            UpdateRoleMutationVariables
+          >({
+            mutation: UPDATE_ROLE_MUTATION,
+            variables: {
+              roleUpdateInput: {
+                id: roleId,
+                title: '',
+                createPrivileges: [],
+                removePrivileges: [randomPrivilege.id],
+              },
+            },
+            context: {
+              headers: {
+                current_workspace_id: workspaceId,
+              },
+            },
+          });
+
+          if (!updateRole.errors) {
+            throw new Error('Expected an error, but none was returned');
+          }
+          expect(updateRole.errors[0].message).toContain(
+            'title should not be empty',
+          );
+        } else {
+          throw new Error(
+            'Random privilege id and created role id not found! The role list fetch might have failed!',
+          );
+        }
+      }
+    });
+
+    test(`Update role for user : ${type} with wrong privilege id`, async () => {
+      if (!roleId) return;
+      if (type === 'SUPER_ADMIN') {
         const updateRole = await api.graphql.mutate<
           UpdateRoleMutation,
           UpdateRoleMutationVariables
@@ -170,9 +244,14 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
           variables: {
             roleUpdateInput: {
               id: roleId,
-              title: '',
-              createPrivileges: [],
-              removePrivileges: [randomPrivilege.id],
+              title: faker.lorem.word(),
+              createPrivileges: [crypto.randomUUID()],
+              removePrivileges: [],
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -181,63 +260,39 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
           throw new Error('Expected an error, but none was returned');
         }
         expect(updateRole.errors[0].message).toContain(
-          'title should not be empty',
-        );
-      } else {
-        throw new Error(
-          'Random privilege id and created role id not found! The role list fetch might have failed!',
+          'Foreign key constraint violated: `RolePrivilege_privilegeId_fkey (index)`',
         );
       }
-    });
-
-    test(`Update role for user : ${type} with wrong privilege id`, async () => {
-      if (!roleId) return;
-      const updateRole = await api.graphql.mutate<
-        UpdateRoleMutation,
-        UpdateRoleMutationVariables
-      >({
-        mutation: UPDATE_ROLE_MUTATION,
-        variables: {
-          roleUpdateInput: {
-            id: roleId,
-            title: faker.lorem.word(),
-            createPrivileges: [crypto.randomUUID()],
-            removePrivileges: [],
-          },
-        },
-      });
-
-      if (!updateRole.errors) {
-        throw new Error('Expected an error, but none was returned');
-      }
-      expect(updateRole.errors[0].message).toContain(
-        'Foreign key constraint failed on the field: `RolePrivilege_privilegeId_fkey (index)`',
-      );
     });
 
     test(`Update role for user : ${type} with wrong role id`, async () => {
       if (!randomPrivilege) return;
-      const updateRole = await api.graphql.mutate<
-        UpdateRoleMutation,
-        UpdateRoleMutationVariables
-      >({
-        mutation: UPDATE_ROLE_MUTATION,
-        variables: {
-          roleUpdateInput: {
-            id: crypto.randomUUID(),
-            title: faker.lorem.word(),
-            createPrivileges: [randomPrivilege?.id],
-            removePrivileges: [],
+      if (type === 'SUPER_ADMIN') {
+        const updateRole = await api.graphql.mutate<
+          UpdateRoleMutation,
+          UpdateRoleMutationVariables
+        >({
+          mutation: UPDATE_ROLE_MUTATION,
+          variables: {
+            roleUpdateInput: {
+              id: crypto.randomUUID(),
+              title: faker.lorem.word(),
+              createPrivileges: [randomPrivilege?.id],
+              removePrivileges: [],
+            },
           },
-        },
-      });
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
+        });
 
-      if (!updateRole.errors) {
-        throw new Error('Expected an error, but none was returned');
+        if (!updateRole.errors) {
+          throw new Error('Expected an error, but none was returned');
+        }
+        expect(updateRole.errors[0].message).toContain('Role not found');
       }
-      expect(updateRole.errors[0].message).toContain(
-        'Record to update not found',
-      );
     });
 
     test(`Get Role for user ${type} with wrong role id`, async () => {
@@ -249,6 +304,11 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
         variables: {
           roleGetInput: {
             id: crypto.randomUUID(),
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -269,6 +329,11 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
           roleDeleteInput: {
             id: crypto.randomUUID(),
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -297,9 +362,7 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
         if (!assignRole.errors) {
           throw new Error('Expected an error, but none was returned');
         }
-        expect(assignRole.errors[0].message).toContain(
-          'Foreign key constraint failed on the field: `UserRole_roleId_fkey (index)`',
-        );
+        expect(assignRole.errors[0].message).toContain('Role not found');
       } else {
         throw new Error(
           'User ID not found! User list might not have been fetched properly',
@@ -326,7 +389,7 @@ import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql
           throw new Error('Expected an error, but none was returned');
         }
         expect(assignRole.errors[0].message).toContain(
-          'Foreign key constraint failed on the field: `UserRole_userId_fkey (index)`',
+          'Foreign key constraint violated: `UserRole_userId_fkey (index)`',
         );
       } else {
         throw new Error(

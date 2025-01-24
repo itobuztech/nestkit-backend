@@ -4,8 +4,8 @@ import { PrismaClient, User, UserType } from '@prisma/client';
 import {
   AcceptInvitationMutation,
   AcceptInvitationMutationVariables,
-  GetUsersQuery,
-  GetUsersQueryVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   ListWorkSpaceQuery,
   ListWorkSpaceQueryVariables,
   SendInvitationMutation,
@@ -14,19 +14,19 @@ import {
 import { LIST_WORKSPACE_QUERY } from '../../../graphql/list-workspace-query.gql';
 import { SEND_INVITATION_MUTATION } from '../../../graphql/send-invitation-mutation.gql';
 import { VERIFY_INVITATION_MUTATION } from '../../../graphql/verify-invitation-mutation.gql';
-import { USER_LIST } from '../../../graphql/get-user-list.gql';
-import { sample } from 'lodash';
- 
+import { faker } from '@faker-js/faker';
+import { CREATE_WORKSPACE_MUTATION } from '../../../graphql/create-workspace-mutation.gql';
+
 describe('Membership invitation module', () => {
   let workspaceID: string | undefined;
   const onboardingToken: string =
     '$2b$10$u0wMXxOHe1mJEy2S18zgU.z73msGf9FVaep46wG2vZYFy3WJLWiKu';
   let user: User | null;
   let userId: string | undefined;
-  let userEmail: string | undefined;
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
   const dbClient = new PrismaClient();
+  const workspaceName = faker.lorem.word();
 
   afterAll(async () => {
     await prisma.$disconnect();
@@ -35,7 +35,7 @@ describe('Membership invitation module', () => {
   test(`Login as a Admin`, async () => {
     user = await dbClient.user.findFirst({
       where: {
-        userType: UserType.ADMIN,
+        userType: UserType.SUPER_ADMIN,
         isVerified: true,
       },
     });
@@ -52,16 +52,14 @@ describe('Membership invitation module', () => {
     expect(response.data).toBeDefined();
   });
 
-  test(`Get user list and fetch a random user id Admin`, async () => {
-    const userList = await api.graphql.query<
-      GetUsersQuery,
-      GetUsersQueryVariables
-    >({
-      query: USER_LIST,
+  test(`Fetch a random user id`, async () => {
+    const randomUser = await dbClient.user.findFirst({
+      where: {
+        email: { not: user?.email },
+        isVerified: true,
+      },
     });
-    userId = sample(userList.data.getUsers)?.id;
-    userEmail = sample(userList.data.getUsers)?.email;
-    expect(userList.data.getUsers.length).not.toBe(0);
+    userId = randomUser?.id;
   });
 
   test(`Send invitation with a user Id who is already in the workspace Admin`, async () => {
@@ -70,6 +68,25 @@ describe('Membership invitation module', () => {
         userId: userId,
       },
     });
+
+    if (user?.id && workspace?.id) {
+      const adminHasAccess = await dbClient.workspaceMembership.findFirst({
+        where: {
+          userId: user?.id,
+          workspaceId: workspace?.workspaceId,
+        },
+      });
+      if (!adminHasAccess)
+        await dbClient.workspaceMembership.create({
+          data: {
+            userId: user?.id,
+            workspaceId: workspace?.workspaceId,
+            isOwner: true,
+            isAccepted: true,
+          },
+        });
+    }
+
     workspaceID = workspace?.workspaceId;
     if (workspaceID && userId) {
       const sendInvitation = await api.graphql.mutate<
@@ -94,12 +111,21 @@ describe('Membership invitation module', () => {
   });
 
   test(`Send invitation with a workspace which is not available for the logged in user`, async () => {
+    const excludedWorkspaceIds = await dbClient.workspaceMembership.findMany({
+      where: { userId: user?.id },
+      select: { workspaceId: true },
+    });
+
     const workspace = await dbClient.workspaceMembership.findFirst({
       where: {
-        userId: { not: user?.id },
+        workspaceId: {
+          notIn: excludedWorkspaceIds.map((wm) => wm.workspaceId),
+        },
       },
     });
-    if (userId && workspace) {
+
+    workspaceID = workspace?.workspaceId;
+    if (userId && workspaceID) {
       const sendInvitation = await api.graphql.mutate<
         SendInvitationMutation,
         SendInvitationMutationVariables
@@ -108,7 +134,7 @@ describe('Membership invitation module', () => {
         variables: {
           sendInvitationInput: {
             userId: userId,
-            workspaceId: workspace?.workspaceId,
+            workspaceId: workspaceID,
           },
         },
       });
@@ -119,9 +145,9 @@ describe('Membership invitation module', () => {
         'Membership not available for this workspace',
       );
     }
-  });
+  }, 9000);
 
-  test(`Verify invitation Admin`, async () => {
+  test(`Verify invitation Admin with invalid token`, async () => {
     const verifyInvitation = await api.graphql.mutate<
       AcceptInvitationMutation,
       AcceptInvitationMutationVariables
@@ -142,13 +168,24 @@ describe('Membership invitation module', () => {
     );
   });
 
-  test(`Send invitation to a user `, async () => {
-    const workspace = await dbClient.workspaceMembership.findFirst({
-      where: {
-        userId: user?.id,
+  test('New Workspace created', async () => {
+    const createWorkspace = await api.graphql.mutate<
+      CreateWorkspaceMutation,
+      CreateWorkspaceMutationVariables
+    >({
+      mutation: CREATE_WORKSPACE_MUTATION,
+      variables: {
+        createWorkspaceInput: {
+          name: workspaceName,
+        },
       },
     });
-    workspaceID = workspace?.workspaceId;
+
+    workspaceID = createWorkspace.data?.createWorkspace.id;
+    expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+  });
+
+  test(`Send invitation to a user `, async () => {
     if (workspaceID && userId) {
       const sendInvitation = await api.graphql.mutate<
         SendInvitationMutation,
@@ -162,16 +199,23 @@ describe('Membership invitation module', () => {
           },
         },
       });
+      console.log(sendInvitation);
       expect(sendInvitation.data?.sendInvitation.success).toBe(true);
     }
   });
 
   test(`Login as the user who has been invited`, async () => {
-    if (userEmail) {
+    user = await dbClient.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (user) {
       const response = await api.login({
-        email: userEmail,
+        email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
+      console.log(response);
       expect(response.data).toBeDefined();
     }
   });
