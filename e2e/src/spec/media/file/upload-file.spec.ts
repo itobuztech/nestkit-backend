@@ -222,6 +222,6 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
     });
 
-    expect(fileList.data.listMedia.file[0].id).not.toContain(fileId);
+    expect(fileList.data.listMedia.file[0].id).not.toBe(fileId);
   });
 });
