@@ -210,6 +210,28 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
     expect(deleteFile.data.deleteFile.valueOf()).toBeDefined();
   });
 
+  test('Delete media file from the from stash', async () => {
+    const deleteFile = await api.graphql.query<
+      DeleteFileMutation,
+      DeleteFileMutationVariables
+    >({
+      query: DELETE_MEDIA_MUTATION,
+      variables: {
+        fileDeleteInput: {
+          id: fileId,
+          fromStash: true,
+        },
+      },
+      context: {
+        headers: {
+          current_workspace_id: workspaceId,
+          Authorization: `Bearer ${loginResponse.data.login.token}`,
+        },
+      },
+    });
+    expect(deleteFile.data.deleteFile.valueOf()).toBeDefined();
+  });
+
   test('After deleting with fromStash false then fetch the list and check the file will not exist', async () => {
     const fileList = await api.graphql.query<FileQuery, FileQueryVariables>({
       query: FILE_LIST_QUERY,
@@ -223,5 +245,12 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
     });
 
     expect(fileList.data.listMedia.file[0].id).not.toBe(fileId);
+    const dbClient = new PrismaClient();
+    const post = await dbClient.folder.findUnique({
+      where: {
+        id: fileId,
+      },
+    });
+    expect(post).toBe(null);
   });
 });
