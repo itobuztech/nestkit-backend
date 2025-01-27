@@ -246,7 +246,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
     expect(fileList.data.listMedia.file[0].id).not.toBe(fileId);
     const dbClient = new PrismaClient();
-    const post = await dbClient.folder.findUnique({
+    const post = await dbClient.file.findFirst({
       where: {
         id: fileId,
       },
