@@ -5,7 +5,7 @@ import { USER_LIST } from '../../graphql/get-user-list.gql';
 import { GetUsersQuery, GetUsersQueryVariables } from '../../gql/graphql';
 
 describe('User List', () => {
-  [UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+  [UserType.USER, UserType.SUPER_ADMIN].forEach((type) => {
     const dbClient = new PrismaClient();
     const api = new GraphQlApi();
     beforeAll(async () => {

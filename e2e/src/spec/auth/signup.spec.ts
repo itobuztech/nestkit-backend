@@ -3,7 +3,6 @@ import { VERIFY_EMAIL_MUTATION } from '../../graphql/verify-email-mutation.gql';
 import { LOGIN_QUERY } from '../../graphql/login-query.gql';
 import { GraphQlApi } from '../../lib/graphql-api';
 import { waitForTime } from '../../lib/wait-for-time';
-import { fetchEmailsFromInbox } from '../../lib/fetchEmails';
 import { appEnv } from '../../lib/app-env';
 import { PrismaClient, User } from '@prisma/client';
 import {
@@ -16,19 +15,17 @@ import {
   VerifyEmailMutation,
   VerifyEmailMutationVariables,
 } from '../../gql/graphql';
+import { fetchEmailsMailHog } from '../../lib/fetchEmailsMailHog';
+import { faker } from '@faker-js/faker/.';
 
 describe('User Sign up', () => {
   let invitationLink: string | undefined;
   let onboardingToken: string | undefined;
   let addedUser: User | null;
   let userId: string | undefined;
-  const userEmail = `automation-${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`;
+  const userEmail = faker.internet.email();
   const api = new GraphQlApi();
   const prisma = new PrismaClient();
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
 
   test('Add a new user', async () => {
     const signUpData = await api.graphql.mutate<
@@ -47,21 +44,25 @@ describe('User Sign up', () => {
     const data = signUpData.data?.signup;
     userId = data?.id;
     expect(data?.id).not.toBe(null);
+    await waitForTime(30000);
+  }, 50000);
 
-    await waitForTime();
-  }, 10000);
+  test('Should create a verification URL', async () => {
+    invitationLink = await fetchEmailsMailHog('Welcome');
+    invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
+    onboardingToken = invitationLink?.replace(
+      'http://localhost:3020/verify-email?token&#x3D;',
+      '',
+    );
+    expect(invitationLink).toContain('verify-email');
+  });
 
   test('Should hash the password correctly', async () => {
     addedUser = await prisma.user.findUnique({
-      where: { email: userEmail },
+      where: { id: userId },
     });
-    expect(addedUser?.password).not.toBe(appEnv.SEED_PASSWORD);
-  });
 
-  test('Should create a verification URL', async () => {
-    invitationLink = await fetchEmailsFromInbox('Welcome');
-    onboardingToken = invitationLink?.substring(46);
-    expect(invitationLink).toContain('verify-email');
+    expect(addedUser?.password).not.toBe(appEnv.SEED_PASSWORD);
   });
 
   test('Should check if the user already exists', () => {
@@ -95,7 +96,6 @@ describe('User Sign up', () => {
         } as VerifyEmailInput,
       },
     });
-
     const data = verifyEmailData.data?.verifyEmail;
     expect(data?.refreshToken).not.toBe(null);
   });
@@ -119,7 +119,6 @@ describe('User Sign up', () => {
 
   test('should return the user ID after successful signup', async () => {
     expect(userId).not.toBe(null);
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });

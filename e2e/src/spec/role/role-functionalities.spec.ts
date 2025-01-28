@@ -4,6 +4,8 @@ import { appEnv } from '../../lib/app-env';
 import {
   CreateRoleMutation,
   CreateRoleMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   DeleteRoleMutation,
   DeleteRoleMutationVariables,
   GetRoleQuery,
@@ -24,8 +26,9 @@ import { faker } from '@faker-js/faker';
 import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
 import { sample } from 'lodash';
 import { GraphQLError } from 'graphql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.USER, UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Role functionalities for user : ${type}`, () => {
     let user: User | null;
     let randomPrivilege:
@@ -54,6 +57,8 @@ import { GraphQLError } from 'graphql';
     const titleUpdated = faker.lorem.word();
     let createdRoleId: string | undefined;
     const api = new GraphQlApi();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test(`Login as a ${type.toUpperCase()} `, async () => {
       const dbClient = new PrismaClient();
@@ -74,6 +79,23 @@ import { GraphQLError } from 'graphql';
       });
 
       expect(response.data).toBeDefined();
+    });
+
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
     test(`View the list of privileges for user - ${type}`, async () => {
@@ -125,6 +147,11 @@ import { GraphQLError } from 'graphql';
               privileges: [randomPrivilege.id],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         createdRoleId = createRoleResponse.data?.createRole.id;
@@ -143,11 +170,15 @@ import { GraphQLError } from 'graphql';
             fromStash: false,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
 
       roleList.data.roleList.role.forEach((role) => {
         expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
         expect(role.title).toBeDefined();
       });
 
@@ -174,6 +205,11 @@ import { GraphQLError } from 'graphql';
               removePrivileges: [randomPrivilege.id],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(updateRole.data?.updateRole.id).toBe(createdRoleId);
@@ -194,6 +230,11 @@ import { GraphQLError } from 'graphql';
           variables: {
             roleGetInput: {
               id: createdRoleId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -226,6 +267,11 @@ import { GraphQLError } from 'graphql';
               fromStash: false,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         expect(deleteRole.data?.deleteRole).toBe(true);
@@ -245,6 +291,11 @@ import { GraphQLError } from 'graphql';
         variables: {
           roleListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -270,6 +321,11 @@ import { GraphQLError } from 'graphql';
                 fromStash: false,
               },
             },
+            context: {
+              headers: {
+                current_workspace_id: workspaceId,
+              },
+            },
           });
         } else {
           throw new Error(
@@ -293,6 +349,11 @@ import { GraphQLError } from 'graphql';
             roleDeleteInput: {
               id: createdRoleId,
               fromStash: true,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });

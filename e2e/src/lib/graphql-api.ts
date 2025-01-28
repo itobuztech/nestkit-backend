@@ -13,7 +13,7 @@ import { LoginInput, LoginQuery } from '../gql/graphql';
 
 export class GraphQlApi {
   public graphql: ApolloClient<NormalizedCacheObject>;
-  private token: string | null = null;
+  private token?: string | null = null;
 
   constructor() {
     this.graphql = new ApolloClient({
@@ -40,10 +40,6 @@ export class GraphQlApi {
 
   private authLink() {
     return setContext((_, { headers }) => {
-      console.log({headers: {
-        ...headers,
-        authorization: this.token ? `Bearer ${this.token}` : '',
-      },});
       return {
         headers: {
           ...headers,

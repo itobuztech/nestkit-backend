@@ -4,14 +4,16 @@ import { appEnv } from '../../lib/app-env';
 import {
   CreatePostMutation,
   CreatePostMutationVariables,
-  CurrentUserQuery,
-  CurrentUserQueryVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   DeletePostMutation,
   DeletePostMutationVariables,
   GetPostListQuery,
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
+  GetUserPermissionQuery,
+  GetUserPermissionQueryVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -19,22 +21,24 @@ import { GET_POST_QUERY } from '../../graphql/get-post-query.gql';
 import { CREATE_POST_MUTATION } from '../../graphql/create-post-mutation.gql';
 import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
-import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
 import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-const userArrays = [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER];
+const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
   describe(`Post CRUD functionalities negative testing for ${userTypeRole} - NST-42`, () => {
     let user: User | null;
     let postId: string | undefined;
-    const content = faker.lorem.paragraph();
     const title = faker.lorem.word();
     let createFlag = false;
     let updateFlag = false;
     let deleteFlag = false;
     const api = new GraphQlApi();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test(`Login as a ${userTypeRole.toUpperCase()}`, async () => {
       const dbClient = new PrismaClient();
@@ -53,17 +57,37 @@ userArrays.forEach((userTypeRole) => {
       });
       expect(response.data).toBeDefined();
     });
-
-    test('Get current user privileges', async () => {
-      const currentUserResponse = await api.graphql.query<
-        CurrentUserQuery,
-        CurrentUserQueryVariables
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
       >({
-        query: CURRENT_USER_QUERY,
-        variables: {},
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
       });
 
-      for (const privilege of currentUserResponse.data.currentUser.privilege) {
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+    });
+    test('Get current user privileges', async () => {
+      const userPermissions = await api.graphql.query<
+        GetUserPermissionQuery,
+        GetUserPermissionQueryVariables
+      >({
+        query: GET_USER_PERMISSION,
+        variables: {},
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
+      });
+      for (const privilege of userPermissions.data.getUserPermission
+        .privilege) {
         if (privilege.group === 'POST') {
           if (privilege.name === 'CREATE') {
             createFlag = true;
@@ -73,33 +97,6 @@ userArrays.forEach((userTypeRole) => {
             deleteFlag = true;
           }
         }
-      }
-    });
-
-    test(`Create Post as ${userTypeRole} with wrong authorId`, async () => {
-      if (!user) return;
-      if (createFlag) {
-        const createPostResponse = await api.graphql.mutate<
-          CreatePostMutation,
-          CreatePostMutationVariables
-        >({
-          mutation: CREATE_POST_MUTATION,
-          variables: {
-            createPostInput: {
-              authorId: crypto.randomUUID(),
-              content: content,
-              published: faker.datatype.boolean(),
-              title: title,
-            },
-          },
-        });
-
-        if (!createPostResponse.errors) {
-          throw new Error('Expected an error, but none was returned');
-        }
-        expect(createPostResponse.errors[0].message).toContain(
-          'Foreign key constraint failed on the field: `Post_authorId_fkey (index)`',
-        );
       }
     });
 
@@ -113,10 +110,14 @@ userArrays.forEach((userTypeRole) => {
           mutation: CREATE_POST_MUTATION,
           variables: {
             createPostInput: {
-              authorId: user.id,
               content: '',
               published: faker.datatype.boolean(),
               title: '',
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -142,6 +143,11 @@ userArrays.forEach((userTypeRole) => {
               id: crypto.randomUUID(),
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
         if (!getPost.errors) {
           throw new Error('Expected an error, but none was returned');
@@ -160,6 +166,11 @@ userArrays.forEach((userTypeRole) => {
           variables: {
             getPostListInput: {
               fromStash: false,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -185,13 +196,18 @@ userArrays.forEach((userTypeRole) => {
               title: title,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
 
         if (!updatePostResponse.errors) {
           throw new Error('Expected an error, but none was returned');
         }
         expect(updatePostResponse.errors[0].message).toContain(
-          'An operation failed because it depends on one or more records that were required but not found',
+          'Post not found',
         );
       }
     });
@@ -211,6 +227,11 @@ userArrays.forEach((userTypeRole) => {
               content: '',
               published: faker.datatype.boolean(),
               title: '',
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -237,6 +258,11 @@ userArrays.forEach((userTypeRole) => {
             postDeleteInput: {
               id: crypto.randomUUID(),
               fromStash: false,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });

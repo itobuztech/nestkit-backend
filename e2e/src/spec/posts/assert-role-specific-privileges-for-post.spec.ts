@@ -6,6 +6,8 @@ import {
   AssignRoleMutationVariables,
   CreatePostMutation,
   CreatePostMutationVariables,
+  CreateWorkspaceMutation,
+  CreateWorkspaceMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   DeletePostMutation,
@@ -14,8 +16,8 @@ import {
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
-  RoleListQuery,
-  RoleListQueryVariables,
+  GetUserPermissionQuery,
+  GetUserPermissionQueryVariables,
   UnAssignRoleMutation,
   UnAssignRoleMutationVariables,
   UpdatePostMutation,
@@ -23,7 +25,6 @@ import {
   UpdateRoleMutation,
   UpdateRoleMutationVariables,
 } from '../../gql/graphql';
-import { GET_ROLE_LIST_QUERY } from '../../graphql/get-role-list-query.gql';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
 import { faker } from '@faker-js/faker';
@@ -35,8 +36,10 @@ import { UPDATE_POST_MUTATION } from '../../graphql/update-post-mutation.gql';
 import { GET_POST_LIST_QUERY } from '../../graphql/get-post-list-query.gql';
 import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
 
-[UserType.ADMIN, UserType.SUPER_ADMIN].forEach((type) => {
+[UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
     let loginUser: User | null;
     let user: User | null;
@@ -52,6 +55,8 @@ import { GraphQLError } from 'graphql';
     const titleUpdated = faker.lorem.word();
     const api = new GraphQlApi();
     const dbClient = new PrismaClient();
+    let workspaceId: string | undefined;
+    const workspaceName = faker.lorem.word();
 
     test('Login with the user', async () => {
       user = await dbClient.user.findFirst({
@@ -69,27 +74,66 @@ import { GraphQLError } from 'graphql';
       }
     });
 
-    test(`Fetch current user privileges for user - ${type}`, async () => {
+    test('New Workspace created', async () => {
+      const createWorkspace = await api.graphql.mutate<
+        CreateWorkspaceMutation,
+        CreateWorkspaceMutationVariables
+      >({
+        mutation: CREATE_WORKSPACE_MUTATION,
+        variables: {
+          createWorkspaceInput: {
+            name: workspaceName,
+          },
+        },
+      });
+      console.log(createWorkspace);
+      workspaceId = createWorkspace.data?.createWorkspace.id;
+      expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
+    });
+
+    test(`Fetch User permissions - ${type}`, async () => {
       async function currentUserInfo() {
-        const currentUser = await api.graphql.query<
-          CurrentUserQuery,
-          CurrentUserQueryVariables
+        const userPermissions = await api.graphql.query<
+          GetUserPermissionQuery,
+          GetUserPermissionQueryVariables
         >({
-          query: CURRENT_USER_QUERY,
+          query: GET_USER_PERMISSION,
           variables: {},
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
-
-        userId = currentUser.data.currentUser.id;
-
+        console.log(userPermissions);
         const privileges: string[] = [];
-        currentUser.data.currentUser.privilege.forEach((privilege) => {
-          if (privilege.group === 'POST') privileges?.push(privilege.id);
-        });
+        userPermissions.data.getUserPermission.privilege.forEach(
+          (privilege) => {
+            if (privilege.group === 'POST') privileges?.push(privilege.id);
+          },
+        );
 
         return privileges;
       }
 
       userPrivilegesArray = await currentUserInfo();
+    });
+
+    test(`Fetch user ID for user - ${type}`, async () => {
+      const currentUser = await api.graphql.query<
+        CurrentUserQuery,
+        CurrentUserQueryVariables
+      >({
+        query: CURRENT_USER_QUERY,
+        variables: {},
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
+      });
+
+      userId = currentUser.data.currentUser.id;
     });
 
     test(`Login as a ${type} `, async () => {
@@ -109,29 +153,34 @@ import { GraphQLError } from 'graphql';
       expect(response.data).toBeDefined();
     });
 
-    test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
-          },
+    test(`Get the role id of the user`, async () => {
+      const role = await dbClient.role.findFirst({
+        where: {
+          type: UserType.USER,
         },
       });
+      if (!role) {
+        return;
+      }
+      userRoleId = role?.id;
+    });
 
-      roleList.data.roleList.role.forEach((role) => {
-        expect(role.id).toBeDefined();
-        expect(role.name).toBeDefined();
-        expect(role.title).toBeDefined();
+    test(`Add the membership of the workspace to the ${type}`, async () => {
+      const superAdminUser = await dbClient.user.findFirst({
+        where: {
+          userType: UserType.SUPER_ADMIN,
+        },
       });
-
-      const userRole = roleList.data.roleList.role.find(
-        (role) => role.name === UserType.USER,
-      );
-      userRoleId = userRole?.id;
+      if (superAdminUser && workspaceId) {
+        await dbClient.workspaceMembership.create({
+          data: {
+            workspaceId,
+            userId: superAdminUser?.id,
+            isOwner: false,
+            isAccepted: true,
+          },
+        });
+      }
     });
 
     test(`Update role for user : ${type}`, async () => {
@@ -149,12 +198,17 @@ import { GraphQLError } from 'graphql';
               removePrivileges: userPrivilegesArray,
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
-
+        console.log(updateRole);
         expect(updateRole.data?.updateRole.id).toBe(userRoleId);
       } else {
         throw new Error(
-          'Random privilege id and created role id not found! The privilege list fetch and role creation might have failed!',
+          'User privilege array and user role id not found! The privilege list fetch and role creation might have failed!',
         );
       }
     });
@@ -171,7 +225,6 @@ import { GraphQLError } from 'graphql';
 
     test(`Create Post as USER`, async () => {
       try {
-        if (!user) return;
         await api.graphql.mutate<
           CreatePostMutation,
           CreatePostMutationVariables
@@ -179,10 +232,14 @@ import { GraphQLError } from 'graphql';
           mutation: CREATE_POST_MUTATION,
           variables: {
             createPostInput: {
-              authorId: user?.id,
               content: content,
               published: faker.datatype.boolean(),
               title: title,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -203,22 +260,15 @@ import { GraphQLError } from 'graphql';
     });
 
     test(`Fetch the role list and store the role ID - ${type}`, async () => {
-      const roleList = await api.graphql.query<
-        RoleListQuery,
-        RoleListQueryVariables
-      >({
-        query: GET_ROLE_LIST_QUERY,
-        variables: {
-          roleListInput: {
-            fromStash: false,
-          },
+      const role = await dbClient.role.findFirst({
+        where: {
+          type: type,
         },
       });
-
-      const userRole = roleList.data.roleList.role.find(
-        (role) => role.name === type,
-      );
-      roleIdToBeAssigned = userRole?.id;
+      if (!role) {
+        return;
+      }
+      roleIdToBeAssigned = role?.id;
     });
 
     test(`Assign the ${type} role to the user`, async () => {
@@ -255,7 +305,6 @@ import { GraphQLError } from 'graphql';
     });
 
     test(`Create Post as USER`, async () => {
-      if (!user) return;
       const createPostResponse = await api.graphql.mutate<
         CreatePostMutation,
         CreatePostMutationVariables
@@ -263,14 +312,18 @@ import { GraphQLError } from 'graphql';
         mutation: CREATE_POST_MUTATION,
         variables: {
           createPostInput: {
-            authorId: user?.id,
             content: content,
             published: faker.datatype.boolean(),
             title: title,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
-
+      console.log(createPostResponse);
       const data = createPostResponse.data;
       expect(data?.createPost.id).toBeDefined();
 
@@ -287,6 +340,11 @@ import { GraphQLError } from 'graphql';
           variables: {
             getPostInput: {
               id: postId,
+            },
+          },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
             },
           },
         });
@@ -309,10 +367,14 @@ import { GraphQLError } from 'graphql';
         variables: {
           postId: postId,
           updatePostInput: {
-            authorId: user?.id,
             content: updatedContent,
             published: faker.datatype.boolean(),
             title: updatedTitle,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -330,6 +392,11 @@ import { GraphQLError } from 'graphql';
         variables: {
           getPostListInput: {
             fromStash: false,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -359,6 +426,11 @@ import { GraphQLError } from 'graphql';
             fromStash: false,
           },
         },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
+          },
+        },
       });
       expect(deletePostResponse.data?.deletePost).toBe(true);
     });
@@ -375,6 +447,11 @@ import { GraphQLError } from 'graphql';
           postDeleteInput: {
             id: postId,
             fromStash: true,
+          },
+        },
+        context: {
+          headers: {
+            current_workspace_id: workspaceId,
           },
         },
       });
@@ -436,8 +513,13 @@ import { GraphQLError } from 'graphql';
               removePrivileges: [],
             },
           },
+          context: {
+            headers: {
+              current_workspace_id: workspaceId,
+            },
+          },
         });
-
+        console.log(updateRole);
         expect(updateRole.data?.updateRole.id).toBe(userRoleId);
       } else {
         throw new Error(
