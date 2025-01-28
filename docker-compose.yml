@@ -1,5 +1,4 @@
 name: nest-starter
-version: '3.7'
 services:
 
   mailhog:
