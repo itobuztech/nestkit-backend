@@ -1,13 +1,12 @@
 name: nest-starter
-version: '3.7'
 services:
 
   mailhog:
     image: mailhog/mailhog:latest
     restart: always
     ports:
-      - 1025:1025
-      - 8025:8025
+     - '${SMTP_PORT:-1025}:1025'
+     - '${WEB_MAIL_PORT:-8025}:8025'
 
   postgres:
       container_name: postgres
@@ -19,16 +18,16 @@ services:
         - POSTGRES_USER=nodeProdUser
         - POSTGRES_DB=nest_starter
       ports:
-        - '5433:5432'
+        - '${POSTGRES_PORT:-5432}:5432'
       # postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter
       
-  sonarqube:
-     image: sonarqube:community
-     ports:
-        - '9000:9000'
-     environment:
-      - SONARQUBE_JDBC_USERNAME=sonar
-      - SONARQUBE_JDBC_PASSWORD=sonar
-      - SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
+  # sonarqube:
+  #    image: sonarqube:community
+  #    ports:
+  #       - '9000:9000'
+  #    environment:
+  #     - SONARQUBE_JDBC_USERNAME=sonar
+  #     - SONARQUBE_JDBC_PASSWORD=sonar
+  #     - SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
   
       

@@ -38,7 +38,10 @@ export const appEnv = cleanEnv(process.env, {
 
   //  Mail sending
   MAIL_FROM_USER: str({ default: 'example', desc: 'Mail from user' }),
-  MAIL_FROM_EMAIL: str({ default: 'example@example.com', desc: 'Mail from email' }),
+  MAIL_FROM_EMAIL: str({
+    default: 'example@example.com',
+    desc: 'Mail from email',
+  }),
 
   // FRONTEND_URL
   SIGNUP_VERIFY_URL: str({
@@ -66,6 +69,31 @@ export const appEnv = cleanEnv(process.env, {
 
   // Pagination
   PAGE_SIZE: num({ default: 10 }),
+
+  // AWS
+  AWS_REGION: str({ default: 'ap-south-1' }),
+  AWS_ACCESS_KEY_ID:
+    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
+      ? str()
+      : str({ default: '' }),
+  AWS_SECRET_ACCESS_KEY:
+    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
+      ? str()
+      : str({ default: '' }),
+  AWS_PUBLIC_BUCKET:
+    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
+      ? str()
+      : str({ default: '' }),
+  AWS_SECURE_BUCKET:
+    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
+      ? str()
+      : str({ default: '' }),
+  AWS_PUBLIC_BUCKET_URL:
+    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
+      ? str()
+      : str({ default: '' }),
+  SIGNED_URL_EXPIRY: num({ default: 3600 }),
+  isS3Enabled: bool({ default: false }),
 });
 
 export default appEnv;

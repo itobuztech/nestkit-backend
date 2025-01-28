@@ -17,6 +17,7 @@ import { ThrottleTestModule } from './throttle-test/throttle-test.module';
 import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './auth/throttler.guard';
+import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
 
 @Module({
@@ -51,6 +52,8 @@ import appEnv from './env';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
+    
+    AwsModule,
   ],
   providers: [
     {
