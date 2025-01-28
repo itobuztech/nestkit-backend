@@ -1,11 +1,19 @@
-import { Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { Request } from "express";
+import {
+  Controller,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
-import { FileService } from "../file/file.service";
-import { UpdateProfileImageService } from "./update-profile-image.service";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
-
+import { FileService } from '../file/file.service';
+import { UpdateProfileImageService } from './update-profile-image.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import appEnv from 'src/env';
+import { File } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Controller('media')
@@ -21,8 +29,22 @@ export class UpdateProfileImageController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ) {
-    const filePath = await this.uploadMediaService.saveFile(file);
-    const media = await this.uploadMediaService.uploadMedia({ ...file, path: filePath }, { workspaceId: req.currentWorkspaceId as string });
-    return await this.updateProfileImage.updateProfileMedia(media, req.user?.id || '');
+    const workspaceId = req.currentWorkspaceId as string;
+    let media: File;
+    if (appEnv.isS3Enabled) {
+      media = await this.uploadMediaService.uploadMedia({
+        file,
+        workspaceId,
+      });
+    } else {
+      media = await this.uploadMediaService.saveFile({
+        file,
+        workspaceId,
+      });
+    }
+    return await this.updateProfileImage.updateProfileMedia(
+      media,
+      req.user?.id || '',
+    );
   }
 }
