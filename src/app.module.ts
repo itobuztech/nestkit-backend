@@ -47,13 +47,12 @@ import appEnv from './env';
       csrfPrevention: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
+    AwsModule,
     
     // Always place to bottom
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    
-    AwsModule,
   ],
   providers: [
     {

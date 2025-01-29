@@ -141,15 +141,17 @@ export class FileService {
     // Fetching old file metadata
     const metadata = await sharp(fileBuffer).metadata();
 
+    
+    let croppedBuffer = fileBuffer;
     // creating new file with cropped image
     if (metadata.width && metadata.height) {
-      cropInput.width = metadata.width;
-      cropInput.height = metadata.height;
-      cropInput.top = cropInput.top ?? 0;
-      cropInput.left = cropInput.left ?? 0;
+      croppedBuffer = await sharp(fileBuffer).extract(cropInput).toBuffer();
+    } else {
+      // If the image is not valid, block the execution of the function
+      return;
     }
 
-    const croppedBuffer = await sharp(fileBuffer).extract(cropInput).toBuffer();
+   
 
     // Storing the new file
     if (appEnv.isS3Enabled) {
