@@ -21,6 +21,7 @@ import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -50,10 +51,21 @@ import { AppService } from './app.service';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     AwsModule,
+    ClientsModule.register([
+      {
+        name: 'USERS_SERVICE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'users',
+          protoPath: join(process.cwd(), 'src/grpc/users.proto'),
+          url: 'localhost:50051',
+        },
+      },
+    ]),
     
     // Always place to bottom
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
+      rootPath: join(process.cwd(), 'public'),
     }),
   ],
   providers: [
