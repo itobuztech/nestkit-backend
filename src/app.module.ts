@@ -19,6 +19,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './auth/throttler.guard';
 import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -55,10 +57,12 @@ import appEnv from './env';
     }),
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
