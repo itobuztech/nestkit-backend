@@ -64,6 +64,22 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+
+    // RabbitMQ Client
+
+    ClientsModule.register([
+			{
+				name: 'NOTIFICATION_SERVICE',
+				transport: Transport.RMQ,
+				options: {
+					urls: [appEnv.RABBIT_MQ_URL],
+					queue: 'notification_queue',
+					queueOptions: {
+						durable: false,
+					},
+				},
+			},
+		]),
     
     // Always place to bottom
     ServeStaticModule.forRoot({

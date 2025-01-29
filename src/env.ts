@@ -1,16 +1,14 @@
 import { cleanEnv, str, email, num, bool, makeValidator } from 'envalid';
 
 const awsConfigValidator = makeValidator((value) => {
-
-    if (process.env.isS3Enabled && process.env.isS3Enabled === 'true') {
-      if (!value) {
-        throw new Error('Field is required')
-      }
+  if (process.env.isS3Enabled && process.env.isS3Enabled === 'true') {
+    if (!value) {
+      throw new Error('Field is required');
     }
+  }
 
-    return value;
-    
-})
+  return value;
+});
 
 export const appEnv = cleanEnv(process.env, {
   DATABASE_URL: str({
@@ -82,19 +80,24 @@ export const appEnv = cleanEnv(process.env, {
   PAGE_SIZE: num({ default: 10 }),
 
   // AWS
-  AWS_REGION: awsConfigValidator({ default: ''}),
-  AWS_ACCESS_KEY_ID: awsConfigValidator({ default: ''}),
-  AWS_SECRET_ACCESS_KEY: awsConfigValidator({ default: ''}),
-  AWS_PUBLIC_BUCKET: awsConfigValidator({ default: ''}),
-  AWS_SECURE_BUCKET: awsConfigValidator({ default: ''}),
-  AWS_PUBLIC_BUCKET_URL: awsConfigValidator({ default: ''}),
+  AWS_REGION: awsConfigValidator({ default: '' }),
+  AWS_ACCESS_KEY_ID: awsConfigValidator({ default: '' }),
+  AWS_SECRET_ACCESS_KEY: awsConfigValidator({ default: '' }),
+  AWS_PUBLIC_BUCKET: awsConfigValidator({ default: '' }),
+  AWS_SECURE_BUCKET: awsConfigValidator({ default: '' }),
+  AWS_PUBLIC_BUCKET_URL: awsConfigValidator({ default: '' }),
   AWS_SIGNED_URL_EXPIRY: num({ default: 3600 }),
   isS3Enabled: bool({ default: false }),
-
 
   // GRPC
   GRPC_PORT: num({ default: 4001 }),
   GRPC_CONNECTION_URL: str({ default: 'localhost:4001' }),
+
+  // RabbitMQ
+  RABBIT_MQ_URL: str({
+    default: 'amqp://admin:admin@localhost:5672',
+    desc: 'amqp://<username>:<password>@<host>:<port>/<vhost>',
+  }),
 });
 
 console.log(appEnv.AWS_ACCESS_KEY_ID);
