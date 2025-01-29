@@ -22,9 +22,10 @@ export class AppController implements OnModuleInit {
     return this.appService.getHello();
   }
 
-  @Get('users')
+  @Get('grpc-client')
   async getUsers() {
     return this.usersService.GetUser({ email: 'Jon@gmail.com' });
+    // return { email: 'example.com' }
   }
 
   @GrpcMethod('UsersService', 'GetUser')

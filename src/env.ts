@@ -1,4 +1,16 @@
-import { cleanEnv, str, email, num, bool } from 'envalid';
+import { cleanEnv, str, email, num, bool, makeValidator } from 'envalid';
+
+const awsConfigValidator = makeValidator((value) => {
+
+    if (process.env.isS3Enabled && process.env.isS3Enabled === 'true') {
+      if (!value) {
+        throw new Error('Field is required')
+      }
+    }
+
+    return value;
+    
+})
 
 export const appEnv = cleanEnv(process.env, {
   DATABASE_URL: str({
@@ -15,8 +27,7 @@ export const appEnv = cleanEnv(process.env, {
   SEED_EMAIL: email({ default: 'example@example.com' }),
   JSON_TOKEN_SECRET: str({ default: 'SamLauncher@123' }),
   CORS_ORIGIN: str({
-    default: '*',
-    desc: 'Comma separated list of origins examples http://localhost:4000,http://localhost:3020',
+    default: 'http://localhost:4000,http://localhost:3020',
   }),
   BACKEND_URL: str({ default: 'http://localhost:4000' }),
   FRONTEND_URL: str({ default: 'http://localhost:3020' }),
@@ -71,29 +82,20 @@ export const appEnv = cleanEnv(process.env, {
   PAGE_SIZE: num({ default: 10 }),
 
   // AWS
-  AWS_REGION: str({ default: 'ap-south-1' }),
-  AWS_ACCESS_KEY_ID:
-    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
-      ? str()
-      : str({ default: '' }),
-  AWS_SECRET_ACCESS_KEY:
-    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
-      ? str()
-      : str({ default: '' }),
-  AWS_PUBLIC_BUCKET:
-    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
-      ? str()
-      : str({ default: '' }),
-  AWS_SECURE_BUCKET:
-    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
-      ? str()
-      : str({ default: '' }),
-  AWS_PUBLIC_BUCKET_URL:
-    process.env.isS3Enabled && process.env.isS3Enabled === 'true'
-      ? str()
-      : str({ default: '' }),
-  SIGNED_URL_EXPIRY: num({ default: 3600 }),
+  AWS_REGION: awsConfigValidator({ default: ''}),
+  AWS_ACCESS_KEY_ID: awsConfigValidator({ default: ''}),
+  AWS_SECRET_ACCESS_KEY: awsConfigValidator({ default: ''}),
+  AWS_PUBLIC_BUCKET: awsConfigValidator({ default: ''}),
+  AWS_SECURE_BUCKET: awsConfigValidator({ default: ''}),
+  AWS_PUBLIC_BUCKET_URL: awsConfigValidator({ default: ''}),
+  AWS_SIGNED_URL_EXPIRY: num({ default: 3600 }),
   isS3Enabled: bool({ default: false }),
+
+
+  // GRPC
+  GRPC_PORT: num({ default: 4001 }),
+  GRPC_CONNECTION_URL: str({ default: 'localhost:4001' }),
 });
 
+console.log(appEnv.AWS_ACCESS_KEY_ID);
 export default appEnv;

@@ -51,6 +51,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     AwsModule,
+
+    // GRPC Client
     ClientsModule.register([
       {
         name: 'USERS_SERVICE',
@@ -58,7 +60,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         options: {
           package: 'users',
           protoPath: join(process.cwd(), 'src/grpc/users.proto'),
-          url: 'localhost:50051',
+          url: appEnv.GRPC_CONNECTION_URL,
         },
       },
     ]),

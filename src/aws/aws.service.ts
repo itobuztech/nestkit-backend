@@ -16,13 +16,15 @@ export class AwsService {
   private readonly s3Client: S3Client;
 
   constructor() {
-    this.s3Client = new S3Client({
-      region: appEnv.AWS_REGION,
-      credentials: {
-        accessKeyId: appEnv.AWS_ACCESS_KEY_ID,
-        secretAccessKey: appEnv.AWS_SECRET_ACCESS_KEY,
-      },
-    });
+    if (appEnv.isS3Enabled) {
+      this.s3Client = new S3Client({
+        region: appEnv.AWS_REGION,
+        credentials: {
+          accessKeyId: appEnv.AWS_ACCESS_KEY_ID,
+          secretAccessKey: appEnv.AWS_SECRET_ACCESS_KEY,
+        },
+      });
+    }
   }
 
   async uploadFile(
@@ -74,7 +76,7 @@ export class AwsService {
         Key: s3Key,
       });
       const response = await getSignedUrl(this.s3Client, command, {
-        expiresIn: appEnv.SIGNED_URL_EXPIRY,
+        expiresIn: appEnv.AWS_SIGNED_URL_EXPIRY,
       });
       return response;
     }

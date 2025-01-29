@@ -89,12 +89,12 @@ export class GetFileService {
           },
           update: {
             signedUrl: fileUrl,
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+            expiresAt: new Date(Date.now() + appEnv.AWS_SIGNED_URL_EXPIRY * 1000),
           },
           create: {
             signedUrl: fileUrl,
             fileId: file.id,
-            expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+            expiresAt: new Date(Date.now() + appEnv.AWS_SIGNED_URL_EXPIRY * 1000),
           },
         });
 

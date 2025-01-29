@@ -60,7 +60,7 @@ export class FileService {
         data: {
           signedUrl: fileUrl,
           fileId: media.id,
-          expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          expiresAt: new Date(Date.now() + appEnv.AWS_SIGNED_URL_EXPIRY * 1000),
         },
       });
     }
