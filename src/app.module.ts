@@ -5,7 +5,6 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SentryModule } from '@sentry/nestjs/setup';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { RoleModule } from './roles/role.module';
 import { PostModule } from './post/post.module';
@@ -20,9 +19,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './auth/throttler.guard';
 import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { QueModule } from './que/que.module';
+import { GrpcModule } from './grpc/grpc.module';
+import { RabitMqModule } from './rabitMq/rabitmq.module';
 
 @Module({
   imports: [
@@ -38,6 +37,8 @@ import { QueModule } from './que/que.module';
     }),
     AuthModule,
     QueModule,
+    GrpcModule,
+    RabitMqModule,
     ThrottleTestModule,
     WorkspaceModule,
     RoleModule,
@@ -54,33 +55,6 @@ import { QueModule } from './que/que.module';
     }),
     AwsModule,
 
-    // GRPC Client
-    ClientsModule.register([
-      {
-        name: 'USERS_SERVICE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'users',
-          protoPath: join(process.cwd(), 'src/grpc/users.proto'),
-          url: appEnv.GRPC_CONNECTION_URL,
-        },
-      },
-    ]),
-
-    // RabbitMQ Producer
-    ClientsModule.register([
-      {
-        name: 'NOTIFICATION_SERVICE',
-        transport: Transport.RMQ,
-        options: {
-          urls: [appEnv.RABBIT_MQ_URL],
-          queue: 'notification_queue',
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ]),
 
     // Always place to bottom
     ServeStaticModule.forRoot({
@@ -88,12 +62,10 @@ import { QueModule } from './que/que.module';
     }),
   ],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
   ],
-  controllers: [AppController],
 })
 export class AppModule {}
