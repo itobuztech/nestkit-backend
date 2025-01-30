@@ -6,6 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SentryModule } from '@sentry/nestjs/setup';
 
+
 import { RoleModule } from './roles/role.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
@@ -65,8 +66,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       },
     ]),
 
-    // RabbitMQ Client
-
+    // RabbitMQ Producer
     ClientsModule.register([
 			{
 				name: 'NOTIFICATION_SERVICE',
@@ -80,6 +80,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 				},
 			},
 		]),
+
     
     // Always place to bottom
     ServeStaticModule.forRoot({

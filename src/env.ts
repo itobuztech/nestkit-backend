@@ -100,5 +100,4 @@ export const appEnv = cleanEnv(process.env, {
   }),
 });
 
-console.log(appEnv.AWS_ACCESS_KEY_ID);
 export default appEnv;

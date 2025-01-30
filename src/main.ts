@@ -29,6 +29,7 @@ async function bootstrap() {
     },
   });
 
+  // RabbitMQ Consumer
   app.connectMicroservice<MicroserviceOptions>({
 		transport: Transport.RMQ,
 		options: {
