@@ -98,6 +98,14 @@ export const appEnv = cleanEnv(process.env, {
     default: 'amqp://admin:admin@localhost:5672',
     desc: 'amqp://<username>:<password>@<host>:<port>/<vhost>',
   }),
+
+  // Redis
+  REDIS_HOST: str({
+    default: 'localhost',
+  }),
+  REDIS_PORT: num({
+    default: 6379,
+  }),
 });
 
 export default appEnv;

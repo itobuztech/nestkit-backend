@@ -5,7 +5,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SentryModule } from '@sentry/nestjs/setup';
-
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { RoleModule } from './roles/role.module';
 import { PostModule } from './post/post.module';
@@ -22,21 +22,22 @@ import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { QueModule } from './que/que.module';
 
 @Module({
   imports: [
     SentryModule.forRoot(),
     PrismaModule,
     ThrottlerModule.forRootAsync({
-      useFactory: (): ThrottlerModuleOptions => ([
+      useFactory: (): ThrottlerModuleOptions => [
         {
           ttl: appEnv.THROTTLE_TTL,
           limit: appEnv.THROTTLE_LIMIT,
         },
-      ]),
+      ],
     }),
     AuthModule,
+    QueModule,
     ThrottleTestModule,
     WorkspaceModule,
     RoleModule,
@@ -68,20 +69,19 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
     // RabbitMQ Producer
     ClientsModule.register([
-			{
-				name: 'NOTIFICATION_SERVICE',
-				transport: Transport.RMQ,
-				options: {
-					urls: [appEnv.RABBIT_MQ_URL],
-					queue: 'notification_queue',
-					queueOptions: {
-						durable: false,
-					},
-				},
-			},
-		]),
+      {
+        name: 'NOTIFICATION_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [appEnv.RABBIT_MQ_URL],
+          queue: 'notification_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
 
-    
     // Always place to bottom
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
