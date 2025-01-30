@@ -38,13 +38,13 @@ type PrivilegeResponse {
   name: String!
   group: String!
   id: String!
-  type: type!
+  type: privilegeType!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
 }
 
-enum type {
+enum privilegeType {
   BASE
 }
 
@@ -57,10 +57,26 @@ type RoleUpdateResponse {
 }
 
 type RolePrivilegeResponse {
-  group: String!
-  name: String!
+  group: privilegeGroup!
+  name: privilegeName!
   id: String!
-  type: String!
+  type: privilegeType!
+}
+
+enum privilegeGroup {
+  POST
+  USER
+  ROLE
+  WORKSPACE
+  MEMBERSHIP
+  MEDIA
+}
+
+enum privilegeName {
+  CREATE
+  READ
+  UPDATE
+  DELETE
 }
 
 type RoleGetResponse {

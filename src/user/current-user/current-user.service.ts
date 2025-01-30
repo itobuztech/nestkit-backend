@@ -1,5 +1,5 @@
 import { Context, Query, Resolver } from '@nestjs/graphql';
-import { RoleType } from '@prisma/client';
+import { PrivilegeType, RoleType } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -73,7 +73,7 @@ export class CurrentUserService {
         id: privilege.privilege.id,
         name: privilege.privilege.name,
         group: privilege.privilege.group,
-        type: privilege.privilege.type || '',
+        type: privilege.privilege.type || PrivilegeType.BASE,
       });
     });
 
