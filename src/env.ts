@@ -13,7 +13,7 @@ const awsConfigValidator = makeValidator((value) => {
 export const appEnv = cleanEnv(process.env, {
   DATABASE_URL: str({
     default:
-      'postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter',
+      'postgresql://nodeProdUser:postgresPasswword@localhost:5432/nest_starter',
   }),
   PORT: num({ default: 4000 }),
   ADMIN_EMAIL: email({ default: 'admin@example.com' }),

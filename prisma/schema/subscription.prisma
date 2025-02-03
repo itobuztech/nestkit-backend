@@ -1,0 +1,64 @@
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+
+model SubscriptionPlan {
+  id            String         @id @default(uuid())
+
+  name          String         @unique
+  description   String?
+
+  price         Float
+  currency      String         @default("USD")
+  durationDays  Int 
+  isActive      Boolean        @default(true)
+  subscriptions Subscription[] @relation(name: "planSubscriptionRelation")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+  payments  Payment[]         @relation(name: "paymentSubscriptionRelation")
+
+  userId String
+  user   User   @relation(name: "userSubscriptionRelation", fields: [userId], references: [id], onDelete: Cascade)
+
+  planId    String
+  plan   SubscriptionPlan @relation(name: "planSubscriptionRelation", fields: [planId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  amount         Float
+  currency       String        @default("USD")
+  paymentDate    DateTime      @default(now())
+  status         PaymentStatus @default(PENDING)
+
+  subscriptionId String
+  subscription Subscription @relation(name: "paymentSubscriptionRelation", fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+

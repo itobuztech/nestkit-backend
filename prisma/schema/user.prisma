@@ -25,6 +25,7 @@ model User {
   userType           UserType   @default(USER)
   posts              Post[]
 
+  subscriptions  Subscription[] @relation(name: "userSubscriptionRelation")
   roles UserRole[] @relation(name: "userRoleRelation")
   pages Page[]     @relation(name: "userPageRelation")
 

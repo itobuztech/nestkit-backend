@@ -21,14 +21,14 @@ services:
         - '${POSTGRES_PORT:-5432}:5432'
       # postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter
       
-  sonarqube:
-     image: sonarqube:community
-     ports:
-        - '9000:9000'
-     environment:
-      - SONARQUBE_JDBC_USERNAME=${SONARQUBE_JDBC_USERNAME:-sonar}
-      - SONARQUBE_JDBC_PASSWORD=${SONARQUBE_JDBC_PASSWORD:-sonar}
-      - SONARQUBE_JDBC_URL=${SONARQUBE_JDBC_URL:-jdbc:postgresql://postgres:5432/sonar}
+  # sonarqube:
+  #    image: sonarqube:community
+  #    ports:
+  #       - '9000:9000'
+  #    environment:
+  #     - SONARQUBE_JDBC_USERNAME=${SONARQUBE_JDBC_USERNAME:-sonar}
+  #     - SONARQUBE_JDBC_PASSWORD=${SONARQUBE_JDBC_PASSWORD:-sonar}
+  #     - SONARQUBE_JDBC_URL=${SONARQUBE_JDBC_URL:-jdbc:postgresql://postgres:5432/sonar}
 
   rabbitmq:
     image: rabbitmq:3.12-management  # Includes the management UI
