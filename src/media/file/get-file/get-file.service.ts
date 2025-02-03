@@ -111,6 +111,6 @@ export class GetFileService {
       }
     }
 
-    return file.url;
+    return `${appEnv.BACKEND_URL}/${file.url}`;
   }
 }
