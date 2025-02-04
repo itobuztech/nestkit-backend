@@ -23,4 +23,25 @@ export class MessageService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async addConnection(userId: string, socketId: string) {
+    return this.prisma.connectedUser.create({
+      data: {
+        userId,
+        socketId,
+      },
+    });
+  }
+
+  async removeConnection(socketId: string) {
+    return await this.prisma.connectedUser.deleteMany({
+      where: { socketId: socketId },
+    });
+  }
+
+  async getConnections(userId: string) {
+    return this.prisma.connectedUser.findMany({
+      where: { userId },
+    });
+  }
 }

@@ -8,3 +8,12 @@ model Message {
   sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 }
+
+model ConnectedUser {
+  id        String   @id @default(uuid())
+  userId    String
+  socketId  String
+  createdAt DateTime @default(now())
+
+  user User @relation(name: "connectedUserMessage", fields: [userId], references: [id], onDelete: Cascade)
+}

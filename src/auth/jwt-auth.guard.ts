@@ -52,6 +52,8 @@ export class JwtAuthGuard implements CanActivate {
     } else if (context.getType<GqlContextType>() === 'graphql') {
       const ctx = GqlExecutionContext.create(context);
       return ctx.getContext().req;
+    } else if (context.getType() === 'ws') {
+      return context.switchToWs().getClient().handshake;
     }
     throw new UnauthorizedException('Invalid context type');
   }

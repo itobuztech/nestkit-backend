@@ -33,6 +33,7 @@ model User {
   session             Session[]             @relation(name: "userSessionRelation")
   messagesSent   Message[] @relation("MessageSender")
   messagesReceived Message[] @relation("MessageReceiver")
+  messageConnection ConnectedUser[] @relation(name: "connectedUserMessage")
 
   folder Folder[] @relation(name: "FolderUserRelation")
   file   File[]   @relation(name: "FileUserRelation")
