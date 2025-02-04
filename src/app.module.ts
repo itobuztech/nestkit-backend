@@ -1,3 +1,4 @@
+import { MessageModule } from './message/message.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -36,6 +37,7 @@ import { RabitMqModule } from './rabitMq/rabitmq.module';
       ],
     }),
     AuthModule,
+    MessageModule,
     QueModule,
     GrpcModule,
     RabitMqModule,
@@ -54,7 +56,6 @@ import { RabitMqModule } from './rabitMq/rabitmq.module';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     AwsModule,
-
 
     // Always place to bottom
     ServeStaticModule.forRoot({

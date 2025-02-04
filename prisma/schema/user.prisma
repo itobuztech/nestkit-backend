@@ -31,6 +31,8 @@ model User {
 
   workspaceMembership WorkspaceMembership[] @relation(name: "userIdMembershipRelation")
   session             Session[]             @relation(name: "userSessionRelation")
+  messagesSent   Message[] @relation("MessageSender")
+  messagesReceived Message[] @relation("MessageReceiver")
 
   folder Folder[] @relation(name: "FolderUserRelation")
   file   File[]   @relation(name: "FileUserRelation")
