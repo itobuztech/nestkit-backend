@@ -1,7 +1,13 @@
+enum AppConfigField {
+  APP_NAME
+  LOGO_URL
+  FAVICON_URL
+}
+
 model AppConfig {
   id String @id @default(uuid())
   
-  key String @unique
+  field AppConfigField @unique
   value String
 
   createdAt DateTime @default(now())
