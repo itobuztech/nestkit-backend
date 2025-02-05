@@ -106,6 +106,12 @@ export const appEnv = cleanEnv(process.env, {
   REDIS_PORT: num({
     default: 6379,
   }),
+
+
+  // CURRENCY
+  DEFAULT_CURRENCY: str({
+    default: 'USD',
+  }),
 });
 
 export default appEnv;
