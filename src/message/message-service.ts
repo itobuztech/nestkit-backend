@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service'; // Ensure Prisma is set up
-import { Prisma } from '@prisma/client';
+import { ConnectedUserStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class MessageService {
@@ -29,13 +29,15 @@ export class MessageService {
       data: {
         userId,
         socketId,
+        status: ConnectedUserStatus.ONLINE
       },
     });
   }
 
-  async removeConnection(socketId: string) {
-    return await this.prisma.connectedUser.deleteMany({
+  async updateConnection(socketId: string) {
+    return await this.prisma.connectedUser.updateMany({
       where: { socketId: socketId },
+      data: { status: ConnectedUserStatus.OFFLINE },
     });
   }
 

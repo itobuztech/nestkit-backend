@@ -40,7 +40,7 @@ export class MessageGateway {
   }
 
   async handleDisconnect(client: Socket) {
-    await this.messageService.removeConnection(client.id);
+    await this.messageService.updateConnection(client.id);
     console.log(`Client disconnected: ${client.id}`);
   }
 
