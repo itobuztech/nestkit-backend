@@ -29,6 +29,7 @@ export class ResizeFileService {
     @Args('resizeFileInput', { nullable: true })
     resizeFileInput: ResizeFileInput,
   ) {
+    
     const file = await this.prismaService.file.findUnique({
       where: { id: resizeFileInput.id },
     });
@@ -52,31 +53,31 @@ export class ResizeFileService {
       });
     }
 
-    let filePath = '';
+    let filePath = null;
 
     // Fetching old file
-    const oldFileBuffer = await this.getOldFile(file);
+    const originalFile = await this.getOldFile(file);
 
     // resizing image
     if (
-      resizeFileInput.resizeOptions.left &&
-      resizeFileInput.resizeOptions.top
+      typeof resizeFileInput.resizeOptions.left === 'number' &&
+      typeof resizeFileInput.resizeOptions.top === 'number'
     ) {
       filePath = await this.fileService.cropImage(
         file,
         resizeFileInput.resizeOptions,
-        oldFileBuffer,
+        originalFile,
       );
     } else {
       filePath = await this.fileService.resizeImage(
         file,
         resizeFileInput.resizeOptions,
-        oldFileBuffer,
+        originalFile,
       );
     }
 
     let fileUrl = filePath;
-    if (appEnv.isS3Enabled) {
+    if (appEnv.isS3Enabled && filePath) {
       fileUrl = await this.awsService.getfileUrl(filePath, file.accessLevel!);
     }
 
@@ -95,7 +96,7 @@ export class ResizeFileService {
         mimeType: file.mimeType,
         size: file.size,
         accessLevel: file.accessLevel,
-        url: fileUrl,
+        url: fileUrl || '',
         workspaceId: file.workspaceId,
         s3Key: appEnv.isS3Enabled ? filePath : null,
       },
@@ -105,9 +106,9 @@ export class ResizeFileService {
     if (media.s3Key && media.accessLevel === AccessLevel.RESTRICTED) {
       await this.prismaService.s3AccessSession.create({
         data: {
-          signedUrl: fileUrl,
+          signedUrl: fileUrl || '',
           fileId: media.id,
-          expiresAt: new Date(Date.now() + appEnv.SIGNED_URL_EXPIRY * 1000),
+          expiresAt: new Date(Date.now() + appEnv.AWS_SIGNED_URL_EXPIRY * 1000),
         },
       });
     }

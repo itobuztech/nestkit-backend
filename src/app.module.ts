@@ -1,3 +1,4 @@
+import { MessageModule } from './message/message.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -19,20 +20,27 @@ import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './auth/throttler.guard';
 import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
+import { QueModule } from './que/que.module';
+import { GrpcModule } from './grpc/grpc.module';
+import { RabitMqModule } from './rabitMq/rabitmq.module';
 
 @Module({
   imports: [
     SentryModule.forRoot(),
     PrismaModule,
     ThrottlerModule.forRootAsync({
-      useFactory: (): ThrottlerModuleOptions => ([
+      useFactory: (): ThrottlerModuleOptions => [
         {
           ttl: appEnv.THROTTLE_TTL,
           limit: appEnv.THROTTLE_LIMIT,
         },
-      ]),
+      ],
     }),
     AuthModule,
+    MessageModule,
+    QueModule,
+    GrpcModule,
+    RabitMqModule,
     ThrottleTestModule,
     WorkspaceModule,
     RoleModule,
@@ -47,13 +55,12 @@ import appEnv from './env';
       csrfPrevention: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
-    
+    AwsModule,
+
     // Always place to bottom
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
+      rootPath: join(process.cwd(), 'public'),
     }),
-    
-    AwsModule,
   ],
   providers: [
     {

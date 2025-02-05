@@ -1,5 +1,9 @@
 {
-  "cSpell.words": ["TESTINATOR"],
+  "cSpell.words": [
+    "Rabit",
+    "rabitmq",
+    "TESTINATOR"
+  ],
   "editor.tabSize": 2,
   "sonarlint.connectedMode.project": {
     "connectionId": "localhost",

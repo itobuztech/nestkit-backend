@@ -1,11 +1,23 @@
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType, registerEnumType } from "@nestjs/graphql";
+import { PrivilegeGroup, PrivilegeName, PrivilegeType } from "@prisma/client";
+
+registerEnumType(PrivilegeGroup, {
+  name: 'privilegeGroup',
+});
+
+registerEnumType(PrivilegeName, {
+  name: 'privilegeName',
+});
+registerEnumType(PrivilegeType, {
+  name: 'privilegeType',
+});
 
 @ObjectType()
 export class RolePrivilegeResponse {
-  @Field() group: string;
-  @Field() name: string;
+  @Field(() => PrivilegeGroup) group: PrivilegeGroup;
+  @Field(() => PrivilegeName) name: PrivilegeName;
   @Field() id: string;
-  @Field() type: string;
+  @Field(() => PrivilegeType) type: PrivilegeType;
 }
 
 @ObjectType()
