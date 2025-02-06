@@ -17,7 +17,6 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = this.getRequest(context);
     const token = this.extractTokenFromHeader(request);
-    console.log(request.headers);
     const currentWorkspaceId = request.headers[appConfig.currentworkspaceid] as string;
 
     if (!token) {
