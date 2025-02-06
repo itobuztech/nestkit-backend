@@ -17,7 +17,8 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = this.getRequest(context);
     const token = this.extractTokenFromHeader(request);
-    const currentWorkspaceId = request.headers[appConfig.current_workspace_id] as string;
+    console.log(request.headers);
+    const currentWorkspaceId = request.headers[appConfig.currentworkspaceid] as string;
 
     if (!token) {
       throw new UnauthorizedException('No token provided');
