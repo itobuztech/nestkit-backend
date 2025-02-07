@@ -13,7 +13,7 @@ import { FileService } from '../file/file.service';
 import { UpdateProfileImageService } from './update-profile-image.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import appEnv from 'src/env';
-import { File } from '@prisma/client';
+import { AccessLevel, File } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Controller('media')
@@ -35,6 +35,7 @@ export class UpdateProfileImageController {
       media = await this.uploadMediaService.uploadMedia({
         file,
         workspaceId,
+        accessLevel: AccessLevel.PUBLIC,
       });
     } else {
       media = await this.uploadMediaService.saveFile({
