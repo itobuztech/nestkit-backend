@@ -352,6 +352,29 @@ type CreateUpdateSubscriptionPlanResponse {
   message: String!
 }
 
+type PlanInfoResponse {
+  id: String!
+  title: String!
+  description: String
+  feature: SubscriptionFeature
+  order: Float!
+  enabled: Boolean!
+  planId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+enum SubscriptionFeature {
+  MEDIA
+  CUSTOM_ROLE
+}
+
+type ListPlanInfoResponse {
+  planInfoList: [PlanInfoResponse!]!
+  pagination: BaseListResponse!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -370,6 +393,7 @@ type Query {
   getFolder(getFolderInput: GetFolderInput!): GetFolderResponse!
   listFolder(listFolderInput: ListFolderInput): FolderListResponse!
   listSubscriptionPlan(listSubscriptionPlanInput: ListSubscriptionPlanInput!): ListSubscriptionPlanResponse!
+  listPlanInfo(listPlanInfoInput: ListPlanInfoInput!): ListPlanInfoResponse!
 }
 
 input LoginInput {
@@ -508,6 +532,21 @@ enum subscriptionPlanOrderByField {
   createdAt
   name
   price
+}
+
+input ListPlanInfoInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  title: String
+  planId: String!
+  orderByField: planInfoOrderByField = createdAt
+}
+
+enum planInfoOrderByField {
+  createdAt
+  title
 }
 
 type Mutation {
