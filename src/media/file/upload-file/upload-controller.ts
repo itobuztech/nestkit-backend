@@ -29,7 +29,18 @@ export class UploadMediaController {
     MemberShipValidationType.MEMBERSHIP_VALIDITY,
   )
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: appEnv.MAX_FILE_SIZE,
+    },
+    fileFilter: (req, file, callback) => {
+      if (appEnv.ALLOWED_MIME_TYPES.split(',').includes(file.mimetype)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Invalid file type'), false);
+      }
+    },
+  }))
   async uploadFile(
     @Body('accessLevel') accessLevel: AccessLevel,
     @UploadedFile() file: Express.Multer.File,

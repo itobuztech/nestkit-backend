@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import appEnv from 'src/env';
 const prismaClient = new PrismaClient();
+import { faker } from '@faker-js/faker';
 
 async function subscriptionPlan() {
   await prismaClient.subscriptionPlan.deleteMany();
@@ -56,13 +57,11 @@ async function subscriptionPlan() {
 async function subscriptionInfo() {
   await prismaClient.subscriptionPlanInfo.deleteMany();
 
-  const subscriptionPremiumPlan = await prismaClient.subscriptionPlan.findFirst(
-    {
-      where: {
-        name: 'Premium',
-      },
+  const subscriptionPremiumPlan = await prismaClient.subscriptionPlan.findFirst({
+    where: {
+      name: 'Premium',
     },
-  );
+  });
 
   if (!subscriptionPremiumPlan) {
     return;
@@ -79,12 +78,11 @@ async function subscriptionInfo() {
   });
 
   /// Add more subscription info here
-  const subscriptionUltimatePlan =
-    await prismaClient.subscriptionPlan.findFirst({
-      where: {
-        name: 'Ultimate',
-      },
-    });
+  const subscriptionUltimatePlan = await prismaClient.subscriptionPlan.findFirst({
+    where: {
+      name: 'Ultimate',
+    },
+  });
 
   if (!subscriptionUltimatePlan) {
     return;
@@ -116,8 +114,8 @@ async function couponSeed() {
   await prismaClient.coupon.createMany({
     data: [
       {
-        code: 'TESTCODE',
-        description: 'Test Coupon',
+        code: faker.string.alphanumeric(8),
+        description: faker.lorem.sentence(),
         discountType: DiscountType.PERCENTAGE,
         discountValue: 10,
         minPurchaseAmount: 200,
@@ -125,8 +123,8 @@ async function couponSeed() {
         validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       },
       {
-        code: 'TESTCODE2',
-        description: 'Test Coupon 2',
+        code: faker.string.alphanumeric(8),
+        description: faker.lorem.sentence(),
         discountType: DiscountType.PERCENTAGE,
         discountValue: 20,
         minPurchaseAmount: 1000,
@@ -170,11 +168,7 @@ async function paymentSeed() {
       await prismaClient.payment.create({
         data: {
           subscriptionId: subscription.id,
-          amount:
-            subscription.plan.price -
-            (subscription.plan.price *
-              (subscription.coupon?.discountValue || 0)) /
-              100,
+          amount: subscription.plan.price - (subscription.plan.price * (subscription.coupon?.discountValue || 0)) / 100,
           appliedCouponId: subscription.couponId,
           gateway: PaymentGateway.RAZORPAY,
           status: index % 2 ? PaymentStatus.FAILED : PaymentStatus.SUCCESS,
