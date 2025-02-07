@@ -23,6 +23,7 @@ import appEnv from './env';
 import { QueModule } from './que/que.module';
 import { GrpcModule } from './grpc/grpc.module';
 import { RabitMqModule } from './rabitMq/rabitmq.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { RabitMqModule } from './rabitMq/rabitmq.module';
     PostModule,
     UserModule,
     MediaModule,
+    SubscriptionModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       introspection: true,

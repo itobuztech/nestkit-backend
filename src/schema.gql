@@ -329,6 +329,24 @@ type FolderListResponse {
   pagination: BaseListResponse!
 }
 
+type SubscriptionPlanResponse {
+  id: String!
+  name: String!
+  description: String
+  price: Float!
+  currency: String!
+  durationDays: Float!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type ListSubscriptionPlanResponse {
+  subscriptionPlans: [SubscriptionPlanResponse!]!
+  pagination: BaseListResponse!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -346,6 +364,7 @@ type Query {
   getFile(getFileInput: GetFileInput): GetFileResponse
   getFolder(getFolderInput: GetFolderInput!): GetFolderResponse!
   listFolder(listFolderInput: ListFolderInput): FolderListResponse!
+  listSubscriptionPlan(listSubscriptionPlanInput: ListSubscriptionPlanInput!): ListSubscriptionPlanResponse!
 }
 
 input LoginInput {
@@ -469,6 +488,21 @@ enum FolderOrderByField {
   title
   authorId
   published
+}
+
+input ListSubscriptionPlanInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  name: String
+  orderByField: subscriptionPlanOrderByField = createdAt
+}
+
+enum subscriptionPlanOrderByField {
+  createdAt
+  name
+  price
 }
 
 type Mutation {
