@@ -380,6 +380,11 @@ type CreateUpdatePlanInfoResponse {
   message: String!
 }
 
+type DeletePlanInfoResponse {
+  success: Boolean!
+  message: String!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -590,6 +595,7 @@ type Mutation {
   updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
   createUpdateSubscriptionPlan(input: CreateUpdateSubscriptionPlanInput!): CreateUpdateSubscriptionPlanResponse!
   createUpdatePlanInfo(input: CreateUpdatePlanInfoInput!): CreateUpdatePlanInfoResponse!
+  deletePlanInfo(deletePlanInfoInput: DeletePlanInfoInput!): DeletePlanInfoResponse!
 }
 
 input PasswordResetRequestInput {
@@ -794,4 +800,9 @@ input CreateUpdatePlanInfoInput {
   feature: SubscriptionFeature
   enabled: Boolean
   planId: String!
+}
+
+input DeletePlanInfoInput {
+  id: String!
+  fromStash: Boolean
 }
