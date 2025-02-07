@@ -347,7 +347,7 @@ type ListSubscriptionPlanResponse {
   pagination: BaseListResponse!
 }
 
-type CreateSubscriptionPlanResponse {
+type CreateUpdateSubscriptionPlanResponse {
   id: String!
   message: String!
 }
@@ -544,7 +544,7 @@ type Mutation {
   createFolder(createFolderInput: CreateFolderInput): CreateFolderResponse!
   deleteFolder(folderDeleteInput: DeleteFolderInput): Boolean!
   updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
-  createSubscriptionPlan(input: CreateSubscriptionPlanInput!): CreateSubscriptionPlanResponse!
+  createUpdateSubscriptionPlan(input: CreateUpdateSubscriptionPlanInput!): CreateUpdateSubscriptionPlanResponse!
 }
 
 input PasswordResetRequestInput {
@@ -732,7 +732,8 @@ input UpdateFolderInput {
   parentId: String
 }
 
-input CreateSubscriptionPlanInput {
+input CreateUpdateSubscriptionPlanInput {
+  id: String
   name: String!
   description: String
   price: Float!

@@ -1,8 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsUUID } from 'class-validator';
 
 @InputType()
-export class CreateSubscriptionPlanInput {
+export class CreateUpdateSubscriptionPlanInput {
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsUUID(undefined, { message: 'Please provide a valid plan id' })
+  id?: string;
+
   @Field(() => String)
   name: string;
 
