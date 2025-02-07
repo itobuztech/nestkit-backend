@@ -4,6 +4,7 @@ import { CreateUpdateSubscriptionPlanService } from './create-update-subscriptio
 import { ListPlanInfoService } from './list-plan-info/list-plan-info.service';
 import { CreateUpdatePlanInfoService } from './create-update-plan-info/create-update-plan-info.service';
 import { DeletePlanInfoService } from './delete-plan-info/delete-plan-info.service';
+import { DeletePlanService } from './delete-plan/delete-plan.service';
 
 @Module({
   providers: [
@@ -12,6 +13,7 @@ import { DeletePlanInfoService } from './delete-plan-info/delete-plan-info.servi
     ListPlanInfoService,
     CreateUpdatePlanInfoService,
     DeletePlanInfoService,
+    DeletePlanService,
   ],
   exports: [],
 })

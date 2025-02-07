@@ -1,7 +1,6 @@
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUpdateSubscriptionPlanInput } from './create-update-subscription-plan-input.dto';
 import { appConfig } from 'src/app.config';
@@ -13,7 +12,6 @@ import { CreateUpdateSubscriptionPlanResponse } from './create-update-subscripti
 export class CreateUpdateSubscriptionPlanService {
   constructor(private readonly prisma: PrismaService) {}
 
-  @UseGuards(RoleGuard)
   @Mutation(() => CreateUpdateSubscriptionPlanResponse)
   async createUpdateSubscriptionPlan(
     @Args('input')

@@ -385,6 +385,11 @@ type DeletePlanInfoResponse {
   message: String!
 }
 
+type DeletePlanResponse {
+  success: Boolean!
+  message: String!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -596,6 +601,7 @@ type Mutation {
   createUpdateSubscriptionPlan(input: CreateUpdateSubscriptionPlanInput!): CreateUpdateSubscriptionPlanResponse!
   createUpdatePlanInfo(input: CreateUpdatePlanInfoInput!): CreateUpdatePlanInfoResponse!
   deletePlanInfo(deletePlanInfoInput: DeletePlanInfoInput!): DeletePlanInfoResponse!
+  deletePlan(deletePlanInput: DeletePlanInput!): DeletePlanResponse!
 }
 
 input PasswordResetRequestInput {
@@ -803,6 +809,11 @@ input CreateUpdatePlanInfoInput {
 }
 
 input DeletePlanInfoInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input DeletePlanInput {
   id: String!
   fromStash: Boolean
 }
