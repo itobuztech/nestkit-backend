@@ -16,6 +16,7 @@ enum PrivilegeGroup {
   WORKSPACE
   MEMBERSHIP
   MEDIA
+  SUBSCRIPTION
 }
 
 enum RoleType {

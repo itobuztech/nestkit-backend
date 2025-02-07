@@ -70,6 +70,7 @@ enum privilegeGroup {
   WORKSPACE
   MEMBERSHIP
   MEDIA
+  SUBSCRIPTION
 }
 
 enum privilegeName {
