@@ -19,7 +19,7 @@ export class UpdateProfileImageService {
 
     return {
       success: true,
-      profileImage: `${appEnv.BACKEND_URL}/${response.profileImage}`,
+      profileImage: response.profileImage?.includes('http') ? response.profileImage  : `${appEnv.BACKEND_URL}/${response.profileImage}`,
     }
   }
 }
