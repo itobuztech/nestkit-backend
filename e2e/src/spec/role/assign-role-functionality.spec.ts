@@ -179,7 +179,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -208,7 +208,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -296,7 +296,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           variables: {},
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -354,7 +354,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
               },
               context: {
                 headers: {
-                  current_workspace_id: workspaceId,
+                  currentWorkSpaceId: workspaceId,
                 },
               },
             });
@@ -436,7 +436,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         variables: {},
         context: {
           headers: {
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });

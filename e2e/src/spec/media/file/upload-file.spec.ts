@@ -84,7 +84,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
         {
           headers: {
             ...formData.getHeaders(),
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
             Authorization: `Bearer ${loginResponse.data.login.token}`,
           },
         },
@@ -106,7 +106,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -127,7 +127,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -156,7 +156,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -177,7 +177,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -202,7 +202,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -224,7 +224,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -238,7 +238,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
       context: {
         headers: {
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
