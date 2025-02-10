@@ -89,6 +89,39 @@ export const appEnv = cleanEnv(process.env, {
   AWS_SIGNED_URL_EXPIRY: num({ default: 3600 }),
   isS3Enabled: bool({ default: false }),
 
+
+  // File Types 
+  ALLOWED_MIME_TYPES: str({
+    default: [
+      'text/plain',          // .txt
+      'application/pdf',     // .pdf
+      'image/jpeg',          // .jpg, .jpeg
+      'image/png',           // .png
+      'image/gif',           // .gif
+      'application/msword',  // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/vnd.ms-excel', // .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-powerpoint', // .ppt
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+      'application/zip',     // .zip
+      'application/x-tar',   // .tar
+      'application/x-rar-compressed', // .rar
+      'application/x-7z-compressed', // .7z
+      'text/csv',            // .csv
+      'application/rtf',     // .rtf
+      'video/mp4',           // .mp4
+      'video/x-msvideo',     // .avi
+      'video/x-ms-wmv',      // .wmv
+      'video/mpeg',          // .mpeg
+      'video/quicktime',     // .mov
+      'video/x-flv',         // .flv
+      'video/webm',          // .webm
+      'video/ogg',           // .ogv
+    ].toString(),
+  }),
+  MAX_FILE_SIZE: num({ default: 50 * 1024 * 1024 }), // 50MB
+
   // GRPC
   GRPC_PORT: num({ default: 4001 }),
   GRPC_CONNECTION_URL: str({ default: 'localhost:4001' }),
@@ -106,6 +139,14 @@ export const appEnv = cleanEnv(process.env, {
   REDIS_PORT: num({
     default: 6379,
   }),
+
+
+  // CURRENCY
+  DEFAULT_CURRENCY: str({
+    default: 'USD',
+  }),
+
+
 });
 
 export default appEnv;

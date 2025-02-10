@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolePrivilegeResponse } from 'src/roles/get-role/role-get-response.dto';
 import { CurrentUserResponse } from './current-user.response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -28,6 +29,10 @@ export class CurrentUserService {
 
     if (!user) {
       throw new Error('User not found');
+    }
+
+    if (!user.profileImage?.includes('http') && user.profileImage) {
+      user.profileImage = `${appEnv.BACKEND_URL}/${user.profileImage}`;
     }
 
     const ownerMembership = await this.prisma.workspaceMembership.findFirst({

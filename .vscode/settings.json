@@ -8,5 +8,8 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "localhost",
     "projectKey": "nest-starter-backend"
-  }
+  },
+  "editor.rulers": [
+    120
+  ],
 }
