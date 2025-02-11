@@ -2,38 +2,31 @@ import { HttpStatus, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUpdateSubscriptionPlanInput } from './create-update-subscription-plan-input.dto';
+import { CreateSubscriptionPlanInput } from './create-subscription-plan-input.dto';
 import { appConfig } from 'src/app.config';
 import { CreateAppError } from 'src/shared/create-error/create-error';
-import { CreateUpdateSubscriptionPlanResponse } from './create-update-subscription-plan-response.dto';
+import { CreateSubscriptionPlanResponse } from './create-subscription-plan-response.dto';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
-export class CreateUpdateSubscriptionPlanService {
+export class CreateSubscriptionPlanService {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Mutation(() => CreateUpdateSubscriptionPlanResponse)
-  async createUpdateSubscriptionPlan(
+  @Mutation(() => CreateSubscriptionPlanResponse)
+  async createSubscriptionPlan(
     @Args('input')
-    input: CreateUpdateSubscriptionPlanInput,
-  ): Promise<CreateUpdateSubscriptionPlanResponse> {
+    input: CreateSubscriptionPlanInput,
+  ): Promise<CreateSubscriptionPlanResponse> {
     try {
-      const { id: planId, ...rest } = input;
-      const plan = await this.prisma.subscriptionPlan.upsert({
-        where: { id: planId || '' },
-        update: {
-          ...rest,
-          isActive: input.isActive ?? undefined,
-          currency: input.currency ?? undefined,
-        },
-        create: {
-          ...rest,
+      const plan = await this.prisma.subscriptionPlan.create({
+        data: {
+          ...input,
           isActive: input.isActive ?? undefined,
           currency: input.currency ?? undefined,
         },
       });
       return {
-        message: `Plan ${input.id ? 'updated' : 'created'} successfully`,
+        message: `Plan created successfully`,
         id: plan.id,
       };
     } catch (error) {

@@ -1,11 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { SubscriptionFeature } from '@prisma/client';
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsUUID } from 'class-validator';
 
 @InputType()
 export class UpdatePlanInfoInput {
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+  @Field(() => String)
   @IsUUID(undefined, { message: 'Please provide a valid plan id' })
   id: string;
 
