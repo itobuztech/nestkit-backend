@@ -348,7 +348,7 @@ type ListSubscriptionPlanResponse {
   pagination: BaseListResponse!
 }
 
-type CreateUpdateSubscriptionPlanResponse {
+type CreateSubscriptionPlanResponse {
   id: String!
   message: String!
 }
@@ -376,7 +376,12 @@ type ListPlanInfoResponse {
   pagination: BaseListResponse!
 }
 
-type CreateUpdatePlanInfoResponse {
+type CreatePlanInfoResponse {
+  id: String!
+  message: String!
+}
+
+type UpdatePlanInfoResponse {
   id: String!
   message: String!
 }
@@ -599,8 +604,9 @@ type Mutation {
   createFolder(createFolderInput: CreateFolderInput): CreateFolderResponse!
   deleteFolder(folderDeleteInput: DeleteFolderInput): Boolean!
   updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
-  createUpdateSubscriptionPlan(input: CreateUpdateSubscriptionPlanInput!): CreateUpdateSubscriptionPlanResponse!
-  createUpdatePlanInfo(input: CreateUpdatePlanInfoInput!): CreateUpdatePlanInfoResponse!
+  createSubscriptionPlan(input: CreateSubscriptionPlanInput!): CreateSubscriptionPlanResponse!
+  createPlanInfo(input: CreatePlanInfoInput!): CreatePlanInfoResponse!
+  updatePlanInfo(input: UpdatePlanInfoInput!): UpdatePlanInfoResponse!
   deletePlanInfo(deletePlanInfoInput: DeletePlanInfoInput!): DeletePlanInfoResponse!
   deletePlan(deletePlanInput: DeletePlanInput!): DeletePlanResponse!
 }
@@ -790,8 +796,7 @@ input UpdateFolderInput {
   parentId: String
 }
 
-input CreateUpdateSubscriptionPlanInput {
-  id: String
+input CreateSubscriptionPlanInput {
   name: String!
   description: String
   price: Float!
@@ -800,8 +805,16 @@ input CreateUpdateSubscriptionPlanInput {
   isActive: Boolean = true
 }
 
-input CreateUpdatePlanInfoInput {
-  id: String
+input CreatePlanInfoInput {
+  title: String!
+  description: String
+  feature: SubscriptionFeature
+  enabled: Boolean
+  planId: String!
+}
+
+input UpdatePlanInfoInput {
+  id: String!
   title: String!
   description: String
   feature: SubscriptionFeature

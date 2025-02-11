@@ -1,11 +1,13 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppError } from 'src/shared/create-error/create-error';
-import { HttpStatus, UseGuards } from '@nestjs/common';
+import { HttpStatus, SetMetadata, UseGuards } from '@nestjs/common';
 import { appConfig } from 'src/app.config';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { DeletePlanInput } from './delete-plan-input.dto';
 import { DeletePlanResponse } from './delete-plan-response.dto';
+import { RoleGuard } from 'src/auth/role.guard';
+import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -13,6 +15,9 @@ export class DeletePlanService {
   constructor(private readonly prisma: PrismaService) {}
 
   @Mutation(() => DeletePlanResponse)
+  @UseGuards(RoleGuard)
+  @SetMetadata('privilegeGroup', PrivilegeGroup.SUBSCRIPTION)
+  @SetMetadata('privilegeName', PrivilegeName.DELETE)
   async deletePlan(@Args('deletePlanInput') deletePlanInput: DeletePlanInput): Promise<DeletePlanResponse> {
     try {
       if (deletePlanInput.fromStash) {

@@ -1,4 +1,4 @@
-import { HttpStatus, UseGuards } from '@nestjs/common';
+import { HttpStatus, SetMetadata, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -6,6 +6,8 @@ import { CreateSubscriptionPlanInput } from './create-subscription-plan-input.dt
 import { appConfig } from 'src/app.config';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import { CreateSubscriptionPlanResponse } from './create-subscription-plan-response.dto';
+import { RoleGuard } from 'src/auth/role.guard';
+import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -13,6 +15,9 @@ export class CreateSubscriptionPlanService {
   constructor(private readonly prisma: PrismaService) {}
 
   @Mutation(() => CreateSubscriptionPlanResponse)
+  @UseGuards(RoleGuard)
+  @SetMetadata('privilegeGroup', PrivilegeGroup.SUBSCRIPTION)
+  @SetMetadata('privilegeName', PrivilegeName.CREATE)
   async createSubscriptionPlan(
     @Args('input')
     input: CreateSubscriptionPlanInput,
