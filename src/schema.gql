@@ -396,6 +396,11 @@ type DeletePlanResponse {
   message: String!
 }
 
+type UpdateSubscriptionPlanResponse {
+  id: String!
+  message: String!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -606,6 +611,7 @@ type Mutation {
   updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
   createSubscriptionPlan(input: CreateSubscriptionPlanInput!): CreateSubscriptionPlanResponse!
   createPlanInfo(input: CreatePlanInfoInput!): CreatePlanInfoResponse!
+  updateSubscriptionPlan(input: UpdateSubscriptionPlanInput!): UpdateSubscriptionPlanResponse!
   updatePlanInfo(input: UpdatePlanInfoInput!): UpdatePlanInfoResponse!
   deletePlanInfo(deletePlanInfoInput: DeletePlanInfoInput!): DeletePlanInfoResponse!
   deletePlan(deletePlanInput: DeletePlanInput!): DeletePlanResponse!
@@ -811,6 +817,16 @@ input CreatePlanInfoInput {
   feature: SubscriptionFeature
   enabled: Boolean
   planId: String!
+}
+
+input UpdateSubscriptionPlanInput {
+  id: String!
+  name: String!
+  description: String
+  price: Float!
+  currency: String
+  durationDays: Float!
+  isActive: Boolean = true
 }
 
 input UpdatePlanInfoInput {
