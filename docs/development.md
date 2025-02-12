@@ -25,5 +25,6 @@ docker run \
     -v "${YOUR_REPO}:/usr/src" \
     sonarsource/sonar-scanner-cli
 
-
+## Redis docker run fix
+sudo sysctl vm.overcommit_memory=1
  
