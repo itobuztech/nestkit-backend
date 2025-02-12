@@ -1,0 +1,9 @@
+ services:
+    sonarqube:
+     image: sonarqube:community
+     ports:
+        - '${SONAR_PORT:-9000}:9000'
+     environment:
+      - SONARQUBE_JDBC_USERNAME=${SONARQUBE_JDBC_USERNAME:-sonar}
+      - SONARQUBE_JDBC_PASSWORD=${SONARQUBE_JDBC_PASSWORD:-sonar}
+      - SONARQUBE_JDBC_URL=${SONARQUBE_JDBC_URL:-jdbc:postgresql://postgres:5432/sonar}
