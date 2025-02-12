@@ -51,7 +51,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     SubscriptionModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      introspection: true,
+      introspection: appEnv.INTROSPECTION,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
       csrfPrevention: false,

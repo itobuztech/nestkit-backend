@@ -11,6 +11,7 @@ const awsConfigValidator = makeValidator((value) => {
 });
 
 export const appEnv = cleanEnv(process.env, {
+  INTROSPECTION: bool({ default: true }),
   DATABASE_URL: str({
     default:
       'postgresql://nodeProdUser:postgresPasswword@localhost:5432/nest_starter',
