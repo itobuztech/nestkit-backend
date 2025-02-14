@@ -15,8 +15,9 @@ import { FileService } from '../file.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
 import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
-import { AccessLevel, File } from '@prisma/client';
+import { AccessLevel, File, PrivilegeGroup, PrivilegeName } from '@prisma/client';
 import appEnv from 'src/env';
+import { RoleGuard } from 'src/auth/role.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('media')
@@ -28,6 +29,9 @@ export class UploadMediaController {
     'memberShipValidationType',
     MemberShipValidationType.MEMBERSHIP_VALIDITY,
   )
+  @UseGuards(RoleGuard)
+  @SetMetadata('privilegeGroup', PrivilegeGroup.MEDIA)
+  @SetMetadata('privilegeName', PrivilegeName.CREATE)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {
     limits: {
