@@ -5,7 +5,7 @@ import { SetMetadata, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolePrivilegeResponse } from 'src/roles/get-role/role-get-response.dto';
 import { orderBy, unionBy } from 'lodash';
-import { RoleType } from '@prisma/client';
+import { PrivilegeType, RoleType } from '@prisma/client';
 import { WorkspaceMemberShipGuard } from 'src/auth/workspace-membership.guard';
 import { MemberShipValidationType } from 'src/auth/membership-validation-type.enum';
 import { GetUserPermissionResponse } from './get-user-permission.response.dto';
@@ -66,7 +66,7 @@ export class GetPermissionService {
         id: privilege.privilege.id,
         name: privilege.privilege.name,
         group: privilege.privilege.group,
-        type: privilege.privilege.type || '',
+        type: privilege.privilege.type || PrivilegeType.BASE,
       });
     });
 

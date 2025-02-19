@@ -18,6 +18,8 @@
 
 
 ## Sonar Analysis 
+docker-compose -f docker-compose-static-analysis.yml up -d
+
 docker run \
     --rm \
     -e SONAR_HOST_URL="http://localhost:9000"  \
@@ -25,5 +27,6 @@ docker run \
     -v "${YOUR_REPO}:/usr/src" \
     sonarsource/sonar-scanner-cli
 
-
+## Redis docker run fix
+sudo sysctl vm.overcommit_memory=1
  

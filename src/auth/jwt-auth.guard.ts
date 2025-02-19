@@ -17,7 +17,7 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = this.getRequest(context);
     const token = this.extractTokenFromHeader(request);
-    const currentWorkspaceId = request.headers[appConfig.current_workspace_id] as string;
+    const currentWorkspaceId = request.headers[appConfig.currentworkspaceid] as string;
 
     if (!token) {
       throw new UnauthorizedException('No token provided');
@@ -52,6 +52,8 @@ export class JwtAuthGuard implements CanActivate {
     } else if (context.getType<GqlContextType>() === 'graphql') {
       const ctx = GqlExecutionContext.create(context);
       return ctx.getContext().req;
+    } else if (context.getType() === 'ws') {
+      return context.switchToWs().getClient().handshake;
     }
     throw new UnauthorizedException('Invalid context type');
   }

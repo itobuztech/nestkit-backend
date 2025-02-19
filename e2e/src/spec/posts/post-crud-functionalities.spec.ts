@@ -12,6 +12,8 @@ import {
   GetPostListQueryVariables,
   GetPostQuery,
   GetPostQueryVariables,
+  RestoreMutation,
+  RestoreMutationVariables,
   GetUserPermissionQuery,
   GetUserPermissionQueryVariables,
   RestoreMutation,

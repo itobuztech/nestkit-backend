@@ -16,6 +16,7 @@ enum PrivilegeGroup {
   WORKSPACE
   MEMBERSHIP
   MEDIA
+  SUBSCRIPTION
 }
 
 enum RoleType {
@@ -41,7 +42,7 @@ model Role {
   type        RoleType        @default(CUSTOM)
   title       String
   description String?
-  workspace   Workspace?      @relation(name: "workSpaceRoles", fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace?      @relation(name: "roleWorkspaceRelation", fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceId String?
   privileges  RolePrivilege[] @relation("rolePrivilegeRelation")
   users       UserRole[]      @relation("roleUserRelation")
@@ -64,11 +65,14 @@ model RolePrivilege {
 }
 
 model UserRole {
-  id        String    @id @default(uuid())
-  user      User      @relation(name: "userRoleRelation", fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  role      Role      @relation(name: "roleUserRelation", fields: [roleId], references: [id], onDelete: Cascade)
-  roleId    String
+  id          String     @id @default(uuid())
+  user        User       @relation(name: "userRoleRelation", fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  role        Role       @relation(name: "roleUserRelation", fields: [roleId], references: [id], onDelete: Cascade)
+  roleId      String
+  workspace   Workspace? @relation(name: "userRoleWorkspaceRelation", fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?

@@ -17,6 +17,7 @@ import { UPDATE_WORKSPACE_MUTATION } from '../../graphql/update-workspace-mutati
 import { LIST_WORKSPACE_QUERY } from '../../graphql/list-workspace-query.gql';
 import { DELETE_WORKSPACE_MUTATION } from '../../graphql/delete-workspace-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { RESTORE_WORKSPACE_MUTATION } from '../../graphql/restore-workspace-mutation.gql';
 
 describe('Workspace Module', () => {
   const dbClient = new PrismaClient();
@@ -38,6 +39,7 @@ describe('Workspace Module', () => {
           isVerified: true,
         },
       });
+      console.log(user, type);
 
       if (!user) {
         return;
@@ -47,7 +49,7 @@ describe('Workspace Module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
-
+      console.log(response, type);
       expect(response.data).toBeDefined();
     });
 
@@ -220,6 +222,25 @@ describe('Workspace Module', () => {
       );
 
       expect(addedWorkspace).toBe(undefined);
+    });
+
+    test('Restore Workspace from stash', async () => {
+      if (!workspaceId) {
+        throw new Error(
+          'Workspace ID is undefined; creation test might have failed',
+        );
+      }
+      const response = await api.graphql.mutate<{
+        data?: { restoreWorkSpace?: boolean };
+      }>({
+        mutation: RESTORE_WORKSPACE_MUTATION,
+        variables: {
+          restoreWorkspaceInput: {
+            id: workspaceId,
+          },
+        },
+      });
+      expect(response.data).toBeDefined();
     });
 
     test('Delete Workspace which is created not from stash again', async () => {
