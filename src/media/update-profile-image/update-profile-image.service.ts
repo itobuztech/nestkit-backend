@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { File } from '@prisma/client';
+import appEnv from 'src/env';
 
 @Injectable()
 export class UpdateProfileImageService {
@@ -18,7 +19,7 @@ export class UpdateProfileImageService {
 
     return {
       success: true,
-      profileImage: response.profileImage,
+      profileImage: response.profileImage?.includes('http') ? response.profileImage  : `${appEnv.BACKEND_URL}/${response.profileImage}`,
     }
   }
 }
