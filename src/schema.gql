@@ -38,13 +38,13 @@ type PrivilegeResponse {
   name: String!
   group: String!
   id: String!
-  type: type!
+  type: privilegeType!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
 }
 
-enum type {
+enum privilegeType {
   BASE
 }
 
@@ -57,10 +57,27 @@ type RoleUpdateResponse {
 }
 
 type RolePrivilegeResponse {
-  group: String!
-  name: String!
+  group: privilegeGroup!
+  name: privilegeName!
   id: String!
-  type: String!
+  type: privilegeType!
+}
+
+enum privilegeGroup {
+  POST
+  USER
+  ROLE
+  WORKSPACE
+  MEMBERSHIP
+  MEDIA
+  SUBSCRIPTION
+}
+
+enum privilegeName {
+  CREATE
+  READ
+  UPDATE
+  DELETE
 }
 
 type RoleGetResponse {
@@ -90,6 +107,17 @@ type AssignedUser {
 
 type AssignRoleUserResponse {
   users: [AssignedUser!]!
+  pagination: BaseListResponse!
+}
+
+type AvailableForAssignUser {
+  id: String!
+  name: String
+  email: String!
+}
+
+type GetUserForAssignResponse {
+  users: [AvailableForAssignUser!]!
   pagination: BaseListResponse!
 }
 
@@ -302,6 +330,77 @@ type FolderListResponse {
   pagination: BaseListResponse!
 }
 
+type SubscriptionPlanResponse {
+  id: String!
+  name: String!
+  description: String
+  price: Float!
+  currency: String!
+  durationDays: Float!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type ListSubscriptionPlanResponse {
+  subscriptionPlans: [SubscriptionPlanResponse!]!
+  pagination: BaseListResponse!
+}
+
+type CreateSubscriptionPlanResponse {
+  id: String!
+  message: String!
+}
+
+type PlanInfoResponse {
+  id: String!
+  title: String!
+  description: String
+  feature: SubscriptionFeature
+  order: Float!
+  enabled: Boolean!
+  planId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+enum SubscriptionFeature {
+  MEDIA
+  CUSTOM_ROLE
+}
+
+type ListPlanInfoResponse {
+  planInfoList: [PlanInfoResponse!]!
+  pagination: BaseListResponse!
+}
+
+type CreatePlanInfoResponse {
+  id: String!
+  message: String!
+}
+
+type UpdatePlanInfoResponse {
+  id: String!
+  message: String!
+}
+
+type DeletePlanInfoResponse {
+  success: Boolean!
+  message: String!
+}
+
+type DeletePlanResponse {
+  success: Boolean!
+  message: String!
+}
+
+type UpdateSubscriptionPlanResponse {
+  id: String!
+  message: String!
+}
+
 type Query {
   login(loginInput: LoginInput!): LoginResponse!
   rateLimitGlobal: String!
@@ -319,6 +418,8 @@ type Query {
   getFile(getFileInput: GetFileInput): GetFileResponse
   getFolder(getFolderInput: GetFolderInput!): GetFolderResponse!
   listFolder(listFolderInput: ListFolderInput): FolderListResponse!
+  listSubscriptionPlan(listSubscriptionPlanInput: ListSubscriptionPlanInput!): ListSubscriptionPlanResponse!
+  listPlanInfo(listPlanInfoInput: ListPlanInfoInput!): ListPlanInfoResponse!
 }
 
 input LoginInput {
@@ -444,6 +545,36 @@ enum FolderOrderByField {
   published
 }
 
+input ListSubscriptionPlanInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  name: String
+  orderByField: subscriptionPlanOrderByField = createdAt
+}
+
+enum subscriptionPlanOrderByField {
+  createdAt
+  name
+  price
+}
+
+input ListPlanInfoInput {
+  page: Int
+  pageSize: Int
+  orderBy: Order = DESC
+  fromStash: Boolean = false
+  title: String
+  planId: String!
+  orderByField: planInfoOrderByField = createdAt
+}
+
+enum planInfoOrderByField {
+  createdAt
+  title
+}
+
 type Mutation {
   requestPasswordReset(passwordReset: PasswordResetRequestInput!): PassWordResetRequestResponse!
   resetPassword(resetPassword: PasswordResetInput!): PassWordResetResponse!
@@ -467,6 +598,7 @@ type Mutation {
   assignRole(assignRoleInput: AssignRoleInput!): AssignRoleResponse!
   unAssignRole(unAssignRoleInput: UnAssignRoleInput!): UnAssignRoleResponse!
   getAssignUsers(assignRoleUserInput: AssignRoleUserInput!): AssignRoleUserResponse!
+  getUsersForAssign(assignRoleUserInput: GetUserForAssignInput!): GetUserForAssignResponse!
   createPost(createPostInput: CreatePostInput!): CreatePostResponse!
   updatePost(postId: String!, updatePostInput: UpdatePostInput!): UpdatePostResponse!
   deletePost(postDeleteInput: PostDeleteInput): Boolean!
@@ -477,6 +609,12 @@ type Mutation {
   createFolder(createFolderInput: CreateFolderInput): CreateFolderResponse!
   deleteFolder(folderDeleteInput: DeleteFolderInput): Boolean!
   updateFolder(updateFolderInput: UpdateFolderInput!): Boolean!
+  createSubscriptionPlan(input: CreateSubscriptionPlanInput!): CreateSubscriptionPlanResponse!
+  createPlanInfo(input: CreatePlanInfoInput!): CreatePlanInfoResponse!
+  updateSubscriptionPlan(input: UpdateSubscriptionPlanInput!): UpdateSubscriptionPlanResponse!
+  updatePlanInfo(input: UpdatePlanInfoInput!): UpdatePlanInfoResponse!
+  deletePlanInfo(deletePlanInfoInput: DeletePlanInfoInput!): DeletePlanInfoResponse!
+  deletePlan(deletePlanInput: DeletePlanInput!): DeletePlanResponse!
 }
 
 input PasswordResetRequestInput {
@@ -573,12 +711,29 @@ input UnAssignRoleInput {
 }
 
 input AssignRoleUserInput {
-  page: Int
-  pageSize: Int
-  orderBy: Order = DESC
-  fromStash: Boolean = false
   roleId: String!
   search: String
+  page: Int
+  pageSize: Int
+  orderBy: AssignedUserOrder = DESC
+}
+
+enum AssignedUserOrder {
+  ASC
+  DESC
+}
+
+input GetUserForAssignInput {
+  roleId: String!
+  search: String
+  page: Int
+  pageSize: Int
+  orderBy: GetUserForAssignOrder = DESC
+}
+
+enum GetUserForAssignOrder {
+  ASC
+  DESC
 }
 
 input CreatePostInput {
@@ -645,4 +800,50 @@ input UpdateFolderInput {
   id: String!
   name: String
   parentId: String
+}
+
+input CreateSubscriptionPlanInput {
+  name: String!
+  description: String
+  price: Float!
+  currency: String
+  durationDays: Float!
+  isActive: Boolean = true
+}
+
+input CreatePlanInfoInput {
+  title: String!
+  description: String
+  feature: SubscriptionFeature
+  enabled: Boolean
+  planId: String!
+}
+
+input UpdateSubscriptionPlanInput {
+  id: String!
+  name: String!
+  description: String
+  price: Float!
+  currency: String
+  durationDays: Float!
+  isActive: Boolean = true
+}
+
+input UpdatePlanInfoInput {
+  id: String!
+  title: String!
+  description: String
+  feature: SubscriptionFeature
+  enabled: Boolean
+  planId: String!
+}
+
+input DeletePlanInfoInput {
+  id: String!
+  fromStash: Boolean
+}
+
+input DeletePlanInput {
+  id: String!
+  fromStash: Boolean
 }

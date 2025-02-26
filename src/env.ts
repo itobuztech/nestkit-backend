@@ -1,9 +1,20 @@
-import { cleanEnv, str, email, num, bool } from 'envalid';
+import { cleanEnv, str, email, num, bool, makeValidator } from 'envalid';
+
+const awsConfigValidator = makeValidator((value) => {
+  if (process.env.isS3Enabled && process.env.isS3Enabled === 'true') {
+    if (!value) {
+      throw new Error('Field is required');
+    }
+  }
+
+  return value;
+});
 
 export const appEnv = cleanEnv(process.env, {
+  INTROSPECTION: bool({ default: true }),
   DATABASE_URL: str({
     default:
-      'postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter',
+      'postgresql://nodeProdUser:postgresPasswword@localhost:5432/nest_starter',
   }),
   PORT: num({ default: 4000 }),
   ADMIN_EMAIL: email({ default: 'admin@example.com' }),
@@ -15,8 +26,7 @@ export const appEnv = cleanEnv(process.env, {
   SEED_EMAIL: email({ default: 'example@example.com' }),
   JSON_TOKEN_SECRET: str({ default: 'SamLauncher@123' }),
   CORS_ORIGIN: str({
-    default: '*',
-    desc: 'Comma separated list of origins examples http://localhost:4000,http://localhost:3020',
+    default: 'http://localhost:4000,http://localhost:3020',
   }),
   BACKEND_URL: str({ default: 'http://localhost:4000' }),
   FRONTEND_URL: str({ default: 'http://localhost:3020' }),
@@ -38,7 +48,10 @@ export const appEnv = cleanEnv(process.env, {
 
   //  Mail sending
   MAIL_FROM_USER: str({ default: 'example', desc: 'Mail from user' }),
-  MAIL_FROM_EMAIL: str({ default: 'example@example.com', desc: 'Mail from email' }),
+  MAIL_FROM_EMAIL: str({
+    default: 'example@example.com',
+    desc: 'Mail from email',
+  }),
 
   // FRONTEND_URL
   SIGNUP_VERIFY_URL: str({
@@ -66,6 +79,75 @@ export const appEnv = cleanEnv(process.env, {
 
   // Pagination
   PAGE_SIZE: num({ default: 10 }),
+
+  // AWS
+  AWS_REGION: awsConfigValidator({ default: '' }),
+  AWS_ACCESS_KEY_ID: awsConfigValidator({ default: '' }),
+  AWS_SECRET_ACCESS_KEY: awsConfigValidator({ default: '' }),
+  AWS_PUBLIC_BUCKET: awsConfigValidator({ default: '' }),
+  AWS_SECURE_BUCKET: awsConfigValidator({ default: '' }),
+  AWS_PUBLIC_BUCKET_URL: awsConfigValidator({ default: '' }),
+  AWS_SIGNED_URL_EXPIRY: num({ default: 3600 }),
+  isS3Enabled: bool({ default: false }),
+
+
+  // File Types 
+  ALLOWED_MIME_TYPES: str({
+    default: [
+      'text/plain',          // .txt
+      'application/pdf',     // .pdf
+      'image/jpeg',          // .jpg, .jpeg
+      'image/png',           // .png
+      'image/gif',           // .gif
+      'application/msword',  // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/vnd.ms-excel', // .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-powerpoint', // .ppt
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+      'application/zip',     // .zip
+      'application/x-tar',   // .tar
+      'application/x-rar-compressed', // .rar
+      'application/x-7z-compressed', // .7z
+      'text/csv',            // .csv
+      'application/rtf',     // .rtf
+      'video/mp4',           // .mp4
+      'video/x-msvideo',     // .avi
+      'video/x-ms-wmv',      // .wmv
+      'video/mpeg',          // .mpeg
+      'video/quicktime',     // .mov
+      'video/x-flv',         // .flv
+      'video/webm',          // .webm
+      'video/ogg',           // .ogv
+    ].toString(),
+  }),
+  MAX_FILE_SIZE: num({ default: 50 * 1024 * 1024 }), // 50MB
+
+  // GRPC
+  GRPC_PORT: num({ default: 4001 }),
+  GRPC_CONNECTION_URL: str({ default: 'localhost:4001' }),
+
+  // RabbitMQ
+  RABBIT_MQ_URL: str({
+    default: 'amqp://admin:admin@localhost:5672',
+    desc: 'amqp://<username>:<password>@<host>:<port>/<vhost>',
+  }),
+
+  // Redis
+  REDIS_HOST: str({
+    default: 'localhost',
+  }),
+  REDIS_PORT: num({
+    default: 6379,
+  }),
+
+
+  // CURRENCY
+  DEFAULT_CURRENCY: str({
+    default: 'USD',
+  }),
+
+
 });
 
 export default appEnv;

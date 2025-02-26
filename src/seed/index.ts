@@ -1,5 +1,6 @@
 import { postSeed } from './post-seed';
 import { roleSeed } from './role-seed';
+import { SubscriptionSeed } from './subscription-seed';
 import { userSeed } from './user-seed';
 import { workSpaceSeed } from './workspace-seed';
 async function main() {
@@ -31,7 +32,14 @@ async function main() {
     console.error('Failed Post Seed', error);
   }
 
-  
+  try {
+    await SubscriptionSeed();
+    console.log('Subscription Seed Success');
+  } catch (error) {
+    console.error('Failed Subscription Seed', error);
+  }
 }
 
-main();
+main().then(() => {
+  console.log('Seed Success');
+});

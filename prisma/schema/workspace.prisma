@@ -11,13 +11,14 @@ model Workspace {
   deletedAt              DateTime?
   workspaceStatus        workspaceStatus          @default(ACTIVE)
   workspaceMembership    WorkspaceMembership[]    @relation(name: "workspaceIdMembershipRelation")
-  post                   Role[]                   @relation(name: "workSpaceRoles")
+  role                   Role[]                   @relation(name: "roleWorkspaceRelation")
   media                  File[]                   @relation(name: "workspaceIdFileRelation")
   folder                 Folder[]                 @relation(name: "workspaceIdFolderRelation")
-  roles                  Post[]                   @relation(name: "workspaceIdPostRelation")
+  post                   Post[]                   @relation(name: "workspaceIdPostRelation")
   postCategory           Category[]               @relation(name: "workspaceIdCategoryRelation")
   postTag                Tag[]                    @relation(name: "workspaceIdTagRelation")
-  WorkspaceEmailTemplate WorkspaceEmailTemplate[] @relation(name: "workspaceIdEmailTemplate")
+  workspaceEmailTemplate WorkspaceEmailTemplate[] @relation(name: "workspaceIdEmailTemplate")
+  userRole               UserRole[]               @relation(name: "userRoleWorkspaceRelation")
 }
 
 model WorkspaceMembership {

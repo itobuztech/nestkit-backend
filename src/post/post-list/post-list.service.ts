@@ -21,7 +21,7 @@ export class PostListService {
     @Args('getPostListInput', { nullable: true }) getPostListInput: GetPostListInput,
   ): Promise<PostListResponse> {
 
-    const currentWorkspaceId = req.headers[appConfig.current_workspace_id] as string | undefined;
+    const currentWorkspaceId = req.headers[appConfig.currentworkspaceid] as string | undefined;
     
     let queryObject: Prisma.PostWhereInput = {
       workspaceId: {

@@ -12,6 +12,7 @@ import { GetFolderService } from './folder/get-folder/get-folder.service';
 import { DeleteFolderService } from './folder/delete-folder/delete-folder.service';
 import { ListFolderService } from './folder/list-folder/list-folder.service';
 import { UpdateFolderService } from './folder/update-folder/update-folder.service';
+import { AwsService } from 'src/aws/aws.service';
 
 @Module({
   controllers: [UploadMediaController, UpdateProfileImageController],
@@ -27,6 +28,7 @@ import { UpdateFolderService } from './folder/update-folder/update-folder.servic
     DeleteFolderService,
     ListFolderService,
     UpdateFolderService,
+    AwsService,
   ],
 })
 export class MediaModule {}

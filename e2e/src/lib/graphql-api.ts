@@ -60,6 +60,7 @@ export class GraphQlApi {
         loginInput,
       },
     });
+
     // Store the token in local storage for future use
     this.token = response.data.login.token;
 

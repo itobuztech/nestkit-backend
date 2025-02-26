@@ -1,4 +1,8 @@
 export const appConfig = {
-  current_workspace_id: 'current_workspace_id',
-  userPasswordValidationRegex: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]+$/,
+  currentworkspaceid: 'currentworkspaceid',
+  userPasswordValidationRegex:
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]+$/,
+  uniqueConstraintsPrismaErrorCode: 'P2002',
+  notFoundPrismaErrorCode: 'P2025',
+  foreignKeyConstraintsPrismaErrorCode: 'P2003',
 };

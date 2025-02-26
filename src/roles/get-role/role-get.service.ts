@@ -8,7 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RoleGetInput } from './role-get-input.dto';
 import { CreateAppError } from 'src/shared/create-error/create-error';
 import { RoleGuard } from 'src/auth/role.guard';
-import { PrivilegeGroup, PrivilegeName } from '@prisma/client';
+import { PrivilegeGroup, PrivilegeName, PrivilegeType } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -47,7 +47,7 @@ export class RoleGetService {
         id: privilege.privilege.id,
         name: privilege.privilege.name,
         group: privilege.privilege.group,
-        type: privilege.privilege.type || '',
+        type: privilege.privilege.type || PrivilegeType.BASE,
       });
     });
 

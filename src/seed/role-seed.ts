@@ -16,16 +16,16 @@ export async function roleSeed() {
 
   // create privileges data
   const privilegeData: Prisma.PrivilegeCreateManyInput | Prisma.PrivilegeCreateManyInput[] = [];
-  const models = [PrivilegeGroup.POST, PrivilegeGroup.USER, PrivilegeGroup.ROLE, PrivilegeGroup.WORKSPACE, PrivilegeGroup.MEMBERSHIP, PrivilegeGroup.MEDIA];
-  models.forEach((model) => {
+
+  for (const privilegeGroup of Object.values(PrivilegeGroup)) {
     [PrivilegeName.CREATE, PrivilegeName.DELETE, PrivilegeName.UPDATE, PrivilegeName.READ].forEach((name) => {
       privilegeData.push({
         name,
-        group: model,
+        group: privilegeGroup,
         type: PrivilegeType.BASE,
       });
     });
-  });
+  }
 
   // Create privileges
   await prismaClient.privilege.createMany({
@@ -53,7 +53,7 @@ export async function roleSeed() {
   });
 
   //  find base privileges
-  const basePrivileges = await prismaClient.privilege.findMany({
+  const superAdminPrivileges = await prismaClient.privilege.findMany({
     where: {
       type: PrivilegeType.BASE,
     },
@@ -70,7 +70,7 @@ export async function roleSeed() {
   if (superAdminRole) {
     // Attach all privileges to super admin role
     await prismaClient.rolePrivilege.createMany({
-      data: basePrivileges.map((privilege) => ({
+      data: superAdminPrivileges.map((privilege) => ({
         roleId: superAdminRole.id,
         privilegeId: privilege.id,
       })),
@@ -85,10 +85,27 @@ export async function roleSeed() {
     },
   });
   
+
+  const adminRolePrivileges = await prismaClient.privilege.findMany({
+    where: {
+      type: PrivilegeType.BASE,
+      group: {
+        notIn: [PrivilegeGroup.SUBSCRIPTION],
+      },
+      NOT: {
+        OR: [
+          { name: PrivilegeName.CREATE },
+          { name: PrivilegeName.UPDATE },
+          { name: PrivilegeName.DELETE },
+        ]
+      }
+    },
+  });
+
   if (adminRole) {
     // Attach all privileges to admin role
     await prismaClient.rolePrivilege.createMany({
-      data: basePrivileges.map((privilege) => ({
+      data: adminRolePrivileges.map((privilege) => ({
         roleId: adminRole.id,
         privilegeId: privilege.id,
       })),

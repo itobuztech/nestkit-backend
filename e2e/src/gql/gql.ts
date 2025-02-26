@@ -31,6 +31,7 @@ const documents = {
     "\n  query RoleList($roleListInput: RoleListInput) {\n    roleList(roleListInput: $roleListInput) {\n      role {\n        title\n        description\n        type\n        id\n        deletedAt\n        description\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.RoleListDocument,
     "\n  query GetRole($roleGetInput: RoleGetInput!) {\n    getRole(roleGetInput: $roleGetInput) {\n      id\n      title\n      type\n      description\n      createdAt\n      updatedAt\n      deletedAt\n      privilege {\n        name\n        group\n        id\n        type\n      }\n    }\n  }\n": types.GetRoleDocument,
     "\n  query GetUsers($getUsersInput: GetUsersInput) {\n    getUsers(getUsersInput: $getUsersInput) {\n      email\n      id\n      name\n    }\n  }\n": types.GetUsersDocument,
+    "\n  query GetUserPermission {\n    getUserPermission {\n      roles {\n        id\n        title\n      }\n\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n": types.GetUserPermissionDocument,
     "\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n": types.FileDocument,
     "\n  query ListFolder($listFolderInput: ListFolderInput) {\n    listFolder(listFolderInput: $listFolderInput) {\n      folder {\n        name\n        id\n        parentId\n        createdAt\n        updatedAt\n        deletedAt\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n        totalRows\n      }\n    }\n  }\n": types.ListFolderDocument,
     "\n  query ListWorkSpace($listWorkspaceInput: ListWorkSpaceInput) {\n    listWorkSpace(listWorkspaceInput: $listWorkspaceInput) {\n      workspace {\n        name\n        id\n      }\n      pagination {\n        totalPage\n        currentPage\n        perPage\n      }\n    }\n  }\n": types.ListWorkSpaceDocument,
@@ -41,6 +42,8 @@ const documents = {
     "\n  mutation RefreshAccessToken($refreshAccessTokenInput: RefreshAccessTokenInput!) {\n  refreshAccessToken(refreshAccessTokenInput: $refreshAccessTokenInput) {\n    token\n    refreshToken\n  }\n}\n": types.RefreshAccessTokenDocument,
     "\n  mutation RequestPasswordReset($passwordReset: PasswordResetRequestInput!) {\n    requestPasswordReset(passwordReset: $passwordReset) {\n      message\n    }\n  }\n": types.RequestPasswordResetDocument,
     "\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n": types.ResizeFileDocument,
+    "\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n": types.RestoreDocument,
+    "\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n": types.RestoreWorkSpaceDocument,
     "\n  mutation SendInvitation($sendInvitationInput: SendInvitationInput!) {\n    sendInvitation(sendInvitationInput: $sendInvitationInput) {\n      success\n    }\n  }\n": types.SendInvitationDocument,
     "\n  mutation Signup($signupInput: SignupInput!) {\n    signup(signupInput: $signupInput) {\n      id\n    }\n  }\n": types.SignupDocument,
     "\n  mutation UnAssignRole($unAssignRoleInput: UnAssignRoleInput!) {\n    unAssignRole(unAssignRoleInput: $unAssignRoleInput) {\n      success\n    }\n  }\n": types.UnAssignRoleDocument,
@@ -141,6 +144,10 @@ export function graphql(source: "\n  query GetUsers($getUsersInput: GetUsersInpu
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query GetUserPermission {\n    getUserPermission {\n      roles {\n        id\n        title\n      }\n\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUserPermission {\n    getUserPermission {\n      roles {\n        id\n        title\n      }\n\n      privilege {\n        group\n        name\n        id\n        type\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n"): (typeof documents)["\n   query File($listMediaInput: ListMediaInput) {\n  listMedia(listMediaInput: $listMediaInput) {\n    file {\n      id\n      name\n      description\n      size\n      mimeType\n      url\n      folderId\n      authorId\n      createdAt\n      updatedAt\n      deletedAt\n    }\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -178,6 +185,14 @@ export function graphql(source: "\n  mutation RequestPasswordReset($passwordRese
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n"): (typeof documents)["\n  mutation ResizeFile($resizeFileInput: ResizeFileInput) {\n  resizeFile(resizeFileInput: $resizeFileInput)\n}\n\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n"): (typeof documents)["\n  mutation Restore($postRestoreInput: PostRestoreInput) {\n  restore(postRestoreInput: $postRestoreInput)\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n"): (typeof documents)["\n  mutation RestoreWorkSpace($restoreWorkspaceInput: WorkspaceRestoreInput) {\n  restoreWorkSpace(restoreWorkspaceInput: $restoreWorkspaceInput)\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

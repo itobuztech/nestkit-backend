@@ -1,5 +1,5 @@
 import { Context, Query, Resolver } from '@nestjs/graphql';
-import { RoleType } from '@prisma/client';
+import { PrivilegeType, RoleType } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolePrivilegeResponse } from 'src/roles/get-role/role-get-response.dto';
 import { CurrentUserResponse } from './current-user.response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
@@ -28,6 +29,10 @@ export class CurrentUserService {
 
     if (!user) {
       throw new Error('User not found');
+    }
+
+    if (!user.profileImage?.includes('http') && user.profileImage) {
+      user.profileImage = `${appEnv.BACKEND_URL}/${user.profileImage}`;
     }
 
     const ownerMembership = await this.prisma.workspaceMembership.findFirst({
@@ -73,7 +78,7 @@ export class CurrentUserService {
         id: privilege.privilege.id,
         name: privilege.privilege.name,
         group: privilege.privilege.group,
-        type: privilege.privilege.type || '',
+        type: privilege.privilege.type || PrivilegeType.BASE,
       });
     });
 
@@ -83,18 +88,22 @@ export class CurrentUserService {
         isAccepted: true,
         deletedAt: null,
       },
-      include: {
-        workspace: true
-      }
+      distinct: ['workspaceId'],
     });
 
-    const workspace = membership.map(m => m.workspace);
-
+    const workspaceList = await this.prisma.workspace.findMany({
+      where: {
+        id: {
+          in: membership.map(m => m.workspaceId)
+        },
+        deletedAt: null,
+      }
+    });
 
     return  {
       ...user,
       sessionCount: user.session.length,
-      workspace,
+      workspace: workspaceList,
     };
   }
 

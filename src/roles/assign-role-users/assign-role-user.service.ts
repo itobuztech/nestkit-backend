@@ -1,5 +1,6 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { SetMetadata, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 
 import { AssignRoleUserResponse } from './assign-role-user-response.dto';
 import { AssignRoleUserInput } from './assign-role-user-input.dto';
@@ -20,6 +21,7 @@ export class AssignRoleUserService {
   @UseGuards(RoleGuard)
   @SetMetadata('privilegeGroup', PrivilegeGroup.ROLE)
   @SetMetadata('privilegeName', PrivilegeName.UPDATE)
+
   @UseGuards(WorkspaceMemberShipGuard)
   @SetMetadata(
     'memberShipValidationType',
@@ -27,9 +29,11 @@ export class AssignRoleUserService {
   )
   async getAssignUsers(
     @Args('assignRoleUserInput') assignRoleUserInput: AssignRoleUserInput,
+    @Context('req') req: Request,
   ): Promise<AssignRoleUserResponse> {
     const queryObject: Prisma.UserRoleWhereInput = {
       roleId: assignRoleUserInput.roleId,
+      workspaceId: req.currentWorkspaceId,
       deletedAt: null,
       user: {
         name: {
@@ -39,14 +43,14 @@ export class AssignRoleUserService {
       },
     };
 
-    const postCount = await this.prismaService.userRole.count({
+    const userRoleCount = await this.prismaService.userRole.count({
       where: queryObject,
     });
 
     const paginationMeta = paginationInputTransformer({
       page: assignRoleUserInput?.page,
       pageSize: assignRoleUserInput?.pageSize,
-      totalRowCount: postCount,
+      totalRowCount: userRoleCount,
     });
 
 
@@ -73,7 +77,7 @@ export class AssignRoleUserService {
         currentPage: paginationMeta.page,
         totalPage: paginationMeta.totalPage,
         perPage: paginationMeta.perPage,
-        totalRows: postCount,
+        totalRows: userRoleCount,
       },
     };
   }

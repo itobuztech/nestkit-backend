@@ -3,6 +3,9 @@
 - npm install -g corepack 
 - Install docker 
 
+## API Documentation 
+https://documenter.getpostman.com/view/180560/2sAYdfopwC
+
 ## Setup 
 - docker-compose up -d 
 - This will start database server locally 
@@ -16,8 +19,9 @@
 - once you start dev server in console required variables will be listed 
 
 
-
 ## Sonar Analysis 
+docker-compose -f docker-compose-static-analysis.yml up -d
+
 docker run \
     --rm \
     -e SONAR_HOST_URL="http://localhost:9000"  \
@@ -25,5 +29,6 @@ docker run \
     -v "${YOUR_REPO}:/usr/src" \
     sonarsource/sonar-scanner-cli
 
-
+## Redis docker run fix
+sudo sysctl vm.overcommit_memory=1
  

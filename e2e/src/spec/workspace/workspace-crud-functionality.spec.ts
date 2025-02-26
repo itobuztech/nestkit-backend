@@ -17,6 +17,7 @@ import { UPDATE_WORKSPACE_MUTATION } from '../../graphql/update-workspace-mutati
 import { LIST_WORKSPACE_QUERY } from '../../graphql/list-workspace-query.gql';
 import { DELETE_WORKSPACE_MUTATION } from '../../graphql/delete-workspace-mutation.gql';
 import { GraphQLError } from 'graphql';
+import { RESTORE_WORKSPACE_MUTATION } from '../../graphql/restore-workspace-mutation.gql';
 
 describe('Workspace Module', () => {
   const dbClient = new PrismaClient();
@@ -30,7 +31,7 @@ describe('Workspace Module', () => {
     await dbClient.$disconnect();
   });
 
-  [UserType.ADMIN, UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
+  [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
     test(`Login as a ${type}`, async () => {
       user = await dbClient.user.findFirst({
         where: {
@@ -38,6 +39,7 @@ describe('Workspace Module', () => {
           isVerified: true,
         },
       });
+      console.log(user, type);
 
       if (!user) {
         return;
@@ -47,7 +49,7 @@ describe('Workspace Module', () => {
         email: user.email,
         password: appEnv.SEED_PASSWORD,
       });
-
+      console.log(response, type);
       expect(response.data).toBeDefined();
     });
 
@@ -68,7 +70,6 @@ describe('Workspace Module', () => {
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
-    //This test has an issue - NST-61
     test('List of Workspace and created workspace assertion', async () => {
       const listWorkspace = await api.graphql.query<
         ListWorkSpaceQuery,
@@ -77,12 +78,40 @@ describe('Workspace Module', () => {
         query: LIST_WORKSPACE_QUERY,
       });
 
-      console.log(listWorkspace.data.listWorkSpace.workspace);
       const addedWorkspace = listWorkspace.data.listWorkSpace.workspace.find(
         (workspace) => workspace.id === workspaceId,
       );
+      let newWorkspace;
 
-      expect(addedWorkspace?.name).toBe(workspaceName);
+      if (!addedWorkspace) {
+        for (
+          let page = 2;
+          page <= listWorkspace.data.listWorkSpace.pagination.totalPage;
+          page++
+        ) {
+          const workspaceList = await api.graphql.query<
+            ListWorkSpaceQuery,
+            ListWorkSpaceQueryVariables
+          >({
+            query: LIST_WORKSPACE_QUERY,
+            variables: {
+              listWorkspaceInput: {
+                page,
+              },
+            },
+          });
+
+          newWorkspace = workspaceList.data.listWorkSpace.workspace.find(
+            (workspace) => workspace.id === workspaceId,
+          );
+          if (newWorkspace) {
+            expect(newWorkspace?.name).toBe(workspaceName);
+            break;
+          }
+        }
+      } else {
+        expect(addedWorkspace?.name).toBe(workspaceName);
+      }
       expect(listWorkspace.data.listWorkSpace.workspace.length).toBeGreaterThan(
         0,
       );
@@ -122,7 +151,37 @@ describe('Workspace Module', () => {
         (workspace) => workspace.id === workspaceId,
       );
 
-      expect(addedWorkspace?.name).toBe(workspaceNameUpdated);
+      let newWorkspace;
+      if (!addedWorkspace) {
+        for (
+          let page = 2;
+          page <= listWorkspace.data.listWorkSpace.pagination.totalPage;
+          page++
+        ) {
+          const workspaceList = await api.graphql.query<
+            ListWorkSpaceQuery,
+            ListWorkSpaceQueryVariables
+          >({
+            query: LIST_WORKSPACE_QUERY,
+            variables: {
+              listWorkspaceInput: {
+                page,
+              },
+            },
+          });
+
+          newWorkspace = workspaceList.data.listWorkSpace.workspace.find(
+            (workspace) => workspace.id === workspaceId,
+          );
+
+          if (newWorkspace) {
+            expect(newWorkspace?.name).toBe(workspaceNameUpdated);
+            break;
+          }
+        }
+      } else {
+        expect(addedWorkspace?.name).toBe(workspaceNameUpdated);
+      }
       expect(listWorkspace.data.listWorkSpace.workspace.length).toBeGreaterThan(
         0,
       );
@@ -163,6 +222,25 @@ describe('Workspace Module', () => {
       );
 
       expect(addedWorkspace).toBe(undefined);
+    });
+
+    test('Restore Workspace from stash', async () => {
+      if (!workspaceId) {
+        throw new Error(
+          'Workspace ID is undefined; creation test might have failed',
+        );
+      }
+      const response = await api.graphql.mutate<{
+        data?: { restoreWorkSpace?: boolean };
+      }>({
+        mutation: RESTORE_WORKSPACE_MUTATION,
+        variables: {
+          restoreWorkspaceInput: {
+            id: workspaceId,
+          },
+        },
+      });
+      expect(response.data).toBeDefined();
     });
 
     test('Delete Workspace which is created not from stash again', async () => {

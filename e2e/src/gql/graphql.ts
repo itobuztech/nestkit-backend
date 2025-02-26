@@ -36,8 +36,7 @@ export type AssignRoleResponse = {
 };
 
 export type AssignRoleUserInput = {
-  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
-  orderBy?: InputMaybe<Order>;
+  orderBy?: InputMaybe<AssignedUserOrder>;
   page?: InputMaybe<Scalars['Int']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
   roleId: Scalars['String']['input'];
@@ -52,6 +51,18 @@ export type AssignRoleUserResponse = {
 
 export type AssignedUser = {
   __typename?: 'AssignedUser';
+  email: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export enum AssignedUserOrder {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type AvailableForAssignUser = {
+  __typename?: 'AvailableForAssignUser';
   email: Scalars['String']['output'];
   id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -77,6 +88,20 @@ export type CreateFolderResponse = {
   parentId?: Maybe<Scalars['String']['output']>;
 };
 
+export type CreatePlanInfoInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  feature?: InputMaybe<SubscriptionFeature>;
+  planId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type CreatePlanInfoResponse = {
+  __typename?: 'CreatePlanInfoResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 export type CreatePostInput = {
   authorId?: InputMaybe<Scalars['String']['input']>;
   content?: InputMaybe<Scalars['String']['input']>;
@@ -87,6 +112,21 @@ export type CreatePostInput = {
 export type CreatePostResponse = {
   __typename?: 'CreatePostResponse';
   id: Scalars['String']['output'];
+};
+
+export type CreateSubscriptionPlanInput = {
+  currency?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  durationDays: Scalars['Float']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+};
+
+export type CreateSubscriptionPlanResponse = {
+  __typename?: 'CreateSubscriptionPlanResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type CreateWorkspaceInput = {
@@ -118,6 +158,28 @@ export type CurrentUserWorkspace = {
 export type DeleteFolderInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['String']['input'];
+};
+
+export type DeletePlanInfoInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type DeletePlanInfoResponse = {
+  __typename?: 'DeletePlanInfoResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
+export type DeletePlanInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type DeletePlanResponse = {
+  __typename?: 'DeletePlanResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
 };
 
 export type FileDeleteInput = {
@@ -227,6 +289,25 @@ export type GetPostResponse = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type GetUserForAssignInput = {
+  orderBy?: InputMaybe<GetUserForAssignOrder>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  roleId: Scalars['String']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum GetUserForAssignOrder {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type GetUserForAssignResponse = {
+  __typename?: 'GetUserForAssignResponse';
+  pagination: BaseListResponse;
+  users: Array<AvailableForAssignUser>;
+};
+
 export type GetUserPermissionResponse = {
   __typename?: 'GetUserPermissionResponse';
   privilege: Array<RolePrivilegeResponse>;
@@ -296,6 +377,37 @@ export type ListMembershipResponse = {
   pagination: BaseListResponse;
 };
 
+export type ListPlanInfoInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<PlanInfoOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  planId: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ListPlanInfoResponse = {
+  __typename?: 'ListPlanInfoResponse';
+  pagination: BaseListResponse;
+  planInfoList: Array<PlanInfoResponse>;
+};
+
+export type ListSubscriptionPlanInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<SubscriptionPlanOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ListSubscriptionPlanResponse = {
+  __typename?: 'ListSubscriptionPlanResponse';
+  pagination: BaseListResponse;
+  subscriptionPlans: Array<SubscriptionPlanResponse>;
+};
+
 export type ListWorkSpaceInput = {
   authorId?: InputMaybe<Scalars['String']['input']>;
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -348,16 +460,21 @@ export type Mutation = {
   acceptInvitation: Scalars['Boolean']['output'];
   assignRole: AssignRoleResponse;
   createFolder: CreateFolderResponse;
+  createPlanInfo: CreatePlanInfoResponse;
   createPost: CreatePostResponse;
   createRole: RoleCreateResponse;
+  createSubscriptionPlan: CreateSubscriptionPlanResponse;
   createWorkspace: CreateWorkspaceResponse;
   deleteFile: Scalars['Boolean']['output'];
   deleteFolder: Scalars['Boolean']['output'];
   deleteMembership: Scalars['Boolean']['output'];
+  deletePlan: DeletePlanResponse;
+  deletePlanInfo: DeletePlanInfoResponse;
   deletePost: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteWorkSpace: Scalars['Boolean']['output'];
   getAssignUsers: AssignRoleUserResponse;
+  getUsersForAssign: GetUserForAssignResponse;
   rateLimitCustomize: Scalars['String']['output'];
   rateLimitSkip: Scalars['String']['output'];
   refreshAccessToken: VerifyEmailResponse;
@@ -371,9 +488,11 @@ export type Mutation = {
   signup: SignupResponse;
   unAssignRole: UnAssignRoleResponse;
   updateFolder: Scalars['Boolean']['output'];
+  updatePlanInfo: UpdatePlanInfoResponse;
   updatePost: UpdatePostResponse;
   updateProfile: UpdateProfileResponse;
   updateRole: RoleUpdateResponse;
+  updateSubscriptionPlan: UpdateSubscriptionPlanResponse;
   updateWorkspace: UpdateWorkspaceResponse;
   verifyEmail: VerifyEmailResponse;
   verifyOtp: LoginResponse;
@@ -395,6 +514,11 @@ export type MutationCreateFolderArgs = {
 };
 
 
+export type MutationCreatePlanInfoArgs = {
+  input: CreatePlanInfoInput;
+};
+
+
 export type MutationCreatePostArgs = {
   createPostInput: CreatePostInput;
 };
@@ -402,6 +526,11 @@ export type MutationCreatePostArgs = {
 
 export type MutationCreateRoleArgs = {
   roleCreateInput: RoleCreateInput;
+};
+
+
+export type MutationCreateSubscriptionPlanArgs = {
+  input: CreateSubscriptionPlanInput;
 };
 
 
@@ -425,6 +554,16 @@ export type MutationDeleteMembershipArgs = {
 };
 
 
+export type MutationDeletePlanArgs = {
+  deletePlanInput: DeletePlanInput;
+};
+
+
+export type MutationDeletePlanInfoArgs = {
+  deletePlanInfoInput: DeletePlanInfoInput;
+};
+
+
 export type MutationDeletePostArgs = {
   postDeleteInput?: InputMaybe<PostDeleteInput>;
 };
@@ -442,6 +581,11 @@ export type MutationDeleteWorkSpaceArgs = {
 
 export type MutationGetAssignUsersArgs = {
   assignRoleUserInput: AssignRoleUserInput;
+};
+
+
+export type MutationGetUsersForAssignArgs = {
+  assignRoleUserInput: GetUserForAssignInput;
 };
 
 
@@ -500,6 +644,11 @@ export type MutationUpdateFolderArgs = {
 };
 
 
+export type MutationUpdatePlanInfoArgs = {
+  input: UpdatePlanInfoInput;
+};
+
+
 export type MutationUpdatePostArgs = {
   postId: Scalars['String']['input'];
   updatePostInput: UpdatePostInput;
@@ -513,6 +662,11 @@ export type MutationUpdateProfileArgs = {
 
 export type MutationUpdateRoleArgs = {
   roleUpdateInput: RoleUpdateInput;
+};
+
+
+export type MutationUpdateSubscriptionPlanArgs = {
+  input: UpdateSubscriptionPlanInput;
 };
 
 
@@ -556,6 +710,20 @@ export type PasswordResetInput = {
 
 export type PasswordResetRequestInput = {
   email: Scalars['String']['input'];
+};
+
+export type PlanInfoResponse = {
+  __typename?: 'PlanInfoResponse';
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  feature?: Maybe<SubscriptionFeature>;
+  id: Scalars['String']['output'];
+  order: Scalars['Float']['output'];
+  planId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type PostAuthor = {
@@ -603,7 +771,7 @@ export type PrivilegeResponse = {
   group: Scalars['String']['output'];
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  type: Type;
+  type: PrivilegeType;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -621,6 +789,8 @@ export type Query = {
   listFolder: FolderListResponse;
   listMedia: ListMediaResponse;
   listMemberships: ListMembershipResponse;
+  listPlanInfo: ListPlanInfoResponse;
+  listSubscriptionPlan: ListSubscriptionPlanResponse;
   listWorkSpace: ListWorkSpaceResponse;
   login: LoginResponse;
   rateLimitGlobal: Scalars['String']['output'];
@@ -670,6 +840,16 @@ export type QueryListMediaArgs = {
 
 export type QueryListMembershipsArgs = {
   listMembershipsInput: ListMembershipInput;
+};
+
+
+export type QueryListPlanInfoArgs = {
+  listPlanInfoInput: ListPlanInfoInput;
+};
+
+
+export type QueryListSubscriptionPlanArgs = {
+  listSubscriptionPlanInput: ListSubscriptionPlanInput;
 };
 
 
@@ -745,10 +925,10 @@ export type RoleListResponse = {
 
 export type RolePrivilegeResponse = {
   __typename?: 'RolePrivilegeResponse';
-  group: Scalars['String']['output'];
+  group: PrivilegeGroup;
   id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  name: PrivilegeName;
+  type: PrivilegeType;
 };
 
 export type RoleResponse = {
@@ -797,6 +977,25 @@ export type SignupResponse = {
   id: Scalars['String']['output'];
 };
 
+export enum SubscriptionFeature {
+  CustomRole = 'CUSTOM_ROLE',
+  Media = 'MEDIA'
+}
+
+export type SubscriptionPlanResponse = {
+  __typename?: 'SubscriptionPlanResponse';
+  createdAt: Scalars['DateTime']['output'];
+  currency: Scalars['String']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  durationDays: Scalars['Float']['output'];
+  id: Scalars['String']['output'];
+  isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  price: Scalars['Float']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type UnAssignRoleInput = {
   roleId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -811,6 +1010,21 @@ export type UpdateFolderInput = {
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   parentId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdatePlanInfoInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  feature?: InputMaybe<SubscriptionFeature>;
+  id: Scalars['String']['input'];
+  planId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type UpdatePlanInfoResponse = {
+  __typename?: 'UpdatePlanInfoResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type UpdatePostInput = {
@@ -833,6 +1047,22 @@ export type UpdateProfileInput = {
 export type UpdateProfileResponse = {
   __typename?: 'UpdateProfileResponse';
   success: Scalars['Boolean']['output'];
+};
+
+export type UpdateSubscriptionPlanInput = {
+  currency?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  durationDays: Scalars['Float']['input'];
+  id: Scalars['String']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+};
+
+export type UpdateSubscriptionPlanResponse = {
+  __typename?: 'UpdateSubscriptionPlanResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type UpdateWorkspaceInput = {
@@ -899,13 +1129,41 @@ export enum OrderByField {
   Title = 'title'
 }
 
+export enum PlanInfoOrderByField {
+  CreatedAt = 'createdAt',
+  Title = 'title'
+}
+
+export enum PrivilegeGroup {
+  Media = 'MEDIA',
+  Membership = 'MEMBERSHIP',
+  Post = 'POST',
+  Role = 'ROLE',
+  Subscription = 'SUBSCRIPTION',
+  User = 'USER',
+  Workspace = 'WORKSPACE'
+}
+
+export enum PrivilegeName {
+  Create = 'CREATE',
+  Delete = 'DELETE',
+  Read = 'READ',
+  Update = 'UPDATE'
+}
+
+export enum PrivilegeType {
+  Base = 'BASE'
+}
+
 export enum RoleOrderByField {
   CreatedAt = 'createdAt',
   Title = 'title'
 }
 
-export enum Type {
-  Base = 'BASE'
+export enum SubscriptionPlanOrderByField {
+  CreatedAt = 'createdAt',
+  Name = 'name',
+  Price = 'price'
 }
 
 export enum WorkspaceOrderByField {
@@ -1028,7 +1286,7 @@ export type GetRoleQueryVariables = Exact<{
 }>;
 
 
-export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, type: string, description?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: string, group: string, id: string, type: string }> } };
+export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, type: string, description?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: PrivilegeName, group: PrivilegeGroup, id: string, type: PrivilegeType }> } };
 
 export type GetUsersQueryVariables = Exact<{
   getUsersInput?: InputMaybe<GetUsersInput>;
@@ -1036,6 +1294,11 @@ export type GetUsersQueryVariables = Exact<{
 
 
 export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'GetUserResponse', email: string, id: string, name?: string | null }> };
+
+export type GetUserPermissionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUserPermissionQuery = { __typename?: 'Query', getUserPermission: { __typename?: 'GetUserPermissionResponse', roles: Array<{ __typename?: 'GetUserRole', id: string, title: string }>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: PrivilegeGroup, name: PrivilegeName, id: string, type: PrivilegeType }> } };
 
 export type FileQueryVariables = Exact<{
   listMediaInput?: InputMaybe<ListMediaInput>;
@@ -1082,7 +1345,7 @@ export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { 
 export type RoleQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RoleQuery = { __typename?: 'Query', listBasePrivilege: { __typename?: 'PrivilegeListResponse', privilege: Array<{ __typename?: 'PrivilegeResponse', name: string, group: string, id: string, type: Type, createdAt: any, updatedAt: any, deletedAt?: any | null }> } };
+export type RoleQuery = { __typename?: 'Query', listBasePrivilege: { __typename?: 'PrivilegeListResponse', privilege: Array<{ __typename?: 'PrivilegeResponse', name: string, group: string, id: string, type: PrivilegeType, createdAt: any, updatedAt: any, deletedAt?: any | null }> } };
 
 export type RefreshAccessTokenMutationVariables = Exact<{
   refreshAccessTokenInput: RefreshAccessTokenInput;
@@ -1104,6 +1367,20 @@ export type ResizeFileMutationVariables = Exact<{
 
 
 export type ResizeFileMutation = { __typename?: 'Mutation', resizeFile: any };
+
+export type RestoreMutationVariables = Exact<{
+  postRestoreInput?: InputMaybe<PostRestoreInput>;
+}>;
+
+
+export type RestoreMutation = { __typename?: 'Mutation', restore: boolean };
+
+export type RestoreWorkSpaceMutationVariables = Exact<{
+  restoreWorkspaceInput?: InputMaybe<WorkspaceRestoreInput>;
+}>;
+
+
+export type RestoreWorkSpaceMutation = { __typename?: 'Mutation', restoreWorkSpace: boolean };
 
 export type SendInvitationMutationVariables = Exact<{
   sendInvitationInput: SendInvitationInput;
@@ -1188,6 +1465,7 @@ export const GetPostDocument = {"kind":"Document","definitions":[{"kind":"Operat
 export const RoleListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RoleList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"roleList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleListInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleListInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<RoleListQuery, RoleListQueryVariables>;
 export const GetRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleGetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleGetInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleGetInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}},{"kind":"Field","name":{"kind":"Name","value":"privilege"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}}]} as unknown as DocumentNode<GetRoleQuery, GetRoleQueryVariables>;
 export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"getUsersInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"GetUsersInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUsers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"getUsersInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"getUsersInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
+export const GetUserPermissionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserPermission"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserPermission"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}},{"kind":"Field","name":{"kind":"Name","value":"privilege"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"group"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserPermissionQuery, GetUserPermissionQueryVariables>;
 export const FileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"File"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listMediaInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ListMediaInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listMedia"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"listMediaInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listMediaInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"file"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"folderId"}},{"kind":"Field","name":{"kind":"Name","value":"authorId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]}}]}}]} as unknown as DocumentNode<FileQuery, FileQueryVariables>;
 export const ListFolderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListFolder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listFolderInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ListFolderInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listFolder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"listFolderInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listFolderInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"folder"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalRows"}}]}}]}}]}}]} as unknown as DocumentNode<ListFolderQuery, ListFolderQueryVariables>;
 export const ListWorkSpaceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListWorkSpace"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listWorkspaceInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ListWorkSpaceInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listWorkSpace"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"listWorkspaceInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listWorkspaceInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"workspace"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}}]}}]}}]}}]} as unknown as DocumentNode<ListWorkSpaceQuery, ListWorkSpaceQueryVariables>;
@@ -1198,6 +1476,8 @@ export const RoleDocument = {"kind":"Document","definitions":[{"kind":"Operation
 export const RefreshAccessTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RefreshAccessToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"refreshAccessTokenInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshAccessTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshAccessToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"refreshAccessTokenInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"refreshAccessTokenInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"refreshToken"}}]}}]}}]} as unknown as DocumentNode<RefreshAccessTokenMutation, RefreshAccessTokenMutationVariables>;
 export const RequestPasswordResetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RequestPasswordReset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"passwordReset"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PasswordResetRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestPasswordReset"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"passwordReset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"passwordReset"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>;
 export const ResizeFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResizeFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"resizeFileInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ResizeFileInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resizeFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"resizeFileInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"resizeFileInput"}}}]}]}}]} as unknown as DocumentNode<ResizeFileMutation, ResizeFileMutationVariables>;
+export const RestoreDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Restore"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"postRestoreInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PostRestoreInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restore"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"postRestoreInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"postRestoreInput"}}}]}]}}]} as unknown as DocumentNode<RestoreMutation, RestoreMutationVariables>;
+export const RestoreWorkSpaceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestoreWorkSpace"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"restoreWorkspaceInput"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"WorkspaceRestoreInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restoreWorkSpace"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"restoreWorkspaceInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"restoreWorkspaceInput"}}}]}]}}]} as unknown as DocumentNode<RestoreWorkSpaceMutation, RestoreWorkSpaceMutationVariables>;
 export const SendInvitationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SendInvitation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sendInvitationInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SendInvitationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sendInvitation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sendInvitationInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sendInvitationInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<SendInvitationMutation, SendInvitationMutationVariables>;
 export const SignupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Signup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"signupInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SignupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"signup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"signupInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"signupInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<SignupMutation, SignupMutationVariables>;
 export const UnAssignRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UnAssignRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"unAssignRoleInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UnAssignRoleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unAssignRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"unAssignRoleInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"unAssignRoleInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<UnAssignRoleMutation, UnAssignRoleMutationVariables>;
