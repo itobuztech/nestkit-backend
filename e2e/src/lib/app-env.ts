@@ -1,14 +1,5 @@
-import { bool, cleanEnv, email, num, str, makeValidator } from 'envalid';
+import { bool, cleanEnv, email, num, str } from 'envalid';
 
-const awsConfigValidator = makeValidator((value) => {
-  if (process.env.isS3Enabled && process.env.isS3Enabled === 'true') {
-    if (!value) {
-      throw new Error('Field is required');
-    }
-  }
-
-  return value;
-});
 // Validate and load environment variables
 export const appEnv = cleanEnv(process.env, {
   NODE_ENV: str({
@@ -26,14 +17,15 @@ export const appEnv = cleanEnv(process.env, {
   JEST_HTML_REPORTER_FILE_NAME: str({ default: 'test.html' }),
 
    // AWS
-   AWS_REGION: awsConfigValidator({ default: '' }),
-   AWS_ACCESS_KEY_ID: awsConfigValidator({ default: '' }),
-   AWS_SECRET_ACCESS_KEY: awsConfigValidator({ default: '' }),
-   AWS_PUBLIC_BUCKET: awsConfigValidator({ default: '' }),
-   AWS_SECURE_BUCKET: awsConfigValidator({ default: '' }),
-   AWS_PUBLIC_BUCKET_URL: awsConfigValidator({ default: '' }),
-   AWS_SIGNED_URL_EXPIRY: num({ default: 3600 }),
    isS3Enabled: bool({ default: false }),
+
+  // TESTING 
+  AWS_REGION: str(),
+  AWS_BUCKET_NAME: str(),
+  AWS_BUCKET_UPLOAD_PATH: str({ default: 'example' }),
+  AWS_BUCKET_PUBLIC_URL: str(),
+  AWS_REPORT_UPLOAD: bool({ default: false }),
+
 
   // Imap
   IMAP_HOST: str({ default: 'imap.hostinger.com' }),

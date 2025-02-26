@@ -38,9 +38,10 @@ import { DELETE_POST_MUTATION } from '../../graphql/delete-post-mutation.gql';
 import { GraphQLError } from 'graphql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
+import { testConfig } from '../../lib/test-config';
 
-[UserType.SUPER_ADMIN].forEach((type) => {
-  describe(`Assertions based on role specific privileges after assigning to the user: ${type}`, () => {
+  const userType = UserType.SUPER_ADMIN
+  describe(`Assertions based on role specific privileges after assigning to the `, () => {
     let loginUser: User | null;
     let user: User | null;
     let userRoleId: string | undefined;
@@ -58,7 +59,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
     let workspaceId: string | undefined;
     const workspaceName = faker.lorem.word();
 
-    test('Login with the user', async () => {
+    test(`Login as a user` , async () => {
       user = await dbClient.user.findFirst({
         where: {
           userType: UserType.USER,
@@ -91,7 +92,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       expect(createWorkspace.data?.createWorkspace.id).not.toBeNull();
     });
 
-    test(`Fetch User permissions - ${type}`, async () => {
+    test(`Fetch User permissions`, async () => {
       const userPermissions = await api.graphql.query<
           GetUserPermissionQuery,
           GetUserPermissionQueryVariables
@@ -100,7 +101,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           variables: {},
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -115,7 +116,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       userPrivilegesArray = privileges;
     });
 
-    test(`Fetch user ID for user - ${type}`, async () => {
+    test(`Fetch user ID for user`, async () => {
       const currentUser = await api.graphql.query<
         CurrentUserQuery,
         CurrentUserQueryVariables
@@ -124,7 +125,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         variables: {},
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -132,10 +133,10 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       userId = currentUser.data.currentUser.id;
     });
 
-    test(`Login as a ${type} `, async () => {
+    test(`Login as a SUPER ADMIN`, async () => {
       loginUser = await dbClient.user.findFirst({
         where: {
-          userType: type,
+          userType: userType,
           isVerified: true,
         },
       });
@@ -149,7 +150,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       expect(response.data).toBeDefined();
     });
 
-    test(`Get the role id of the user`, async () => {
+    test(`Get the role of a USER`, async () => {
       const role = await dbClient.role.findFirst({
         where: {
           type: UserType.USER,
@@ -161,7 +162,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       userRoleId = role?.id;
     });
 
-    test(`Add the membership of the workspace to the ${type}`, async () => {
+    test(`Add the membership of the workspace to the SUPER ADMIN`, async () => {
       const superAdminUser = await dbClient.user.findFirst({
         where: {
           userType: UserType.SUPER_ADMIN,
@@ -179,7 +180,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       }
     });
 
-    test(`Update role for user : ${type}`, async () => {
+    test(`Update role as a SUPER ADMIN`, async () => {
       if (userPrivilegesArray && userRoleId) {
         const updateRole = await api.graphql.mutate<
           UpdateRoleMutation,
@@ -196,7 +197,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -235,7 +236,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -245,7 +246,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       }
     });
 
-    test(`Login as a ${type.toUpperCase()} `, async () => {
+    test(`Login as a ${userType.toUpperCase()} `, async () => {
       if (loginUser) {
         const response = await api.login({
           email: loginUser.email,
@@ -255,10 +256,10 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       }
     });
 
-    test(`Fetch the role list and store the role ID - ${type}`, async () => {
+    test(`Fetch the role list and store the role ID`, async () => {
       const role = await dbClient.role.findFirst({
         where: {
-          type: type,
+          type: userType,
         },
       });
       if (!role) {
@@ -267,7 +268,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       roleIdToBeAssigned = role?.id;
     });
 
-    test(`Assign the ${type} role to the user`, async () => {
+    test(`Assign the ${userType} role to the user`, async () => {
       if (roleIdToBeAssigned && userId) {
         const assignRole = await api.graphql.mutate<
           AssignRoleMutation,
@@ -278,6 +279,11 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
             assignRoleInput: {
               roleId: roleIdToBeAssigned,
               userId,
+            },
+          },
+          context: {
+            headers: {
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -315,7 +321,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -340,7 +346,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -370,7 +376,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -392,7 +398,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -424,7 +430,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -447,7 +453,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -494,7 +500,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       }
     });
 
-    test(`Update role for user : ${type}`, async () => {
+    test(`Update role for user : ${userType}`, async () => {
       if (userPrivilegesArray && userRoleId) {
         const updateRole = await api.graphql.mutate<
           UpdateRoleMutation,
@@ -511,7 +517,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -524,4 +530,3 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
       }
     });
   });
-});

@@ -29,6 +29,7 @@ import { faker } from '@faker-js/faker';
 import { CREATE_ROLE_MUTATION } from '../../graphql/create-role-mutation.gql';
 import { PRIVILEGE_LIST } from '../../graphql/privilege-list-query.gql';
 import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
+import { testConfig } from '../../lib/test-config';
 
 [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
   describe(`Assign Role functionalities for user : ${type}`, () => {
@@ -179,7 +180,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -208,7 +209,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -296,7 +297,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           variables: {},
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -354,7 +355,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
               },
               context: {
                 headers: {
-                  currentWorkSpaceId: workspaceId,
+                  [testConfig.currentworkspaceid]: workspaceId,
                 },
               },
             });
@@ -436,7 +437,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
         variables: {},
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });

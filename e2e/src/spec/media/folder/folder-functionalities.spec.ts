@@ -24,6 +24,7 @@ import { GET_FOLDER_QUERY } from '../../../graphql/get-folder-query.gql';
 import { DELETE_FOLDER_MUTATION } from '../../../graphql/delete-folder-mutation.gql';
 import { faker } from '@faker-js/faker';
 import { ApolloQueryResult } from '@apollo/client';
+import { testConfig } from '../../../lib/test-config';
 
 describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
   let user: User | null;
@@ -84,7 +85,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
         },
       },
     });
@@ -103,7 +104,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
         },
       },
     });
@@ -133,7 +134,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -157,7 +158,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -183,7 +184,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -201,7 +202,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
         },
       },
     });
@@ -229,7 +230,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });

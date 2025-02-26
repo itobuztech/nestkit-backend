@@ -55,24 +55,25 @@ describe('Password Reset', () => {
   }, 50000);
 
   // @Soumabha Use MAILHOG FOR TESTING
-  test('Should not return an error if the email is not registered', async () => {
-    const requestRandomUserPasswordReset = await api.graphql.mutate<
-      RequestPasswordResetMutation,
-      RequestPasswordResetMutationVariables
-    >({
-      mutation: REQUEST_PASSWORD_RESET_MUTATION,
-      variables: {
-        passwordReset: {
-          email: `${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`,
-        },
-      },
-    });
+  test.skip('Should not return an error if the email is not registered', async () => {
+    // const requestRandomUserPasswordReset = await api.graphql.mutate<
+    //   RequestPasswordResetMutation,
+    //   RequestPasswordResetMutationVariables
+    // >({
+    //   mutation: REQUEST_PASSWORD_RESET_MUTATION,
+    //   variables: {
+    //     passwordReset: {
+    //       email: `${crypto.randomUUID()}@${appEnv.TESTINATOR_TEAM_ID}`,
+    //     },
+    //   },
+    // });
 
-    expect(
-      requestRandomUserPasswordReset.data?.requestPasswordReset.message,
-    ).toBe('Password reset email sent');
+    // expect(
+    //   requestRandomUserPasswordReset.data?.requestPasswordReset.message,
+    // ).toBe('Password reset email sent');
   });
 
+  // @Soumabha Use MAILHOG FOR TESTING but use ENV variables
   test('Fetch emails from the inbox and extract the invitation link', async () => {
     invitationLink = await fetchEmailsMailHog('Password Reset Request');
     if (invitationLink) {

@@ -26,6 +26,7 @@ import { FILE_LIST_QUERY } from '../../../graphql/list-file-query.gql';
 import { GET_FILE_QUERY } from '../../../graphql/get-file-query.gql';
 import { RESIZE_MEDIA_MUTATION } from '../../../graphql/resize-media-mutation.gql';
 import { DELETE_MEDIA_MUTATION } from '../../../graphql/delete-media-mutation.gql';
+import { testConfig } from '../../../lib/test-config';
 
 describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
   let user: User | null;
@@ -84,7 +85,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
         {
           headers: {
             ...formData.getHeaders(),
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
             Authorization: `Bearer ${loginResponse.data.login.token}`,
           },
         },
@@ -106,7 +107,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -127,7 +128,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -156,7 +157,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -177,7 +178,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -202,7 +203,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -224,7 +225,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
       },
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },
@@ -238,7 +239,7 @@ describe(`File upload functionalities for ${UserType.SUPER_ADMIN}`, () => {
 
       context: {
         headers: {
-          currentWorkSpaceId: workspaceId,
+          [testConfig.currentworkspaceid]: workspaceId,
           Authorization: `Bearer ${loginResponse.data.login.token}`,
         },
       },

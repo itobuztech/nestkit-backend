@@ -27,7 +27,7 @@ async function uploadFileToS3(filePath: string, key: string) {
 
     // Uploading the file to the specified bucket
     const command = new PutObjectCommand(params);
-    const data = await s3Client.send(command);
+    await s3Client.send(command);
     console.log(
       `File uploaded successfully`,
       `${appEnv.AWS_BUCKET_PUBLIC_URL}/${key}`

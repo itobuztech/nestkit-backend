@@ -16,8 +16,6 @@ import {
   RestoreMutationVariables,
   GetUserPermissionQuery,
   GetUserPermissionQueryVariables,
-  RestoreMutation,
-  RestoreMutationVariables,
   UpdatePostMutation,
   UpdatePostMutationVariables,
 } from '../../gql/graphql';
@@ -30,6 +28,7 @@ import { faker } from '@faker-js/faker';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
 import { RESTORE_POST_MUTATION } from '../../graphql/restore-post-mutation.gql';
 import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
+import { testConfig } from '../../lib/test-config';
 
 const userArrays = [UserType.SUPER_ADMIN, UserType.USER];
 userArrays.forEach((userTypeRole) => {
@@ -92,7 +91,7 @@ userArrays.forEach((userTypeRole) => {
         variables: {},
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -129,7 +128,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -182,7 +181,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -226,7 +225,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -250,7 +249,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -298,7 +297,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -326,7 +325,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });

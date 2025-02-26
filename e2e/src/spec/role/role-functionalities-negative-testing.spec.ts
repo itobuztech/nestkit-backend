@@ -32,6 +32,7 @@ import { sample } from 'lodash';
 import { ASSIGN_ROLE_MUTATION } from '../../graphql/assign-role-mutation.gql';
 import { UNASSIGN_ROLE_MUTATION } from '../../graphql/unassign-role-mutation.gql';
 import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutation.gql';
+import { testConfig } from '../../lib/test-config';
 
 [UserType.SUPER_ADMIN].forEach((type) => {
   describe(`Role negative testing functionalities for user : ${type} - NST-37`, () => {
@@ -127,7 +128,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -158,7 +159,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -184,7 +185,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -214,7 +215,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
             },
             context: {
               headers: {
-                currentWorkSpaceId: workspaceId,
+                [testConfig.currentworkspaceid]: workspaceId,
               },
             },
           });
@@ -251,7 +252,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -283,7 +284,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              currentWorkSpaceId: workspaceId,
+              [testConfig.currentworkspaceid]: workspaceId,
             },
           },
         });
@@ -308,7 +309,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
@@ -333,7 +334,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            currentWorkSpaceId: workspaceId,
+            [testConfig.currentworkspaceid]: workspaceId,
           },
         },
       });
