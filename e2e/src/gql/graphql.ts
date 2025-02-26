@@ -36,8 +36,7 @@ export type AssignRoleResponse = {
 };
 
 export type AssignRoleUserInput = {
-  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
-  orderBy?: InputMaybe<Order>;
+  orderBy?: InputMaybe<AssignedUserOrder>;
   page?: InputMaybe<Scalars['Int']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
   roleId: Scalars['String']['input'];
@@ -52,6 +51,18 @@ export type AssignRoleUserResponse = {
 
 export type AssignedUser = {
   __typename?: 'AssignedUser';
+  email: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export enum AssignedUserOrder {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type AvailableForAssignUser = {
+  __typename?: 'AvailableForAssignUser';
   email: Scalars['String']['output'];
   id: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -77,6 +88,20 @@ export type CreateFolderResponse = {
   parentId?: Maybe<Scalars['String']['output']>;
 };
 
+export type CreatePlanInfoInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  feature?: InputMaybe<SubscriptionFeature>;
+  planId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type CreatePlanInfoResponse = {
+  __typename?: 'CreatePlanInfoResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 export type CreatePostInput = {
   authorId?: InputMaybe<Scalars['String']['input']>;
   content?: InputMaybe<Scalars['String']['input']>;
@@ -87,6 +112,21 @@ export type CreatePostInput = {
 export type CreatePostResponse = {
   __typename?: 'CreatePostResponse';
   id: Scalars['String']['output'];
+};
+
+export type CreateSubscriptionPlanInput = {
+  currency?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  durationDays: Scalars['Float']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+};
+
+export type CreateSubscriptionPlanResponse = {
+  __typename?: 'CreateSubscriptionPlanResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type CreateWorkspaceInput = {
@@ -118,6 +158,28 @@ export type CurrentUserWorkspace = {
 export type DeleteFolderInput = {
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['String']['input'];
+};
+
+export type DeletePlanInfoInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type DeletePlanInfoResponse = {
+  __typename?: 'DeletePlanInfoResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
+export type DeletePlanInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type DeletePlanResponse = {
+  __typename?: 'DeletePlanResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
 };
 
 export type FileDeleteInput = {
@@ -227,6 +289,25 @@ export type GetPostResponse = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type GetUserForAssignInput = {
+  orderBy?: InputMaybe<GetUserForAssignOrder>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  roleId: Scalars['String']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum GetUserForAssignOrder {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type GetUserForAssignResponse = {
+  __typename?: 'GetUserForAssignResponse';
+  pagination: BaseListResponse;
+  users: Array<AvailableForAssignUser>;
+};
+
 export type GetUserPermissionResponse = {
   __typename?: 'GetUserPermissionResponse';
   privilege: Array<RolePrivilegeResponse>;
@@ -296,6 +377,37 @@ export type ListMembershipResponse = {
   pagination: BaseListResponse;
 };
 
+export type ListPlanInfoInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<PlanInfoOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  planId: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ListPlanInfoResponse = {
+  __typename?: 'ListPlanInfoResponse';
+  pagination: BaseListResponse;
+  planInfoList: Array<PlanInfoResponse>;
+};
+
+export type ListSubscriptionPlanInput = {
+  fromStash?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Order>;
+  orderByField?: InputMaybe<SubscriptionPlanOrderByField>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ListSubscriptionPlanResponse = {
+  __typename?: 'ListSubscriptionPlanResponse';
+  pagination: BaseListResponse;
+  subscriptionPlans: Array<SubscriptionPlanResponse>;
+};
+
 export type ListWorkSpaceInput = {
   authorId?: InputMaybe<Scalars['String']['input']>;
   fromStash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -348,16 +460,21 @@ export type Mutation = {
   acceptInvitation: Scalars['Boolean']['output'];
   assignRole: AssignRoleResponse;
   createFolder: CreateFolderResponse;
+  createPlanInfo: CreatePlanInfoResponse;
   createPost: CreatePostResponse;
   createRole: RoleCreateResponse;
+  createSubscriptionPlan: CreateSubscriptionPlanResponse;
   createWorkspace: CreateWorkspaceResponse;
   deleteFile: Scalars['Boolean']['output'];
   deleteFolder: Scalars['Boolean']['output'];
   deleteMembership: Scalars['Boolean']['output'];
+  deletePlan: DeletePlanResponse;
+  deletePlanInfo: DeletePlanInfoResponse;
   deletePost: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteWorkSpace: Scalars['Boolean']['output'];
   getAssignUsers: AssignRoleUserResponse;
+  getUsersForAssign: GetUserForAssignResponse;
   rateLimitCustomize: Scalars['String']['output'];
   rateLimitSkip: Scalars['String']['output'];
   refreshAccessToken: VerifyEmailResponse;
@@ -371,9 +488,11 @@ export type Mutation = {
   signup: SignupResponse;
   unAssignRole: UnAssignRoleResponse;
   updateFolder: Scalars['Boolean']['output'];
+  updatePlanInfo: UpdatePlanInfoResponse;
   updatePost: UpdatePostResponse;
   updateProfile: UpdateProfileResponse;
   updateRole: RoleUpdateResponse;
+  updateSubscriptionPlan: UpdateSubscriptionPlanResponse;
   updateWorkspace: UpdateWorkspaceResponse;
   verifyEmail: VerifyEmailResponse;
   verifyOtp: LoginResponse;
@@ -395,6 +514,11 @@ export type MutationCreateFolderArgs = {
 };
 
 
+export type MutationCreatePlanInfoArgs = {
+  input: CreatePlanInfoInput;
+};
+
+
 export type MutationCreatePostArgs = {
   createPostInput: CreatePostInput;
 };
@@ -402,6 +526,11 @@ export type MutationCreatePostArgs = {
 
 export type MutationCreateRoleArgs = {
   roleCreateInput: RoleCreateInput;
+};
+
+
+export type MutationCreateSubscriptionPlanArgs = {
+  input: CreateSubscriptionPlanInput;
 };
 
 
@@ -425,6 +554,16 @@ export type MutationDeleteMembershipArgs = {
 };
 
 
+export type MutationDeletePlanArgs = {
+  deletePlanInput: DeletePlanInput;
+};
+
+
+export type MutationDeletePlanInfoArgs = {
+  deletePlanInfoInput: DeletePlanInfoInput;
+};
+
+
 export type MutationDeletePostArgs = {
   postDeleteInput?: InputMaybe<PostDeleteInput>;
 };
@@ -442,6 +581,11 @@ export type MutationDeleteWorkSpaceArgs = {
 
 export type MutationGetAssignUsersArgs = {
   assignRoleUserInput: AssignRoleUserInput;
+};
+
+
+export type MutationGetUsersForAssignArgs = {
+  assignRoleUserInput: GetUserForAssignInput;
 };
 
 
@@ -500,6 +644,11 @@ export type MutationUpdateFolderArgs = {
 };
 
 
+export type MutationUpdatePlanInfoArgs = {
+  input: UpdatePlanInfoInput;
+};
+
+
 export type MutationUpdatePostArgs = {
   postId: Scalars['String']['input'];
   updatePostInput: UpdatePostInput;
@@ -513,6 +662,11 @@ export type MutationUpdateProfileArgs = {
 
 export type MutationUpdateRoleArgs = {
   roleUpdateInput: RoleUpdateInput;
+};
+
+
+export type MutationUpdateSubscriptionPlanArgs = {
+  input: UpdateSubscriptionPlanInput;
 };
 
 
@@ -556,6 +710,20 @@ export type PasswordResetInput = {
 
 export type PasswordResetRequestInput = {
   email: Scalars['String']['input'];
+};
+
+export type PlanInfoResponse = {
+  __typename?: 'PlanInfoResponse';
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  feature?: Maybe<SubscriptionFeature>;
+  id: Scalars['String']['output'];
+  order: Scalars['Float']['output'];
+  planId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type PostAuthor = {
@@ -603,7 +771,7 @@ export type PrivilegeResponse = {
   group: Scalars['String']['output'];
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  type: Type;
+  type: PrivilegeType;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -621,6 +789,8 @@ export type Query = {
   listFolder: FolderListResponse;
   listMedia: ListMediaResponse;
   listMemberships: ListMembershipResponse;
+  listPlanInfo: ListPlanInfoResponse;
+  listSubscriptionPlan: ListSubscriptionPlanResponse;
   listWorkSpace: ListWorkSpaceResponse;
   login: LoginResponse;
   rateLimitGlobal: Scalars['String']['output'];
@@ -670,6 +840,16 @@ export type QueryListMediaArgs = {
 
 export type QueryListMembershipsArgs = {
   listMembershipsInput: ListMembershipInput;
+};
+
+
+export type QueryListPlanInfoArgs = {
+  listPlanInfoInput: ListPlanInfoInput;
+};
+
+
+export type QueryListSubscriptionPlanArgs = {
+  listSubscriptionPlanInput: ListSubscriptionPlanInput;
 };
 
 
@@ -745,10 +925,10 @@ export type RoleListResponse = {
 
 export type RolePrivilegeResponse = {
   __typename?: 'RolePrivilegeResponse';
-  group: Scalars['String']['output'];
+  group: PrivilegeGroup;
   id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  name: PrivilegeName;
+  type: PrivilegeType;
 };
 
 export type RoleResponse = {
@@ -797,6 +977,25 @@ export type SignupResponse = {
   id: Scalars['String']['output'];
 };
 
+export enum SubscriptionFeature {
+  CustomRole = 'CUSTOM_ROLE',
+  Media = 'MEDIA'
+}
+
+export type SubscriptionPlanResponse = {
+  __typename?: 'SubscriptionPlanResponse';
+  createdAt: Scalars['DateTime']['output'];
+  currency: Scalars['String']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  durationDays: Scalars['Float']['output'];
+  id: Scalars['String']['output'];
+  isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  price: Scalars['Float']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type UnAssignRoleInput = {
   roleId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -811,6 +1010,21 @@ export type UpdateFolderInput = {
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   parentId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdatePlanInfoInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  feature?: InputMaybe<SubscriptionFeature>;
+  id: Scalars['String']['input'];
+  planId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type UpdatePlanInfoResponse = {
+  __typename?: 'UpdatePlanInfoResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type UpdatePostInput = {
@@ -833,6 +1047,22 @@ export type UpdateProfileInput = {
 export type UpdateProfileResponse = {
   __typename?: 'UpdateProfileResponse';
   success: Scalars['Boolean']['output'];
+};
+
+export type UpdateSubscriptionPlanInput = {
+  currency?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  durationDays: Scalars['Float']['input'];
+  id: Scalars['String']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+};
+
+export type UpdateSubscriptionPlanResponse = {
+  __typename?: 'UpdateSubscriptionPlanResponse';
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
 };
 
 export type UpdateWorkspaceInput = {
@@ -899,13 +1129,41 @@ export enum OrderByField {
   Title = 'title'
 }
 
+export enum PlanInfoOrderByField {
+  CreatedAt = 'createdAt',
+  Title = 'title'
+}
+
+export enum PrivilegeGroup {
+  Media = 'MEDIA',
+  Membership = 'MEMBERSHIP',
+  Post = 'POST',
+  Role = 'ROLE',
+  Subscription = 'SUBSCRIPTION',
+  User = 'USER',
+  Workspace = 'WORKSPACE'
+}
+
+export enum PrivilegeName {
+  Create = 'CREATE',
+  Delete = 'DELETE',
+  Read = 'READ',
+  Update = 'UPDATE'
+}
+
+export enum PrivilegeType {
+  Base = 'BASE'
+}
+
 export enum RoleOrderByField {
   CreatedAt = 'createdAt',
   Title = 'title'
 }
 
-export enum Type {
-  Base = 'BASE'
+export enum SubscriptionPlanOrderByField {
+  CreatedAt = 'createdAt',
+  Name = 'name',
+  Price = 'price'
 }
 
 export enum WorkspaceOrderByField {
@@ -1028,7 +1286,7 @@ export type GetRoleQueryVariables = Exact<{
 }>;
 
 
-export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, type: string, description?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: string, group: string, id: string, type: string }> } };
+export type GetRoleQuery = { __typename?: 'Query', getRole: { __typename?: 'RoleGetResponse', id: string, title: string, type: string, description?: string | null, createdAt: any, updatedAt: any, deletedAt?: any | null, privilege: Array<{ __typename?: 'RolePrivilegeResponse', name: PrivilegeName, group: PrivilegeGroup, id: string, type: PrivilegeType }> } };
 
 export type GetUsersQueryVariables = Exact<{
   getUsersInput?: InputMaybe<GetUsersInput>;
@@ -1040,7 +1298,7 @@ export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename
 export type GetUserPermissionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUserPermissionQuery = { __typename?: 'Query', getUserPermission: { __typename?: 'GetUserPermissionResponse', roles: Array<{ __typename?: 'GetUserRole', id: string, title: string }>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: string, name: string, id: string, type: string }> } };
+export type GetUserPermissionQuery = { __typename?: 'Query', getUserPermission: { __typename?: 'GetUserPermissionResponse', roles: Array<{ __typename?: 'GetUserRole', id: string, title: string }>, privilege: Array<{ __typename?: 'RolePrivilegeResponse', group: PrivilegeGroup, name: PrivilegeName, id: string, type: PrivilegeType }> } };
 
 export type FileQueryVariables = Exact<{
   listMediaInput?: InputMaybe<ListMediaInput>;
@@ -1080,7 +1338,7 @@ export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { 
 export type RoleQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RoleQuery = { __typename?: 'Query', listBasePrivilege: { __typename?: 'PrivilegeListResponse', privilege: Array<{ __typename?: 'PrivilegeResponse', name: string, group: string, id: string, type: Type, createdAt: any, updatedAt: any, deletedAt?: any | null }> } };
+export type RoleQuery = { __typename?: 'Query', listBasePrivilege: { __typename?: 'PrivilegeListResponse', privilege: Array<{ __typename?: 'PrivilegeResponse', name: string, group: string, id: string, type: PrivilegeType, createdAt: any, updatedAt: any, deletedAt?: any | null }> } };
 
 export type RefreshAccessTokenMutationVariables = Exact<{
   refreshAccessTokenInput: RefreshAccessTokenInput;

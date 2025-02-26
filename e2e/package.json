@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "dotenv -e .env npm run prisma:generate && npm run gql:generate && jest",
+    "test": "jest",
     "test:ci": "dotenv -e .env npm run prisma:generate && npm run gql:generate && jest --runInBand --ci --verbose=false",
     "gql:generate": "dotenv -e .env graphql-codegen",
     "prisma:generate": "npm run prisma -- generate",

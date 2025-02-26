@@ -63,3 +63,4 @@ package-lock.json
 .yarn
 .sonar
 .env.production
+schema.dbml
