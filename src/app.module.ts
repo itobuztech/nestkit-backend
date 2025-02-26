@@ -21,8 +21,8 @@ import { GqlThrottlerGuard } from './auth/throttler.guard';
 import { AwsModule } from './aws/aws.module';
 import appEnv from './env';
 import { QueModule } from './que/que.module';
-import { GrpcModule } from './grpc/grpc.module';
-import { RabitMqModule } from './rabitMq/rabitmq.module';
+// import { GrpcModule } from './grpc/grpc.module';
+// import { RabitMqModule } from './rabitMq/rabitmq.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
@@ -40,8 +40,8 @@ import { SubscriptionModule } from './subscription/subscription.module';
     AuthModule,
     MessageModule,
     QueModule,
-    GrpcModule,
-    RabitMqModule,
+    // GrpcModule,
+    // RabitMqModule,
     ThrottleTestModule,
     WorkspaceModule,
     RoleModule,

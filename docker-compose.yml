@@ -8,7 +8,6 @@ services:
      - '${WEB_MAIL_PORT:-8025}:8025'
 
   postgres:
-      container_name: postgres
       image: postgres:latest
       volumes:
         - ./tmp/db/postgresql:/var/lib/postgresql/data
@@ -24,7 +23,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.12-management  # Includes the management UI
-    container_name: rabbitmq
     restart: unless-stopped
     ports:
       - "${AMQP_PORT:-5672}:5672"  # AMQP protocol port
