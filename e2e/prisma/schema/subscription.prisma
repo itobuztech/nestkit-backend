@@ -1,0 +1,129 @@
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentGateway {
+  STRIPE
+  PAYPAL
+  RAZORPAY
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum SubscriptionFeature {
+  MEDIA
+  CUSTOM_ROLE
+}
+
+model SubscriptionPlan {
+  id String @id @default(uuid())
+
+  name        String  @unique
+  description String?
+
+  price         Float
+  currency      String         @default("USD")
+  durationDays  Int
+  isActive      Boolean        @default(true)
+
+  subscriptions Subscription[] @relation(name: "planSubscriptionRelation")
+  planInfo      SubscriptionPlanInfo[] @relation(name: "planIdSubscriptionPlan")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model SubscriptionPlanInfo {
+  id String @id @default(uuid())
+  title      String
+  description String?
+  feature    SubscriptionFeature?
+  order      Int @default(autoincrement())
+  enabled    Boolean @default(true)
+
+
+  planId String
+  plan   SubscriptionPlan @relation(name: "planIdSubscriptionPlan", fields: [planId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Subscription {
+  id String @id @default(uuid())
+
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+  payments  Payment[]          @relation(name: "paymentSubscriptionRelation")
+
+  userId String
+  user   User   @relation(name: "userSubscriptionRelation", fields: [userId], references: [id], onDelete: Cascade)
+
+  planId String
+  plan   SubscriptionPlan @relation(name: "planSubscriptionRelation", fields: [planId], references: [id], onDelete: Cascade)
+
+  couponId String?
+  coupon   Coupon? @relation(name: "couponIdSubscriptionRelation", fields: [couponId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  amount      Float
+  currency    String        @default("USD")
+  paymentDate DateTime      @default(now())
+  status      PaymentStatus @default(PENDING)
+
+  gateway       PaymentGateway
+  transactionId String?        @unique // Store payment gateway transaction ID
+  metadata      Json? // Store additional info from the gateway
+
+  subscriptionId String
+  subscription   Subscription @relation(name: "paymentSubscriptionRelation", fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  appliedCouponId String?
+  appliedCoupon   Coupon? @relation(name: "couponIdPaymentRelation", fields: [appliedCouponId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Coupon {
+  id          String  @id @default(uuid())
+  code        String  @unique
+  description String?
+
+  discountType      DiscountType
+  discountValue     Float // Can be percentage or fixed amount
+  maxRedemptions    Int? // Max times it can be used
+  usedRedemptions   Int          @default(0) // Track usage
+  minPurchaseAmount Float? // Optional minimum amount for discount
+
+  validFrom  DateTime?
+  validUntil DateTime?
+
+  payments      Payment[]      @relation(name: "couponIdPaymentRelation")
+  subscriptions Subscription[] @relation(name: "couponIdSubscriptionRelation")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
