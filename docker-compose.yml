@@ -17,10 +17,7 @@ services:
         - POSTGRES_DB=${POSTGRES_DB:-nest_starter}
       ports:
         - '${POSTGRES_PORT:-5432}:5432'
-      # postgresql://nodeProdUser:postgresPasswword@localhost:5433/nest_starter
-      
- 
-
+   
   rabbitmq:
     image: rabbitmq:3.12-management  # Includes the management UI
     restart: unless-stopped
