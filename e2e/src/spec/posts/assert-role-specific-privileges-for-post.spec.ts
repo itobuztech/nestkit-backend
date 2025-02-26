@@ -92,8 +92,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
     });
 
     test(`Fetch User permissions - ${type}`, async () => {
-      async function currentUserInfo() {
-        const userPermissions = await api.graphql.query<
+      const userPermissions = await api.graphql.query<
           GetUserPermissionQuery,
           GetUserPermissionQueryVariables
         >({
@@ -113,10 +112,7 @@ import { GET_USER_PERMISSION } from '../../graphql/get-user-permissions.gql';
           },
         );
 
-        return privileges;
-      }
-
-      userPrivilegesArray = await currentUserInfo();
+      userPrivilegesArray = privileges;
     });
 
     test(`Fetch user ID for user - ${type}`, async () => {
