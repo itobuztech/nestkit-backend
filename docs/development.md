@@ -3,6 +3,9 @@
 - npm install -g corepack 
 - Install docker 
 
+## API Documentation 
+https://documenter.getpostman.com/view/180560/2sAYdfopwC
+
 ## Setup 
 - docker-compose up -d 
 - This will start database server locally 
@@ -14,7 +17,6 @@
 - npm run start:dev - run development server 
 - Create .env file and add required variables 
 - once you start dev server in console required variables will be listed 
-
 
 
 ## Sonar Analysis 
