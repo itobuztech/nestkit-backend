@@ -84,7 +84,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
         },
       },
     });
@@ -103,7 +103,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
         },
       },
     });
@@ -133,7 +133,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -157,7 +157,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -183,7 +183,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -201,7 +201,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
       context: {
         headers: {
           Authorization: `Bearer ${loginResponse.data?.login.token}`,
-          current_workspace_id: workspaceId,
+          currentWorkSpaceId: workspaceId,
         },
       },
     });
@@ -229,7 +229,7 @@ describe(`Folder module functionalities for ${UserType.SUPER_ADMIN}`, () => {
         context: {
           headers: {
             Authorization: `Bearer ${loginResponse.data?.login.token}`,
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });

@@ -82,7 +82,7 @@ userArrays.forEach((userTypeRole) => {
         variables: {},
         context: {
           headers: {
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -117,7 +117,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -145,7 +145,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -170,7 +170,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -198,7 +198,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -231,7 +231,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -262,7 +262,7 @@ userArrays.forEach((userTypeRole) => {
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });

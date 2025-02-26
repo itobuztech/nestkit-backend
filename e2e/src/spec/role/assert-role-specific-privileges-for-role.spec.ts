@@ -235,7 +235,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -258,7 +258,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -294,7 +294,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -321,7 +321,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -356,7 +356,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
@@ -382,7 +382,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
         },
         context: {
           headers: {
-            current_workspace_id: workspaceId,
+            currentWorkSpaceId: workspaceId,
           },
         },
       });
@@ -410,7 +410,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
             },
             context: {
               headers: {
-                current_workspace_id: workspaceId,
+                currentWorkSpaceId: workspaceId,
               },
             },
           });
@@ -440,7 +440,7 @@ import { CREATE_WORKSPACE_MUTATION } from '../../graphql/create-workspace-mutati
           },
           context: {
             headers: {
-              current_workspace_id: workspaceId,
+              currentWorkSpaceId: workspaceId,
             },
           },
         });
