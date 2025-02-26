@@ -18,20 +18,12 @@ export const appEnv = cleanEnv(process.env, {
   DATABASE_URL: str({ desc: 'Please provide DB URL' }),
   MAILHOG_API_ROOT: str({ default: 'http://localhost:8025' }),
   SEED_PASSWORD: str({ default: 'SamLauncher@123' }),
-  TESTINATOR_TEAM_ID: str({ default: 'team214166.testinator.com' }),
-  SEED_EMAIL: email({ default: 'example@team214166.testinator.com' }),
+  
+
+  SEED_EMAIL: email({ default: 'example@example.com' }),
   TIMEOUT: num({ default: 5000 }),
-  TESTINATOR_API_KEY: str({ default: '565ea3b28b074fe1b1bcadeef8df2008' }),
-  FETCH_EMAILS_INBOX: str({
-    default: 'https://api.mailinator.com/api/v2/domains/private/inboxes?token=',
-  }),
-  FETCH_SPECIFIC_EMAIL: str({
-    default: 'https://mailinator.com/api/v2/domains/private/messages/',
-  }),
   API_BASE_URL: str({ default: 'http://localhost:4000' }),
-  ADMIN_EMAIL: str({ default: 'example+admin-1@team214166.testinator.com' }),
   JEST_HTML_REPORTER_FILE_NAME: str({ default: 'test.html' }),
-  IMAP_EMAIL: str({ default: 'qa@itobuz.wordpress-studio.io' }),
 
    // AWS
    AWS_REGION: awsConfigValidator({ default: '' }),

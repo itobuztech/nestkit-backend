@@ -54,6 +54,7 @@ describe('Password Reset', () => {
     await waitForTime(30000);
   }, 50000);
 
+  // @Soumabha Use MAILHOG FOR TESTING
   test('Should not return an error if the email is not registered', async () => {
     const requestRandomUserPasswordReset = await api.graphql.mutate<
       RequestPasswordResetMutation,

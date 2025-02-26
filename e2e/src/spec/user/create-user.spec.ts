@@ -5,7 +5,6 @@ import { appEnv } from '../../lib/app-env';
 
 describe.skip('User List', () => {
   const api = new GraphQlApi();
-  // const UserEmail = `${crypto.randomUUID}@${appEnv.TESTINATOR_TEAM_ID}`;
   [UserType.SUPER_ADMIN].forEach((type) => {
     const dbClient = new PrismaClient();
     beforeAll(async () => {
@@ -23,18 +22,6 @@ describe.skip('User List', () => {
       });
     });
   });
-  // test('Create User', async () => {
-  //   const response = await api.graphql.mutate({
-  //     mutation: CREATE_USER,
-  //     variables: {
-  //       createUserInput: {
-  //         email: UserEmail,
-  //         name: faker.internet.userName(),
-  //       },
-  //     },
-  //   });
-  //   expect(response.data?.createUser.id).toBeDefined();
-  // });
 
   test('Search new user in user list and exist', () => {});
 });
