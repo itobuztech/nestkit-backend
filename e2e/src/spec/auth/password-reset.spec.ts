@@ -81,7 +81,7 @@ describe('Password Reset', () => {
         ?.replace(/=/g, '')
         .replace(/[\r\n]+/gm, '');
       onboardingToken = invitationLink?.replace(
-        'http://localhost:3020/password-reset?token&#x3D;',
+        `${appEnv.FRONTEND_BASE_URL}/password-reset?token&#x3D;`,
         '',
       );
 

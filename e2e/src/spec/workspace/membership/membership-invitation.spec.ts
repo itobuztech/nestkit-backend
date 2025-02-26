@@ -70,7 +70,7 @@ describe('Membership invitation module', () => {
     invitationLink = await fetchEmailsMailHog('Welcome');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.replace(
-      'http://localhost:3020/verify-email?token&#x3D;',
+     `${appEnv.FRONTEND_BASE_URL}/verify-email?token&#x3D;`,
       '',
     );
 
@@ -153,7 +153,7 @@ describe('Membership invitation module', () => {
     invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.replace(
-      'http://localhost:3020/membership-verify?token&#x3D;',
+      `${appEnv.FRONTEND_BASE_URL}/membership-verify?token&#x3D;`,
       '',
     );
 
@@ -240,7 +240,7 @@ describe('Membership invitation module', () => {
     invitationLink = await fetchEmailsMailHog('Membership Invitation');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.replace(
-      'http://localhost:3020/membership-verify?token&#x3D;',
+      `${appEnv.FRONTEND_BASE_URL}/membership-verify?token&#x3D;`,
       '',
     );
 

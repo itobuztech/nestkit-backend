@@ -14,6 +14,7 @@ export const appEnv = cleanEnv(process.env, {
   SEED_EMAIL: email({ default: 'example@example.com' }),
   TIMEOUT: num({ default: 5000 }),
   API_BASE_URL: str({ default: 'http://localhost:4000' }),
+  FRONTEND_BASE_URL: str({ default: 'http://localhost:3020' }),
   JEST_HTML_REPORTER_FILE_NAME: str({ default: 'test.html' }),
 
    // AWS

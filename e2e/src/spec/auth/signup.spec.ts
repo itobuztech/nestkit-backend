@@ -51,7 +51,7 @@ describe('User Sign up', () => {
     invitationLink = await fetchEmailsMailHog('Welcome');
     invitationLink = invitationLink?.replace(/=/g, '').replace(/[\r\n]+/gm, '');
     onboardingToken = invitationLink?.replace(
-      'http://localhost:3020/verify-email?token&#x3D;',
+      `${appEnv.FRONTEND_BASE_URL}/verify-email?token&#x3D;`,
       '',
     );
     expect(invitationLink).toContain('verify-email');
