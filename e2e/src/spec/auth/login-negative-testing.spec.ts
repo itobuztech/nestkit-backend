@@ -8,7 +8,7 @@ import { LoginQuery, LoginQueryVariables } from '../../gql/graphql';
 describe('Login module negative testing', () => {
   const api = new GraphQlApi();
 
-  test(`Login with verified user`, async () => {
+  test(`Login with invalid email id`, async () => {
     const loginResponse = await api.graphql.query<
       LoginQuery,
       LoginQueryVariables
@@ -16,18 +16,18 @@ describe('Login module negative testing', () => {
       query: LOGIN_QUERY,
       variables: {
         loginInput: {
-          email: 'soumabha+bro@itobuz.com',
+          email: faker.internet.email(),
           password: appEnv.SEED_PASSWORD,
         },
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
 
-  test(`Login with only email and blank password`, async () => {
+  test(`Login with only email and invalid password`, async () => {
     const dbClient = new PrismaClient();
     const user = await dbClient.user.findFirst({
       where: {
@@ -44,11 +44,11 @@ describe('Login module negative testing', () => {
     >({
       query: LOGIN_QUERY,
       variables: {
-        loginInput: { email: 'soumabha+bro@itobuz.com', password: '' },
+        loginInput: { email: user.email, password: '' },
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -64,7 +64,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -80,7 +80,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -96,7 +96,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -112,7 +112,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -131,7 +131,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -147,7 +147,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });
@@ -172,7 +172,7 @@ describe('Login module negative testing', () => {
       },
     });
     if (!loginResponse.errors) {
-      throw new Error('Expected an error, but none was returned');
+      throw new Error('Expected an graphql error, but none was returned');
     }
     expect(loginResponse.errors[0].message).toBe('Invalid email or password');
   });

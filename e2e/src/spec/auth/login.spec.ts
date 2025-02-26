@@ -4,13 +4,13 @@ import { GraphQlApi } from '../../lib/graphql-api';
 import { CURRENT_USER_QUERY } from '../../graphql/current-user.gql';
 
 describe('Login module', () => {
-  [UserType.SUPER_ADMIN, UserType.USER].forEach((type) => {
+  [UserType.SUPER_ADMIN, UserType.USER].forEach((userType) => {
     const api = new GraphQlApi();
-    test(`${type.toUpperCase()} Login`, async () => {
+    test(`${userType.toUpperCase()} Login`, async () => {
       const dbClient = new PrismaClient();
       const user = await dbClient.user.findFirst({
         where: {
-          userType: type,
+          userType: userType,
           isVerified: true,
         },
       });
@@ -24,7 +24,7 @@ describe('Login module', () => {
       expect(response.data).toBeDefined();
     });
 
-    test(`${type.toUpperCase()} Get Current User`, async () => {
+    test(`${userType.toUpperCase()} Get Current User`, async () => {
       const response = await api.graphql.query({
         query: CURRENT_USER_QUERY,
       });
