@@ -1,8 +1,8 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GetUserResponse } from './get-users.response.dto';
-import { GetUsersInput } from './get-users-input.dto';
+import { GetUserResponse } from './user-list.response.dto';
+import { GetUsersInput } from './user-list.input.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Prisma } from '@prisma/client';
@@ -10,7 +10,7 @@ import appEnv from 'src/env';
 
 @UseGuards(JwtAuthGuard)
 @Resolver()
-export class GetUserService {
+export class UserListService {
   constructor(private prisma: PrismaService) {}
 
   @Query(() => [GetUserResponse])
